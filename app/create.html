@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EgitimAI — Belge Oluştur</title>
+  <meta name="description" content="Yapay zeka ile PDF, Word veya PowerPoint belgesi oluşturun." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/app.css" />
+</head>
+<body id="createPage">
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-icon">
+        <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.15"/>
+          <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+          <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="sidebar__logo-text">EgitimAI</span>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__section-label">Genel</div>
+      <a href="index.html" class="sidebar__link">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="create.html" class="sidebar__link sidebar__link--active">
+        <i data-lucide="plus-circle"></i>
+        <span>Yeni Oluştur</span>
+      </a>
+
+      <div class="sidebar__section-label">Kütüphane</div>
+      <a href="#" class="sidebar__link">
+        <i data-lucide="clock"></i>
+        <span>Geçmiş</span>
+      </a>
+      <a href="#" class="sidebar__link">
+        <i data-lucide="bookmark"></i>
+        <span>Şablonlar</span>
+      </a>
+      <a href="#" class="sidebar__link">
+        <i data-lucide="folder"></i>
+        <span>Klasörlerim</span>
+      </a>
+
+      <div class="sidebar__section-label">Hesap</div>
+      <a href="#" class="sidebar__link">
+        <i data-lucide="settings"></i>
+        <span>Ayarlar</span>
+      </a>
+      <a href="#" class="sidebar__link">
+        <i data-lucide="help-circle"></i>
+        <span>Yardım</span>
+      </a>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" data-user-avatar>?</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name" data-user-name>Yükleniyor...</div>
+          <div class="sidebar__user-plan" data-user-plan>Ücretsiz Plan</div>
+        </div>
+        <button class="btn btn--icon" data-action="logout" title="Çıkış Yap">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== TOPBAR ===== -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="mobile-topbar-toggle" id="sidebarToggle" aria-label="Menüyü Aç">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="topbar__breadcrumb">
+        <span>EgitimAI</span>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+        <a href="index.html" style="color:var(--text-2)">Dashboard</a>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+        <span style="color:var(--text)">Yeni Oluştur</span>
+      </div>
+    </div>
+    <div class="topbar__right">
+      <span class="plan-badge">
+        <i data-lucide="zap" style="width:11px;height:11px;"></i>
+        <span data-user-plan>Ücretsiz</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="app-content">
+    <div class="create-layout">
+
+      <div class="create-header fade-up">
+        <h1>Belge Oluştur</h1>
+        <p>Konuyu girin, ayarları seçin ve yapay zeka sizin için profesyonel bir belge hazırlasın.</p>
+      </div>
+
+      <form id="createForm" novalidate>
+
+        <!-- TOPIC INPUT -->
+        <div class="form-card fade-up fade-up--1">
+          <div class="form-card__title">
+            <i data-lucide="pencil"></i>
+            Konu / Başlık
+          </div>
+          <div class="form-group">
+            <input
+              type="text"
+              id="topicInput"
+              class="form-input form-input--lg"
+              placeholder="Örn: 8. sınıf matematik kesirler konusu sınavı, 20 soru"
+              autocomplete="off"
+              maxlength="200"
+            />
+            <div style="display:flex;justify-content:space-between;margin-top:6px;">
+              <span class="text-muted text-sm">Ne oluşturmak istediğinizi kısaca açıklayın</span>
+              <span class="text-muted text-sm" id="topicCharCount">0 / 200</span>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:4px;">
+            <label class="form-label">Ek açıklama <span style="color:var(--text-3);font-weight:400;">(isteğe bağlı)</span></label>
+            <textarea
+              id="extraNotes"
+              class="form-textarea"
+              placeholder="Belge hakkında ek notlar, özel istekler veya kapsanmasını istediğiniz konular..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- DOCUMENT TYPE -->
+        <div class="form-card fade-up fade-up--2">
+          <div class="form-card__title">
+            <i data-lucide="file"></i>
+            Belge Türü
+          </div>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn toggle-btn--pdf active" data-doc-type="pdf">
+              <i data-lucide="file-text"></i>
+              PDF
+            </button>
+            <button type="button" class="toggle-btn toggle-btn--word" data-doc-type="word">
+              <i data-lucide="file-type"></i>
+              Word (DOCX)
+            </button>
+            <button type="button" class="toggle-btn toggle-btn--pptx" data-doc-type="pptx">
+              <i data-lucide="presentation"></i>
+              PowerPoint
+            </button>
+          </div>
+        </div>
+
+        <!-- AUDIENCE & DETAILS -->
+        <div class="form-card fade-up fade-up--3">
+          <div class="form-card__title">
+            <i data-lucide="users"></i>
+            Hedef Kitle
+          </div>
+          <div class="form-group">
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn active" data-audience="teacher">
+                <i data-lucide="graduation-cap"></i>
+                Öğretmen
+              </button>
+              <button type="button" class="toggle-btn" data-audience="student">
+                <i data-lucide="user"></i>
+                Öğrenci
+              </button>
+            </div>
+          </div>
+
+          <div class="options-grid">
+            <div class="form-group">
+              <label class="form-label" for="gradeLevel">Sınıf Seviyesi</label>
+              <select id="gradeLevel" class="form-select">
+                <option value="">Seçin...</option>
+                <optgroup label="İlkokul">
+                  <option value="1">1. Sınıf</option>
+                  <option value="2">2. Sınıf</option>
+                  <option value="3">3. Sınıf</option>
+                  <option value="4">4. Sınıf</option>
+                </optgroup>
+                <optgroup label="Ortaokul">
+                  <option value="5">5. Sınıf</option>
+                  <option value="6">6. Sınıf</option>
+                  <option value="7">7. Sınıf</option>
+                  <option value="8" selected>8. Sınıf</option>
+                </optgroup>
+                <optgroup label="Lise">
+                  <option value="9">9. Sınıf</option>
+                  <option value="10">10. Sınıf</option>
+                  <option value="11">11. Sınıf</option>
+                  <option value="12">12. Sınıf</option>
+                </optgroup>
+                <optgroup label="Diğer">
+                  <option value="university">Üniversite</option>
+                  <option value="all">Tüm Seviyeler</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="docLanguage">Dil</label>
+              <select id="docLanguage" class="form-select">
+                <option value="tr" selected>Türkçe</option>
+                <option value="en">İngilizce</option>
+                <option value="de">Almanca</option>
+                <option value="fr">Fransızca</option>
+                <option value="ar">Arapça</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="docTone">Ton</label>
+              <select id="docTone" class="form-select">
+                <option value="formal" selected>Resmi</option>
+                <option value="friendly">Samimi</option>
+                <option value="academic">Akademik</option>
+                <option value="simple">Basit</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pageCount">
+              Sayfa Sayısı: <span id="pageCountValue" style="color:var(--accent);">5</span>
+            </label>
+            <div class="range-group">
+              <span class="text-muted text-sm">1</span>
+              <input type="range" id="pageCount" class="form-range" min="1" max="30" value="5" />
+              <span class="text-muted text-sm">30</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBMIT -->
+        <div class="fade-up fade-up--4" style="margin-bottom:16px;">
+          <button type="submit" id="generateBtn" class="btn btn--primary btn--lg btn--full">
+            <i data-lucide="sparkles"></i>
+            Belge Oluştur
+          </button>
+          <p class="text-muted text-sm" style="text-align:center;margin-top:10px;">
+            Oluşturma işlemi 10-30 saniye sürebilir.
+          </p>
+        </div>
+
+      </form>
+
+      <!-- GENERATION PANEL -->
+      <div class="generation-panel fade-up" id="generationPanel">
+        <div class="generation-panel__title">
+          <span class="spinner"></span>
+          Belgeniz Oluşturuluyor
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+
+        <div class="generation-steps">
+          <div class="generation-step" id="step-analyze">
+            <div class="generation-step__dot"></div>
+            <span>İçerik analizi yapılıyor...</span>
+          </div>
+          <div class="generation-step" id="step-outline">
+            <div class="generation-step__dot"></div>
+            <span>Belge yapısı oluşturuluyor...</span>
+          </div>
+          <div class="generation-step" id="step-content">
+            <div class="generation-step__dot"></div>
+            <span>İçerik yazılıyor...</span>
+          </div>
+          <div class="generation-step" id="step-format">
+            <div class="generation-step__dot"></div>
+            <span>Biçimlendirme ve düzenleme...</span>
+          </div>
+          <div class="generation-step" id="step-export">
+            <div class="generation-step__dot"></div>
+            <span>Dosya dönüştürülüyor...</span>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="generation-result" id="generationResult">
+          <div class="generation-result__title">
+            <i data-lucide="check-circle"></i>
+            <span id="resultTitle">Belge hazır!</span>
+          </div>
+          <div class="generation-result__meta" id="resultMeta"></div>
+          <div class="generation-result__actions">
+            <button class="btn btn--primary" data-action="download">
+              <i data-lucide="download"></i>
+              İndir
+            </button>
+            <button class="btn btn--ghost" data-action="download">
+              <i data-lucide="eye"></i>
+              Önizle
+            </button>
+            <button class="btn btn--ghost" onclick="document.getElementById('createForm').reset(); document.getElementById('generationPanel').classList.remove('visible'); document.getElementById('generationResult').classList.remove('visible'); document.getElementById('progressFill').style.width='0%'; document.querySelectorAll('.generation-step').forEach(s=>s.classList.remove('active','done')); document.getElementById('generateBtn').disabled=false; document.getElementById('generateBtn').innerHTML='<i data-lucide=\'sparkles\'></i> Belge Oluştur'; lucide.createIcons();">
+              <i data-lucide="refresh-cw"></i>
+              Yeni Oluştur
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Character counter for topic
+    document.addEventListener('DOMContentLoaded', () => {
+      const topicInput = document.getElementById('topicInput');
+      const charCount  = document.getElementById('topicCharCount');
+      if (topicInput && charCount) {
+        topicInput.addEventListener('input', () => {
+          charCount.textContent = `${topicInput.value.length} / 200`;
+        });
+      }
+
+      // Pre-select type from URL
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get('type');
+      if (type) {
+        document.querySelectorAll('[data-doc-type]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.docType === type);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

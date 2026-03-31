@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EgitimAI — Yapay Zeka ile Belge Üret</title>
+  <meta name="description" content="Öğretmenler ve öğrenciler için yapay zeka destekli PDF, Word ve PowerPoint belge üretici. Saniyeler içinde profesyonel belgeler oluşturun." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="nav__inner container">
+      <a href="#" class="nav__logo">
+        <span class="nav__logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="28" height="28" rx="8" fill="#e8855a"/>
+            <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+            <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="nav__logo-text">EgitimAI</span>
+      </a>
+
+      <nav class="nav__links" id="navLinks">
+        <a href="#features" class="nav__link">Özellikler</a>
+        <a href="#how" class="nav__link">Nasıl Çalışır</a>
+        <a href="#scenarios" class="nav__link">Senaryolar</a>
+        <a href="#pricing" class="nav__link">Fiyatlar</a>
+      </nav>
+
+      <div class="nav__actions">
+        <a href="app/auth.html" class="btn btn--ghost btn--sm">Giriş Yap</a>
+        <a href="app/auth.html?mode=register" class="btn btn--primary btn--sm">Ücretsiz Başla</a>
+      </div>
+
+      <button class="nav__hamburger" id="hamburger" aria-label="Menüyü Aç">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu__inner">
+      <a href="#features" class="mobile-menu__link">Özellikler</a>
+      <a href="#how" class="mobile-menu__link">Nasıl Çalışır</a>
+      <a href="#scenarios" class="mobile-menu__link">Senaryolar</a>
+      <a href="#pricing" class="mobile-menu__link">Fiyatlar</a>
+      <div class="mobile-menu__actions">
+        <a href="app/auth.html" class="btn btn--ghost btn--full">Giriş Yap</a>
+        <a href="app/auth.html?mode=register" class="btn btn--primary btn--full">Ücretsiz Başla</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="hero__bg">
+        <div class="hero__orb hero__orb--1"></div>
+        <div class="hero__orb hero__orb--2"></div>
+        <div class="hero__orb hero__orb--3"></div>
+        <div class="hero__grid"></div>
+      </div>
+
+      <div class="container hero__inner">
+        <div class="hero__badge fade-in">
+          <i data-lucide="sparkles" width="14" height="14"></i>
+          <span>Yapay Zeka Destekli Eğitim Platformu</span>
+        </div>
+
+        <h1 class="hero__title fade-in fade-in--delay-1">
+          Belgelerinizi <br />
+          <em class="hero__title-em">Saniyeler İçinde</em><br />
+          Yapay Zeka Üretsin
+        </h1>
+
+        <p class="hero__subtitle fade-in fade-in--delay-2">
+          Öğretmenler ve öğrenciler için güçlü bir araç. PDF sınav kağıdından PowerPoint sunuma,<br class="desktop-br" />
+          Word ödevinden ders planına — her şeyi AI ile anında oluşturun.
+        </p>
+
+        <div class="hero__cta fade-in fade-in--delay-3">
+          <a href="app/auth.html?mode=register" class="btn btn--primary btn--lg">
+            <i data-lucide="zap"></i>
+            Ücretsiz Başla
+          </a>
+          <a href="#" class="btn btn--ghost btn--lg hero__demo-btn">
+            <i data-lucide="play-circle"></i>
+            Demo İzle
+          </a>
+        </div>
+
+        <div class="hero__stats fade-in fade-in--delay-4">
+          <div class="hero__stat">
+            <strong>50.000+</strong>
+            <span>Belge Üretildi</span>
+          </div>
+          <div class="hero__stat-sep"></div>
+          <div class="hero__stat">
+            <strong>12.000+</strong>
+            <span>Aktif Kullanıcı</span>
+          </div>
+          <div class="hero__stat-sep"></div>
+          <div class="hero__stat">
+            <strong>4.9/5</strong>
+            <span>Kullanıcı Puanı</span>
+          </div>
+        </div>
+
+        <div class="hero__preview fade-in fade-in--delay-4">
+          <div class="preview-window">
+            <div class="preview-window__bar">
+              <span class="preview-window__dot preview-window__dot--red"></span>
+              <span class="preview-window__dot preview-window__dot--yellow"></span>
+              <span class="preview-window__dot preview-window__dot--green"></span>
+              <span class="preview-window__title">EgitimAI — Belge Üretici</span>
+            </div>
+            <div class="preview-window__body">
+              <div class="preview-prompt">
+                <div class="preview-prompt__label">Konu veya talimat girin</div>
+                <div class="preview-prompt__input">
+                  <span class="preview-prompt__text" id="typingText"></span>
+                  <span class="preview-prompt__cursor">|</span>
+                </div>
+              </div>
+              <div class="preview-format">
+                <div class="preview-format__item preview-format__item--active">
+                  <i data-lucide="file-text" width="16" height="16"></i> PDF
+                </div>
+                <div class="preview-format__item">
+                  <i data-lucide="file" width="16" height="16"></i> Word
+                </div>
+                <div class="preview-format__item">
+                  <i data-lucide="presentation" width="16" height="16"></i> PPTX
+                </div>
+              </div>
+              <div class="preview-output">
+                <div class="preview-output__line preview-output__line--title"></div>
+                <div class="preview-output__line"></div>
+                <div class="preview-output__line preview-output__line--short"></div>
+                <div class="preview-output__line"></div>
+                <div class="preview-output__line preview-output__line--med"></div>
+                <div class="preview-output__shimmer">
+                  <i data-lucide="sparkles" width="14" height="14"></i>
+                  <span>AI içerik üretiyor...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features section" id="features">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-tag">
+            <i data-lucide="layers" width="14" height="14"></i>
+            Özellikler
+          </div>
+          <h2 class="section-title">İhtiyacınız olan her belge <em>burada</em></h2>
+          <p class="section-desc">
+            Tek platformda öğretmenler ve öğrenciler için tasarlanmış, yapay zeka destekli kapsamlı belge üretimi.
+          </p>
+        </div>
+
+        <div class="features__grid">
+
+          <div class="feature-card feature-card--pdf reveal reveal--delay-1">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon">
+              <i data-lucide="file-text"></i>
+            </div>
+            <h3 class="feature-card__title">PDF Belgeler</h3>
+            <p class="feature-card__desc">Sınav soruları, ders notları, ödevler ve raporları profesyonel PDF formatında anında oluşturun. Sayfa düzeni, başlıklar ve içerik otomatik ayarlanır.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="check" width="14" height="14"></i> Çoktan seçmeli & açık uçlu sorular</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Özelleştirilebilir sayfa düzeni</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Otomatik cevap anahtarı</li>
+            </ul>
+            <div class="feature-card__badge">PDF</div>
+          </div>
+
+          <div class="feature-card feature-card--word reveal reveal--delay-2">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon">
+              <i data-lucide="file"></i>
+            </div>
+            <h3 class="feature-card__title">Word Dosyaları</h3>
+            <p class="feature-card__desc">Düzenlenebilir DOCX formatında ders planları, proje raporları ve ödevler üretin. İçeriği Word'de açıp kolayca düzenleyin.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="check" width="14" height="14"></i> Tam düzenlenebilir DOCX</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Otomatik başlık hiyerarşisi</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Tablo ve liste desteği</li>
+            </ul>
+            <div class="feature-card__badge">DOCX</div>
+          </div>
+
+          <div class="feature-card feature-card--pptx reveal reveal--delay-3">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon">
+              <i data-lucide="presentation"></i>
+            </div>
+            <h3 class="feature-card__title">PowerPoint Sunumlar</h3>
+            <p class="feature-card__desc">Profesyonel slayt sunumlarını otomatik oluşturun. Her slayta uygun başlık, içerik ve görsel öneriler ile hazır sunuma sahip olun.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="check" width="14" height="14"></i> Akıllı slayt yapılandırması</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Renk teması seçimi</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Konuşmacı notları dahil</li>
+            </ul>
+            <div class="feature-card__badge">PPTX</div>
+          </div>
+
+          <div class="feature-card feature-card--ai reveal reveal--delay-1">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon">
+              <i data-lucide="brain-circuit"></i>
+            </div>
+            <h3 class="feature-card__title">Güçlü AI Motoru</h3>
+            <p class="feature-card__desc">Gelişmiş dil modelleri sayesinde içerikler pedagojik açıdan doğru, dil bilgisi açısından hatasız ve konu odaklı üretilir.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="check" width="14" height="14"></i> Türk müfredatına uygun</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Sınıf seviyesi ayarı</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Kaynak önerileri</li>
+            </ul>
+            <div class="feature-card__badge">AI</div>
+          </div>
+
+          <div class="feature-card feature-card--teacher reveal reveal--delay-2">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon">
+              <i data-lucide="graduation-cap"></i>
+            </div>
+            <h3 class="feature-card__title">Öğretmen Araçları</h3>
+            <p class="feature-card__desc">Müfredatınıza göre özelleştirilmiş sınav, çalışma kağıdı, ders planı ve değerlendirme rubriği gibi araçlarla sınıfınızı yönetin.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="check" width="14" height="14"></i> Öğrenci takip şablonları</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Kazanım bazlı soru üretimi</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Toplu belge oluşturma</li>
+            </ul>
+            <div class="feature-card__badge">Öğretmen</div>
+          </div>
+
+          <div class="feature-card feature-card--student reveal reveal--delay-3">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon">
+              <i data-lucide="book-open"></i>
+            </div>
+            <h3 class="feature-card__title">Öğrenci Araçları</h3>
+            <p class="feature-card__desc">Ödevlerinizi, proje raporlarınızı ve çalışma notlarınızı AI yardımıyla hazırlayın. Akademik yazım standartlarına uygun belgeler alın.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="check" width="14" height="14"></i> APA/MLA atıf formatı</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Özet ve özet çıkarma</li>
+              <li><i data-lucide="check" width="14" height="14"></i> Konu özeti sunumlar</li>
+            </ul>
+            <div class="feature-card__badge">Öğrenci</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how section" id="how">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-tag">
+            <i data-lucide="workflow" width="14" height="14"></i>
+            Nasıl Çalışır
+          </div>
+          <h2 class="section-title">3 adımda <em>hazır belge</em></h2>
+          <p class="section-desc">Karmaşık araçlara gerek yok. Sadece konunuzu yazın, formatı seçin, indirin.</p>
+        </div>
+
+        <div class="how__steps">
+
+          <div class="how__step reveal reveal--delay-1">
+            <div class="how__step-number">01</div>
+            <div class="how__step-icon">
+              <i data-lucide="pencil-line"></i>
+            </div>
+            <div class="how__step-content">
+              <h3>Konuyu Girin</h3>
+              <p>Ne üretmek istediğinizi kısaca açıklayın. "8. sınıf matematik, kesirler konusu, 20 soruluk çoktan seçmeli sınav" gibi bir komut yeterli.</p>
+            </div>
+            <div class="how__step-connector">
+              <i data-lucide="arrow-right"></i>
+            </div>
+          </div>
+
+          <div class="how__step reveal reveal--delay-2">
+            <div class="how__step-number">02</div>
+            <div class="how__step-icon">
+              <i data-lucide="cpu"></i>
+            </div>
+            <div class="how__step-content">
+              <h3>AI Üretsin</h3>
+              <p>Yapay zeka motoru konuyu analiz eder, pedagojik olarak doğru içerik oluşturur ve istediğiniz formata (PDF, DOCX veya PPTX) dönüştürür.</p>
+            </div>
+            <div class="how__step-connector">
+              <i data-lucide="arrow-right"></i>
+            </div>
+          </div>
+
+          <div class="how__step reveal reveal--delay-3">
+            <div class="how__step-number">03</div>
+            <div class="how__step-icon">
+              <i data-lucide="download"></i>
+            </div>
+            <div class="how__step-content">
+              <h3>İndirin & Kullanın</h3>
+              <p>Belgeniz hazır. Tek tıkla indirin, gerekirse düzenleyin ve hemen kullanmaya başlayın. İlk belgeden itibaren zaman kazanın.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="how__demo reveal">
+          <div class="how__demo-inner">
+            <div class="how__demo-left">
+              <div class="demo-terminal">
+                <div class="demo-terminal__bar">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="demo-terminal__body">
+                  <div class="demo-line">
+                    <span class="demo-line__prompt">$</span>
+                    <span class="demo-line__cmd"> Konu: <em>10. sınıf biyoloji, hücre bölünmesi</em></span>
+                  </div>
+                  <div class="demo-line">
+                    <span class="demo-line__prompt">$</span>
+                    <span class="demo-line__cmd"> Tür: <em>Sınav (PDF) — 25 soru</em></span>
+                  </div>
+                  <div class="demo-line demo-line--processing">
+                    <i data-lucide="loader" width="12" height="12" class="spin"></i>
+                    <span> İçerik üretiliyor...</span>
+                  </div>
+                  <div class="demo-line demo-line--success">
+                    <i data-lucide="check-circle" width="12" height="12"></i>
+                    <span> Belge hazır — 2.3 saniye</span>
+                  </div>
+                  <div class="demo-line">
+                    <span class="demo-line__prompt">→</span>
+                    <span class="demo-line__cmd demo-line__cmd--dl"> biyoloji_sinav_2024.pdf</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="how__demo-right">
+              <div class="demo-stats">
+                <div class="demo-stat">
+                  <i data-lucide="clock" width="20" height="20"></i>
+                  <div>
+                    <strong>~3 saniye</strong>
+                    <span>ortalama üretim süresi</span>
+                  </div>
+                </div>
+                <div class="demo-stat">
+                  <i data-lucide="shield-check" width="20" height="20"></i>
+                  <div>
+                    <strong>%99 doğruluk</strong>
+                    <span>pedagojik içerik kalitesi</span>
+                  </div>
+                </div>
+                <div class="demo-stat">
+                  <i data-lucide="refresh-cw" width="20" height="20"></i>
+                  <div>
+                    <strong>Sınırsız</strong>
+                    <span>yeniden üretme hakkı</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENARIOS -->
+    <section class="scenarios section" id="scenarios">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-tag">
+            <i data-lucide="users" width="14" height="14"></i>
+            Kullanım Senaryoları
+          </div>
+          <h2 class="section-title">Her kullanıcı için <em>özel çözüm</em></h2>
+        </div>
+
+        <div class="scenarios__tabs reveal">
+          <button class="scenarios__tab scenarios__tab--active" data-tab="teacher">
+            <i data-lucide="graduation-cap" width="16" height="16"></i>
+            Öğretmenler İçin
+          </button>
+          <button class="scenarios__tab" data-tab="student">
+            <i data-lucide="book-open" width="16" height="16"></i>
+            Öğrenciler İçin
+          </button>
+        </div>
+
+        <div class="scenarios__content" id="scenariosContent">
+
+          <!-- TEACHER -->
+          <div class="scenarios__panel scenarios__panel--active" data-panel="teacher">
+            <div class="scenario-cards">
+
+              <div class="scenario-card reveal reveal--delay-1">
+                <div class="scenario-card__icon">
+                  <i data-lucide="clipboard-list"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pdf">PDF</span>
+                  <h4>Sınav & Test Üretimi</h4>
+                  <p>Kazanım bazlı, farklı zorluk seviyelerinde çoktan seçmeli, doğru/yanlış ve açık uçlu sorular içeren sınav kağıtları üretin.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-2">
+                <div class="scenario-card__icon">
+                  <i data-lucide="calendar-days"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--docx">DOCX</span>
+                  <h4>Haftalık Ders Planı</h4>
+                  <p>MEB müfredatına uygun, kazanım ve etkinlik bazlı haftalık ders planlarını saniyeler içinde oluşturun.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-3">
+                <div class="scenario-card__icon">
+                  <i data-lucide="monitor"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pptx">PPTX</span>
+                  <h4>Ders Sunumu</h4>
+                  <p>Sınıfta kullanmaya hazır, görsel açıdan zengin, konu odaklı PowerPoint sunumlarını otomatik oluşturun.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-1">
+                <div class="scenario-card__icon">
+                  <i data-lucide="bar-chart-2"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pdf">PDF</span>
+                  <h4>Değerlendirme Rubrikleri</h4>
+                  <p>Öğrenci performansını adil ve tutarlı biçimde değerlendirmek için detaylı puanlama rubriği oluşturun.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-2">
+                <div class="scenario-card__icon">
+                  <i data-lucide="scroll-text"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--docx">DOCX</span>
+                  <h4>Çalışma Kağıtları</h4>
+                  <p>Konuya özel alıştırma soruları, boşluk doldurma ve etkinlik sayfaları gibi sınıf içi materyaller üretin.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-3">
+                <div class="scenario-card__icon">
+                  <i data-lucide="mail"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--docx">DOCX</span>
+                  <h4>Veli Bildirimleri</h4>
+                  <p>Resmi ve dostane dilde veli bildirim mektupları, etkinlik duyuruları ve okul haberleri hazırlayın.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- STUDENT -->
+          <div class="scenarios__panel" data-panel="student">
+            <div class="scenario-cards">
+
+              <div class="scenario-card reveal reveal--delay-1">
+                <div class="scenario-card__icon">
+                  <i data-lucide="file-pen-line"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--docx">DOCX</span>
+                  <h4>Ödev & Araştırma</h4>
+                  <p>Akademik yazım kurallarına uygun, kaynak göstergeli araştırma ödevlerini ve yazılı çalışmaları hazırlayın.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-2">
+                <div class="scenario-card__icon">
+                  <i data-lucide="layout-template"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pptx">PPTX</span>
+                  <h4>Proje Sunumu</h4>
+                  <p>Grup projeleriniz için profesyonel, etkileyici sunum slaytlarını hızlıca oluşturun ve sınıfta öne çıkın.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-3">
+                <div class="scenario-card__icon">
+                  <i data-lucide="notebook"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pdf">PDF</span>
+                  <h4>Çalışma Notları</h4>
+                  <p>Ders kitabı konularını kısa, öz ve anlaşılır çalışma notlarına dönüştürün. Sınav öncesi tekrar kolaylaşsın.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-1">
+                <div class="scenario-card__icon">
+                  <i data-lucide="flask-conical"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--docx">DOCX</span>
+                  <h4>Laboratuvar Raporu</h4>
+                  <p>Bilimsel format standartlarına uygun deney raporlarını — hipotez, yöntem, sonuç — kolayca oluşturun.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-2">
+                <div class="scenario-card__icon">
+                  <i data-lucide="book-marked"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pdf">PDF</span>
+                  <h4>Konu Özeti</h4>
+                  <p>Uzun bölümleri yapay zeka ile özetleyin. Madde madde, şematik özetler ve kavram haritaları edinin.</p>
+                </div>
+              </div>
+
+              <div class="scenario-card reveal reveal--delay-3">
+                <div class="scenario-card__icon">
+                  <i data-lucide="pen-tool"></i>
+                </div>
+                <div class="scenario-card__body">
+                  <span class="scenario-card__format scenario-card__format--pptx">PPTX</span>
+                  <h4>Bitirme Projesi</h4>
+                  <p>Kapsamlı bitirme ve yıl sonu projelerinizi — rapor, slayt ve poster — tek seferde üretin.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="pricing section" id="pricing">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-tag">
+            <i data-lucide="credit-card" width="14" height="14"></i>
+            Fiyatlandırma
+          </div>
+          <h2 class="section-title">İhtiyacınıza uygun <em>plan seçin</em></h2>
+          <p class="section-desc">Ücretsiz planla başlayın, büyüdükçe yükseltin. Kredi kartı gerekmez.</p>
+        </div>
+
+        <div class="pricing__toggle reveal">
+          <span class="pricing__toggle-label">Aylık</span>
+          <button class="pricing__toggle-btn" id="pricingToggle" role="switch" aria-checked="false">
+            <span class="pricing__toggle-thumb"></span>
+          </button>
+          <span class="pricing__toggle-label">
+            Yıllık
+            <span class="pricing__discount">%20 İndirim</span>
+          </span>
+        </div>
+
+        <div class="pricing__cards">
+
+          <div class="pricing-card reveal reveal--delay-1">
+            <div class="pricing-card__header">
+              <div class="pricing-card__plan">Ücretsiz</div>
+              <div class="pricing-card__price">
+                <span class="pricing-card__amount" data-monthly="0" data-yearly="0">₺0</span>
+                <span class="pricing-card__period">/ay</span>
+              </div>
+              <p class="pricing-card__desc">Başlamak için ideal. Temel özelliklere ücretsiz erişin.</p>
+            </div>
+            <ul class="pricing-card__features">
+              <li><i data-lucide="check" width="16" height="16"></i> Ayda 10 belge üretimi</li>
+              <li><i data-lucide="check" width="16" height="16"></i> PDF ve DOCX formatları</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Temel AI modeli</li>
+              <li><i data-lucide="check" width="16" height="16"></i> 5 MB depolama</li>
+              <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> PowerPoint üretimi</li>
+              <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> Öncelikli destek</li>
+              <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> Toplu üretim</li>
+            </ul>
+            <a href="app/auth.html?mode=register" class="btn btn--outline btn--full">Ücretsiz Başla</a>
+          </div>
+
+          <div class="pricing-card pricing-card--featured reveal reveal--delay-2">
+            <div class="pricing-card__popular">En Popüler</div>
+            <div class="pricing-card__header">
+              <div class="pricing-card__plan">Pro</div>
+              <div class="pricing-card__price">
+                <span class="pricing-card__amount" data-monthly="199" data-yearly="159">₺199</span>
+                <span class="pricing-card__period">/ay</span>
+              </div>
+              <p class="pricing-card__desc">Öğretmenler ve öğrenciler için tam güç.</p>
+            </div>
+            <ul class="pricing-card__features">
+              <li><i data-lucide="check" width="16" height="16"></i> Sınırsız belge üretimi</li>
+              <li><i data-lucide="check" width="16" height="16"></i> PDF, DOCX ve PPTX</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Gelişmiş AI modeli</li>
+              <li><i data-lucide="check" width="16" height="16"></i> 10 GB depolama</li>
+              <li><i data-lucide="check" width="16" height="16"></i> PowerPoint üretimi</li>
+              <li><i data-lucide="check" width="16" height="16"></i> E-posta desteği</li>
+              <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> Toplu üretim</li>
+            </ul>
+            <a href="app/auth.html?mode=register" class="btn btn--primary btn--full">Pro'ya Geç</a>
+          </div>
+
+          <div class="pricing-card reveal reveal--delay-3">
+            <div class="pricing-card__header">
+              <div class="pricing-card__plan">Kurumsal</div>
+              <div class="pricing-card__price">
+                <span class="pricing-card__amount" data-monthly="899" data-yearly="719">₺899</span>
+                <span class="pricing-card__period">/ay</span>
+              </div>
+              <p class="pricing-card__desc">Okullar ve kurumlar için tüm özellikler.</p>
+            </div>
+            <ul class="pricing-card__features">
+              <li><i data-lucide="check" width="16" height="16"></i> Sınırsız belge üretimi</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Tüm formatlar</li>
+              <li><i data-lucide="check" width="16" height="16"></i> En güçlü AI modeli</li>
+              <li><i data-lucide="check" width="16" height="16"></i> 100 GB depolama</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Toplu belge üretimi</li>
+              <li><i data-lucide="check" width="16" height="16"></i> 7/24 öncelikli destek</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Özel API erişimi</li>
+            </ul>
+            <a href="#" class="btn btn--outline btn--full">Teklif Al</a>
+          </div>
+
+        </div>
+
+        <div class="pricing__note reveal">
+          <i data-lucide="shield" width="16" height="16"></i>
+          Tüm planlarda 14 gün para iade garantisi. Kredi kartı gerekmeden başlayın.
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="cta-banner section">
+      <div class="container">
+        <div class="cta-banner__inner reveal">
+          <div class="cta-banner__glow"></div>
+          <div class="cta-banner__content">
+            <h2>Bugün başlayın, <em>zaman kazanmaya</em> başlayın</h2>
+            <p>12.000'den fazla öğretmen ve öğrenci zaten EgitimAI kullanıyor. Siz de katılın.</p>
+            <div class="cta-banner__actions">
+              <a href="#" class="btn btn--primary btn--lg">
+                <i data-lucide="zap"></i>
+                Ücretsiz Hesap Oluştur
+              </a>
+              <a href="#" class="btn btn--ghost btn--lg">
+                Planları Karşılaştır
+                <i data-lucide="arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+
+        <div class="footer__brand">
+          <a href="#" class="nav__logo">
+            <span class="nav__logo-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="8" fill="#e8855a"/>
+                <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+                <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="nav__logo-text">EgitimAI</span>
+          </a>
+          <p class="footer__brand-desc">Yapay zeka ile eğitim belgelerini dönüştüren platform. Öğretmenler ve öğrenciler için tasarlandı.</p>
+          <div class="footer__social">
+            <a href="#" class="footer__social-link" aria-label="Twitter">
+              <i data-lucide="twitter"></i>
+            </a>
+            <a href="#" class="footer__social-link" aria-label="Instagram">
+              <i data-lucide="instagram"></i>
+            </a>
+            <a href="#" class="footer__social-link" aria-label="LinkedIn">
+              <i data-lucide="linkedin"></i>
+            </a>
+            <a href="#" class="footer__social-link" aria-label="YouTube">
+              <i data-lucide="youtube"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer__nav">
+
+          <div class="footer__col">
+            <h5>Ürün</h5>
+            <ul>
+              <li><a href="#">Özellikler</a></li>
+              <li><a href="#">Fiyatlandırma</a></li>
+              <li><a href="#">Nasıl Çalışır</a></li>
+              <li><a href="#">Güncellemeler</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h5>Çözümler</h5>
+            <ul>
+              <li><a href="#">Öğretmenler</a></li>
+              <li><a href="#">Öğrenciler</a></li>
+              <li><a href="#">Okullar</a></li>
+              <li><a href="#">Kurumlar</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h5>Şirket</h5>
+            <ul>
+              <li><a href="#">Hakkımızda</a></li>
+              <li><a href="#">Blog</a></li>
+              <li><a href="#">Kariyer</a></li>
+              <li><a href="#">İletişim</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h5>Destek</h5>
+            <ul>
+              <li><a href="#">Yardım Merkezi</a></li>
+              <li><a href="#">Topluluk</a></li>
+              <li><a href="#">API Belgeleri</a></li>
+              <li><a href="#">Durum Sayfası</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; 2025 EgitimAI. Tüm hakları saklıdır.</p>
+        <div class="footer__legal">
+          <a href="#">Gizlilik Politikası</a>
+          <a href="#">Kullanım Koşulları</a>
+          <a href="#">KVKK</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
