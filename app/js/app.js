@@ -742,10 +742,12 @@ async function initCreatePage() {
     generatedTitle     = topic.slice(0, 60);
     generatedImageData = null;
 
-    // Fetch image in background if requested
+    // Fetch image in background if requested — errors always resolve to null, never reject
     let imageFetchPromise = Promise.resolve(null);
     if (addVisuals) {
-      imageFetchPromise = fetchEducationalImage(topic, language).then(url => url ? imageUrlToBase64(url) : null);
+      imageFetchPromise = fetchEducationalImage(topic, language)
+        .then(url => url ? imageUrlToBase64(url) : null)
+        .catch(() => null);
     }
 
     await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, imageFetchPromise, session });
@@ -819,7 +821,8 @@ async function initCreatePage() {
             subject:    params.subject,
           })
         }),
-        params.imageFetchPromise,
+        // Image promise always resolves (never rejects) — CORS errors silently become null
+        Promise.resolve(params.imageFetchPromise).catch(() => null),
       ]);
 
       clearInterval(stepTimer);
@@ -1025,6 +1028,17 @@ async function generatePPTX(title, content, pages, imageData) {
   showToast('PowerPoint indiriliyor...', 'success');
 }
 
+/* Remove **bold**, *italic*, __bold__, _italic_ markers from plain text */
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g,     '$1')
+    .replace(/__(.+?)__/g,     '$1')
+    .replace(/_(.+?)_/g,       '$1')
+    .replace(/`(.+?)`/g,       '$1')
+    .trim();
+}
+
 function parseSlidecontent(content) {
   const slides = [];
   const lines  = content.split('\n');
@@ -1036,13 +1050,13 @@ function parseSlidecontent(content) {
     const match = trimmed.match(/^SLAYT\s*\d+\s*[:：]\s*(.+)/i);
     if (match) {
       if (current) slides.push(current);
-      current = { title: match[1].trim(), bullets: [] };
+      current = { title: stripMarkdown(match[1].trim()), bullets: [] };
     } else if (current) {
       if (/^[-•*]\s+/.test(trimmed)) {
-        const b = trimmed.replace(/^[-•*]\s+/, '').trim();
+        const b = stripMarkdown(trimmed.replace(/^[-•*]\s+/, '').trim());
         if (b) current.bullets.push(b);
       } else if (!/^#+/.test(trimmed)) {
-        current.bullets.push(trimmed);
+        current.bullets.push(stripMarkdown(trimmed));
       }
     }
   }
