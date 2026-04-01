@@ -14,20 +14,21 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body);
     const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone } = body;
 
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-    if (!GEMINI_API_KEY) {
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_API_KEY) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'API anahtarı eksik.' }) };
     }
 
     const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone);
 
-    const geminiBody = JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
+    const requestBody = JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 8192,
+      temperature: 0.7,
     });
 
-    const content = await callGemini(GEMINI_API_KEY, geminiBody);
+    const content = await callGroq(GROQ_API_KEY, requestBody);
 
     if (!content) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'İçerik üretilemedi, tekrar deneyin.' }) };
@@ -40,14 +41,15 @@ exports.handler = async (event) => {
   }
 };
 
-function callGemini(apiKey, body) {
+function callGroq(apiKey, body) {
   return new Promise((resolve, reject) => {
     const options = {
-      hostname: 'generativelanguage.googleapis.com',
-      path: `/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      hostname: 'api.groq.com',
+      path: '/openai/v1/chat/completions',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Length': Buffer.byteLength(body),
       },
     };
@@ -59,10 +61,10 @@ function callGemini(apiKey, body) {
         try {
           const json = JSON.parse(data);
           if (json.error) {
-            reject(new Error(json.error.message || 'Gemini API hatası'));
+            reject(new Error(json.error.message || 'Groq API hatası'));
             return;
           }
-          const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const text = json.choices?.[0]?.message?.content || '';
           resolve(text);
         } catch (e) {
           reject(new Error('Yanıt işlenemedi: ' + data.slice(0, 200)));
@@ -102,11 +104,10 @@ SLAYT 2: [Başlık]
 ...
 
 Kurallar:
-- İlk slayt kapak slaydı olsun (sunum başlığı + alt başlık)
+- İlk slayt kapak slaydı olsun
 - Son slayt özet/sonuç olsun
 - Her slayta 3-5 madde ekle
-- Toplam ${pages} slayt oluştur
-- İçerik eğitici, net ve hedef kitleye uygun olsun`;
+- Toplam ${pages} slayt oluştur`;
   }
 
   return `Sen deneyimli bir eğitim uzmanısın. ${audLabel} için ${langLabel} dilinde, ${toneLabel} tonda, ${gradeStr}kapsamlı bir eğitim belgesi oluştur.
@@ -122,11 +123,10 @@ FORMAT:
 
 ## [Bölüm 2]
 [İçerik]
-...
 
 Kurallar:
-- Eğer sınav/soru isteniyorsa soruları numaralandır ve cevapları en sona koy
-- Eğer ders planı isteniyorsa kazanımlar, yöntemler ve değerlendirme bölümleri ekle
+- Sınav isteniyorsa soruları numaralandır, cevapları sona koy
+- Ders planı isteniyorsa kazanımlar, yöntemler, değerlendirme ekle
 - ${pages} sayfalık içeriğe uygun kapsamda yaz
-- Profesyonel, anlaşılır ve hedef kitleye uygun bir dil kullan`;
+- Profesyonel ve anlaşılır dil kullan`;
 }
