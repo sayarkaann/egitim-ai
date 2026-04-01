@@ -1,3 +1,5 @@
+const https = require('https');
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -9,7 +11,9 @@ exports.handler = async (event) => {
   };
 
   try {
-    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone } = body;
+
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
@@ -18,25 +22,12 @@ exports.handler = async (event) => {
 
     const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone);
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
-        })
-      }
-    );
+    const geminiBody = JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
+    });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'AI servisi hatası: ' + errText }) };
-    }
-
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const content = await callGemini(GEMINI_API_KEY, geminiBody);
 
     if (!content) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'İçerik üretilemedi, tekrar deneyin.' }) };
@@ -45,9 +36,46 @@ exports.handler = async (event) => {
     return { statusCode: 200, headers, body: JSON.stringify({ content }) };
 
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || 'Bilinmeyen hata' }) };
   }
 };
+
+function callGemini(apiKey, body) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'generativelanguage.googleapis.com',
+      path: `/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.error) {
+            reject(new Error(json.error.message || 'Gemini API hatası'));
+            return;
+          }
+          const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          resolve(text);
+        } catch (e) {
+          reject(new Error('Yanıt işlenemedi: ' + data.slice(0, 200)));
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.setTimeout(25000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
+    req.write(body);
+    req.end();
+  });
+}
 
 function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone) {
   const langMap  = { tr: 'Türkçe', en: 'İngilizce', de: 'Almanca', fr: 'Fransızca', ar: 'Arapça' };
