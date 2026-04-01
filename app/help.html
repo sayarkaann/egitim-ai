@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EgitimAI — Yardım</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/app.css" />
+</head>
+<body id="helpPage">
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-icon">
+        <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.15"/>
+          <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+          <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="sidebar__logo-text">EgitimAI</span>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="sidebar__section-label">Genel</div>
+      <a href="index.html" class="sidebar__link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+      <a href="create.html" class="sidebar__link"><i data-lucide="plus-circle"></i><span>Yeni Oluştur</span></a>
+      <div class="sidebar__section-label">Kütüphane</div>
+      <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span>Geçmiş</span></a>
+      <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
+      <a href="pricing.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span><span class="sidebar__pro-badge">Pro</span></a>
+      <div class="sidebar__section-label">Hesap</div>
+      <a href="pricing.html" class="sidebar__link"><i data-lucide="crown"></i><span>Planlar</span></a>
+      <a href="settings.html" class="sidebar__link"><i data-lucide="settings"></i><span>Ayarlar</span></a>
+      <a href="help.html" class="sidebar__link sidebar__link--active"><i data-lucide="help-circle"></i><span>Yardım</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" data-user-avatar>?</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name" data-user-name>Yükleniyor...</div>
+          <div class="sidebar__user-plan" data-user-plan>Ücretsiz Plan</div>
+        </div>
+        <button class="btn btn--icon" data-action="logout" title="Çıkış Yap"><i data-lucide="log-out"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="mobile-topbar-toggle" id="sidebarToggle" aria-label="Menüyü Aç"><i data-lucide="menu"></i></button>
+      <div class="topbar__breadcrumb">
+        <span>EgitimAI</span>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+        <span style="color:var(--text)">Yardım</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-content">
+    <div class="create-header fade-up">
+      <h1>Yardım Merkezi</h1>
+      <p>Sık sorulan sorular ve kullanım rehberi.</p>
+    </div>
+
+    <div class="help-layout">
+
+      <div class="form-card fade-up fade-up--1">
+        <div class="form-card__title"><i data-lucide="zap"></i> Hızlı Başlangıç</div>
+        <div class="help-steps">
+          <div class="help-step">
+            <div class="help-step__num">1</div>
+            <div><strong>Yeni Oluştur'a tıklayın</strong><br><span class="text-muted text-sm">Sol menüden "Yeni Oluştur" seçeneğini seçin.</span></div>
+          </div>
+          <div class="help-step">
+            <div class="help-step__num">2</div>
+            <div><strong>Konuyu girin</strong><br><span class="text-muted text-sm">Oluşturmak istediğiniz belgenin konusunu detaylıca yazın.</span></div>
+          </div>
+          <div class="help-step">
+            <div class="help-step__num">3</div>
+            <div><strong>Ayarları seçin</strong><br><span class="text-muted text-sm">Belge türü, dil, sınıf seviyesi ve ton seçin.</span></div>
+          </div>
+          <div class="help-step">
+            <div class="help-step__num">4</div>
+            <div><strong>Oluştur ve İndir</strong><br><span class="text-muted text-sm">Yapay zeka belgeyi hazırlar, siz de PDF/Word/PPTX olarak indirirsiniz.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card fade-up fade-up--2">
+        <div class="form-card__title"><i data-lucide="message-circle"></i> Sık Sorulan Sorular</div>
+        <div class="faq-list" id="faqList">
+
+          <div class="faq-item">
+            <button class="faq-question">Belge oluşturma ne kadar sürer? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Yapay zeka genellikle 10–30 saniye içinde belgeyi hazırlar. Uzun belgeler (15+ sayfa) daha fazla sürebilir.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Ücretsiz planda kaç belge oluşturabilirim? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Ücretsiz planda toplam 3 belge ve her belgede en fazla 5 sayfa oluşturabilirsiniz. Daha fazlası için Pro plana geçebilirsiniz.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Hangi diller destekleniyor? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Türkçe, İngilizce, Almanca, Fransızca ve Arapça desteklenmektedir. Seçtiğiniz dilde eksiksiz belge oluşturulur.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Görsel ekleme nasıl çalışır? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">"Görsel ekle" seçeneğini işaretlediğinizde, Wikipedia ve Wikimedia Commons'tan konuyla ilgili eğitsel görseller otomatik olarak belgeye eklenir.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">PDF olarak nasıl kaydederim? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">PDF seçeneğiyle belge oluşturulduğunda yeni bir sekme açılır ve yazdırma ekranı gelir. "Farklı kaydet → PDF" seçeneğiyle PDF olarak kaydedebilirsiniz.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Öğretmen ve öğrenci modu arasındaki fark nedir? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Öğretmen modunda ders planı, değerlendirme kriterleri ve pedagojik yöntemler öne çıkar. Öğrenci modunda ise sade dil, örnekler ve çalışma ipuçları kullanılır.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Oluşturulan belgeler kaydediliyor mu? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Evet, tüm belgeler "Geçmiş" bölümünde saklanır. İstediğiniz zaman tekrar indirebilir ya da silebilirsiniz.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="form-card fade-up fade-up--3" style="background:linear-gradient(135deg,rgba(232,133,90,.12),rgba(121,144,248,.08));">
+        <div class="form-card__title"><i data-lucide="mail"></i> Destek</div>
+        <p class="text-muted" style="margin-bottom:16px;">Sorunuz cevaplanamadıysa veya bir hata ile karşılaştıysanız iletişime geçin.</p>
+        <a href="mailto:destek@egitimai.com" class="btn btn--primary btn--sm">
+          <i data-lucide="send"></i> E-posta Gönder
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.faq-item');
+          const isOpen = item.classList.contains('open');
+          document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+          if (!isOpen) item.classList.add('open');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

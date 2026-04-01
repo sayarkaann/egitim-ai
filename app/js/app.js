@@ -6,6 +6,10 @@
 const SUPABASE_URL      = 'https://bkeiwcxrdunicjvikfin.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWl3Y3hyZHVuaWNqdmlrZmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTI1MTQsImV4cCI6MjA5MDU2ODUxNH0.GX97jQJbnGynrC09uJUTTOse_J7ZlAmpEu0AZr6jBAU';
 
+/* Free plan limits */
+const FREE_DOC_LIMIT  = 3;
+const FREE_PAGE_LIMIT = 5;
+
 let _sb = null;
 function getSB() {
   if (!_sb) _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -38,6 +42,41 @@ function showToast(message, type = 'info', duration = 3500) {
 
   requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, duration);
+}
+
+/* =====================================================
+   UPGRADE MODAL
+===================================================== */
+function showUpgradeModal(reason = '') {
+  const existing = document.getElementById('upgradeModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'upgradeModal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-icon"><i data-lucide="crown"></i></div>
+      <h2 class="modal-title">Pro Plana Geç</h2>
+      <p class="modal-desc">${reason || 'Ücretsiz planın 3 belge limitine ulaştınız.'}</p>
+      <div class="modal-features">
+        <div class="modal-feature"><i data-lucide="check"></i> Sınırsız belge oluşturma</div>
+        <div class="modal-feature"><i data-lucide="check"></i> 30 sayfaya kadar</div>
+        <div class="modal-feature"><i data-lucide="check"></i> Otomatik görsel ekleme</div>
+        <div class="modal-feature"><i data-lucide="check"></i> Klasörler ve organizasyon</div>
+      </div>
+      <div class="modal-actions">
+        <a href="pricing.html" class="btn btn--primary btn--lg">
+          <i data-lucide="crown"></i> Planları İncele
+        </a>
+        <button class="btn btn--ghost" id="upgradeModalClose">Şimdi değil</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  initIcons(modal);
+
+  document.getElementById('upgradeModalClose')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 }
 
 /* =====================================================
@@ -117,6 +156,63 @@ async function requireAuth() {
 }
 
 /* =====================================================
+   IMAGE FETCH — Wikipedia / Wikimedia Commons
+===================================================== */
+async function fetchEducationalImage(query, language) {
+  if (!query) return null;
+  const wikiLang = language === 'tr' ? 'tr' : 'en';
+
+  try {
+    // 1. Wikipedia article thumbnail
+    const url1 = `https://${wikiLang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=700&origin=*`;
+    const r1   = await fetch(url1);
+    if (r1.ok) {
+      const d1    = await r1.json();
+      const pages = d1.query?.pages;
+      if (pages) {
+        const thumb = Object.values(pages)[0]?.thumbnail?.source;
+        if (thumb) return thumb;
+      }
+    }
+  } catch (_) {}
+
+  try {
+    // 2. Wikimedia Commons search
+    const url2 = `https://commons.wikimedia.org/w/api.php?action=query&list=allimages&ailimit=6&aisearch=${encodeURIComponent(query)}&format=json&origin=*&aiprop=url|size|mediatype&aisort=relevance`;
+    const r2   = await fetch(url2);
+    if (r2.ok) {
+      const d2   = await r2.json();
+      const imgs = d2.query?.allimages || [];
+      const ok   = imgs.find(i =>
+        i.mediatype === 'BITMAP' &&
+        (i.url.toLowerCase().endsWith('.jpg') || i.url.toLowerCase().endsWith('.png') || i.url.toLowerCase().endsWith('.jpeg')) &&
+        (i.width || 0) >= 400 && (i.height || 0) >= 300
+      );
+      if (ok?.url) return ok.url;
+      if (imgs[0]?.url) return imgs[0].url;
+    }
+  } catch (_) {}
+
+  return null;
+}
+
+async function imageUrlToBase64(url) {
+  try {
+    const res  = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+/* =====================================================
    AUTH PAGE
 ===================================================== */
 async function initAuthPage() {
@@ -175,24 +271,18 @@ async function initAuthPage() {
   loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAllErrors(loginForm);
-
     const emailEl    = document.getElementById('loginEmail');
     const passwordEl = document.getElementById('loginPassword');
     let valid = true;
-
-    if (!isValidEmail(emailEl.value))      { showFieldError(emailEl,    'Geçerli bir e-posta adresi girin.'); valid = false; }
-    if (passwordEl.value.length < 6)       { showFieldError(passwordEl, 'Şifre en az 6 karakter olmalıdır.'); valid = false; }
+    if (!isValidEmail(emailEl.value))  { showFieldError(emailEl,    'Geçerli bir e-posta adresi girin.'); valid = false; }
+    if (passwordEl.value.length < 6)   { showFieldError(passwordEl, 'Şifre en az 6 karakter olmalıdır.'); valid = false; }
     if (!valid) return;
 
     const btn = loginForm.querySelector('[type="submit"]');
     btn.disabled = true;
     btn.innerHTML = `<span class="spinner"></span> Giriş yapılıyor...`;
 
-    const { data, error } = await sb.auth.signInWithPassword({
-      email: emailEl.value.trim(),
-      password: passwordEl.value,
-    });
-
+    const { error } = await sb.auth.signInWithPassword({ email: emailEl.value.trim(), password: passwordEl.value });
     if (error) {
       btn.disabled = false;
       btn.innerHTML = `<i data-lucide="log-in"></i> Giriş Yap`;
@@ -201,7 +291,7 @@ async function initAuthPage() {
       showFieldError(emailEl, msg);
       showToast(msg, 'error');
     } else {
-      showToast('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+      showToast('Giriş başarılı!', 'success');
       setTimeout(() => { window.location.href = 'index.html'; }, 800);
     }
   });
@@ -210,19 +300,17 @@ async function initAuthPage() {
   registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAllErrors(registerForm);
-
     const firstEl    = document.getElementById('registerFirst');
     const lastEl     = document.getElementById('registerLast');
     const emailEl    = document.getElementById('registerEmail');
     const passwordEl = document.getElementById('registerPassword');
     const confirmEl  = document.getElementById('registerConfirm');
     let valid = true;
-
-    if (firstEl.value.trim().length < 2)   { showFieldError(firstEl,    'Ad en az 2 karakter olmalıdır.');    valid = false; }
-    if (lastEl.value.trim().length < 2)    { showFieldError(lastEl,     'Soyad en az 2 karakter olmalıdır.'); valid = false; }
-    if (!isValidEmail(emailEl.value))      { showFieldError(emailEl,    'Geçerli bir e-posta adresi girin.'); valid = false; }
-    if (passwordEl.value.length < 6)       { showFieldError(passwordEl, 'Şifre en az 6 karakter olmalıdır.'); valid = false; }
-    if (confirmEl.value !== passwordEl.value) { showFieldError(confirmEl, 'Şifreler eşleşmiyor.');            valid = false; }
+    if (firstEl.value.trim().length < 2)        { showFieldError(firstEl,    'Ad en az 2 karakter olmalıdır.');    valid = false; }
+    if (lastEl.value.trim().length < 2)         { showFieldError(lastEl,     'Soyad en az 2 karakter olmalıdır.'); valid = false; }
+    if (!isValidEmail(emailEl.value))           { showFieldError(emailEl,    'Geçerli bir e-posta adresi girin.'); valid = false; }
+    if (passwordEl.value.length < 6)            { showFieldError(passwordEl, 'Şifre en az 6 karakter olmalıdır.'); valid = false; }
+    if (confirmEl.value !== passwordEl.value)   { showFieldError(confirmEl,  'Şifreler eşleşmiyor.');              valid = false; }
     if (!valid) return;
 
     const btn = registerForm.querySelector('[type="submit"]');
@@ -243,14 +331,13 @@ async function initAuthPage() {
       showToast(error.message, 'error');
     } else if (data.user && !data.session) {
       btn.innerHTML = `✓ E-posta gönderildi!`;
-      showToast('E-postanıza bir onay linki gönderildi. Lütfen kontrol edin.', 'info', 7000);
+      showToast('E-postanıza bir onay linki gönderildi.', 'info', 7000);
     } else {
       showToast('Hesabınız oluşturuldu!', 'success');
       setTimeout(() => { window.location.href = 'index.html'; }, 800);
     }
   });
 
-  // Google (yakında)
   document.querySelectorAll('[data-action="google-auth"]').forEach(btn => {
     btn.addEventListener('click', () => showToast('Google girişi yakında aktif olacak.', 'info'));
   });
@@ -282,7 +369,7 @@ async function initDashboard() {
   animateCounter(document.getElementById('statDocs'),      total);
   animateCounter(document.getElementById('statDownloads'), total);
   animateCounter(document.getElementById('statHours'),     Math.ceil(total * 0.5));
-  animateCounter(document.getElementById('statCredits'),   Math.max(0, 10 - total));
+  animateCounter(document.getElementById('statCredits'),   Math.max(0, FREE_DOC_LIMIT - total));
 
   renderDocsTable(docs || []);
 }
@@ -290,8 +377,8 @@ async function initDashboard() {
 function animateCounter(el, target) {
   if (!el) return;
   const duration = 900;
-  const start = performance.now();
-  const tick = (now) => {
+  const start    = performance.now();
+  const tick     = (now) => {
     const p = Math.min((now - start) / duration, 1);
     el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target).toLocaleString('tr-TR');
     if (p < 1) requestAnimationFrame(tick);
@@ -299,7 +386,7 @@ function animateCounter(el, target) {
   requestAnimationFrame(tick);
 }
 
-function renderDocsTable(docs) {
+function renderDocsTable(docs, showDelete = false) {
   const table = document.querySelector('.docs-table');
   if (!table) return;
 
@@ -319,9 +406,12 @@ function renderDocsTable(docs) {
   const typeLabel = { pdf: 'PDF', word: 'DOCX', pptx: 'PPTX' };
 
   docs.forEach(doc => {
-    const row = document.createElement('div');
+    const row  = document.createElement('div');
     row.className = 'docs-table__row';
-    const date = new Date(doc.created_at).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric' });
+    const date = new Date(doc.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+    const deleteBtn = showDelete
+      ? `<button class="btn btn--icon btn--ghost" title="Sil" data-delete-id="${doc.id}" style="color:var(--danger)"><i data-lucide="trash-2"></i></button>`
+      : '';
     row.innerHTML = `
       <div class="docs-table__name">
         <div class="doc-icon doc-icon--${doc.type}">${typeIcon[doc.type] || 'DOC'}</div>
@@ -334,6 +424,7 @@ function renderDocsTable(docs) {
         <button class="btn btn--icon btn--ghost" title="İndir" data-doc-id="${doc.id}">
           <i data-lucide="download"></i>
         </button>
+        ${deleteBtn}
       </div>`;
     table.appendChild(row);
   });
@@ -343,8 +434,194 @@ function renderDocsTable(docs) {
   table.querySelectorAll('[data-doc-id]').forEach(btn => {
     btn.addEventListener('click', () => {
       const doc = docs.find(d => d.id === btn.dataset.docId);
-      if (doc) downloadDocument(doc.title, doc.type, doc.content, doc.pages);
+      if (doc) downloadDocument(doc.title, doc.type, doc.content, doc.pages, null);
     });
+  });
+
+  if (showDelete) {
+    table.querySelectorAll('[data-delete-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Bu belgeyi silmek istediğinize emin misiniz?')) return;
+        const { error } = await getSB().from('documents').delete().eq('id', btn.dataset.deleteId);
+        if (!error) {
+          btn.closest('.docs-table__row').remove();
+          showToast('Belge silindi.', 'success');
+        } else {
+          showToast('Silme işlemi başarısız.', 'error');
+        }
+      });
+    });
+  }
+}
+
+/* =====================================================
+   HISTORY PAGE
+===================================================== */
+async function initHistoryPage() {
+  if (!document.getElementById('historyPage')) return;
+
+  const session = await requireAuth();
+  if (!session) return;
+
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  const sb = getSB();
+
+  async function loadDocs(searchQuery = '') {
+    let query = sb
+      .from('documents')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (searchQuery) {
+      query = query.ilike('title', `%${searchQuery}%`);
+    }
+
+    const { data: docs } = await query;
+    renderDocsTable(docs || [], true);
+  }
+
+  await loadDocs();
+
+  // Search
+  const searchInput = document.getElementById('historySearch');
+  let searchTimer;
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => loadDocs(searchInput.value.trim()), 400);
+  });
+}
+
+/* =====================================================
+   TEMPLATES PAGE
+===================================================== */
+function initTemplatesPage() {
+  if (!document.getElementById('templatesPage')) return;
+
+  const session_check = requireAuth().then(session => {
+    if (!session) return;
+    populateUserInfo();
+    initSidebar();
+    initLogout();
+    initIcons();
+  });
+
+  const templates = [
+    { icon: 'file-text',    title: 'Çoktan Seçmeli Sınav',     desc: '20 soruluk, 4 şıklı çoktan seçmeli sınav', type: 'pdf',  audience: 'teacher', topic: '20 soruluk çoktan seçmeli sınav', subject: 'Matematik' },
+    { icon: 'book-open',    title: 'Ders Planı',                desc: 'Kazanımlar, yöntemler ve değerlendirme içeren tam ders planı', type: 'word', audience: 'teacher', topic: 'Haftalık ders planı', subject: 'Türkçe' },
+    { icon: 'presentation', title: 'Konu Sunumu',               desc: 'Görsel ve etkileyici PowerPoint sunumu', type: 'pptx',  audience: 'teacher', topic: 'Konu sunumu', subject: 'Fen Bilimleri' },
+    { icon: 'clipboard',    title: 'Konu Özeti (Öğrenci)',      desc: 'Öğrenci için sade ve anlaşılır konu özeti', type: 'pdf',  audience: 'student', topic: 'Konu özeti çalışma notu', subject: 'Tarih' },
+    { icon: 'edit',         title: 'Alıştırma Soruları',        desc: 'Cevaplı alıştırma ve pratik soruları', type: 'pdf',  audience: 'student', topic: 'Alıştırma soruları ve çözümleri', subject: 'Matematik' },
+    { icon: 'layers',       title: 'Yıllık Plan',               desc: 'Aylık konu dağılımı içeren yıllık plan', type: 'word', audience: 'teacher', topic: 'Yıllık ders planı', subject: 'Coğrafya' },
+    { icon: 'flask-conical','title': 'Deney Raporu',            desc: 'Fen bilimleri laboratuvar deney raporu', type: 'pdf',  audience: 'student', topic: 'Deney raporu şablonu', subject: 'Fen Bilimleri' },
+    { icon: 'bar-chart',    title: 'Değerlendirme Rubriği',     desc: 'Ödev ve proje değerlendirme kriterleri', type: 'word', audience: 'teacher', topic: 'Değerlendirme rubriği', subject: 'Tüm Dersler' },
+    { icon: 'globe',        title: 'İngilizce Konu Belgesi',    desc: 'İngilizce olarak hazırlanmış konu belgesi', type: 'pdf', audience: 'student', topic: 'Topic study notes', subject: 'İngilizce', language: 'en' },
+    { icon: 'users',        title: 'Grup Aktivitesi Planı',     desc: 'İşbirlikli öğrenme etkinlik planı', type: 'word', audience: 'teacher', topic: 'Grup çalışması etkinlik planı', subject: 'Sosyal Bilgiler' },
+    { icon: 'calculator',   title: 'Matematik Çalışma Kağıdı',  desc: 'Adım adım çözümlü matematik soruları', type: 'pdf', audience: 'student', topic: 'Matematik çalışma kağıdı ve çözümler', subject: 'Matematik' },
+    { icon: 'mic',          title: 'Münazara / Sunum Kılavuzu', desc: 'Öğrenciler için sunum ve münazara kılavuzu', type: 'word', audience: 'student', topic: 'Sunum ve münazara kılavuzu', subject: 'Türkçe' },
+  ];
+
+  const grid = document.querySelector('.templates-grid');
+  if (!grid) return;
+
+  grid.innerHTML = templates.map(t => `
+    <div class="template-card" data-template='${JSON.stringify(t)}'>
+      <div class="template-card__icon"><i data-lucide="${t.icon}"></i></div>
+      <div class="template-card__body">
+        <div class="template-card__title">${t.title}</div>
+        <div class="template-card__desc">${t.desc}</div>
+        <div class="template-card__meta">
+          <span class="badge badge--${t.type}">${t.type.toUpperCase()}</span>
+          <span class="badge" style="background:rgba(255,220,170,.08);color:var(--text-2);">${t.subject}</span>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm template-card__btn">
+        <i data-lucide="arrow-right"></i> Kullan
+      </button>
+    </div>`).join('');
+
+  initIcons(grid);
+
+  grid.querySelectorAll('.template-card').forEach(card => {
+    card.querySelector('.template-card__btn')?.addEventListener('click', () => {
+      const t = JSON.parse(card.dataset.template);
+      const params = new URLSearchParams({
+        topic:    t.topic,
+        type:     t.type,
+        audience: t.audience,
+        subject:  t.subject,
+        ...(t.language ? { language: t.language } : {}),
+      });
+      window.location.href = `create.html?${params.toString()}`;
+    });
+  });
+}
+
+/* =====================================================
+   SETTINGS PAGE
+===================================================== */
+async function initSettingsPage() {
+  if (!document.getElementById('settingsPage')) return;
+
+  const session = await requireAuth();
+  if (!session) return;
+
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  const meta      = session.user.user_metadata || {};
+  const firstName = meta.first_name || meta.firstName || '';
+  const lastName  = meta.last_name  || meta.lastName  || '';
+
+  const firstEl = document.getElementById('settingsFirst');
+  const lastEl  = document.getElementById('settingsLast');
+  const emailEl = document.getElementById('settingsEmail');
+  if (firstEl) firstEl.value = firstName;
+  if (lastEl)  lastEl.value  = lastName;
+  if (emailEl) emailEl.value = session.user.email;
+
+  // Get doc count for plan display
+  const sb = getSB();
+  const { count } = await sb
+    .from('documents')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', session.user.id);
+
+  const usageBar = document.getElementById('planUsageBar');
+  const usageText = document.getElementById('planUsageText');
+  if (usageBar)  usageBar.style.width  = `${Math.min(100, ((count || 0) / FREE_DOC_LIMIT) * 100)}%`;
+  if (usageText) usageText.textContent = `${count || 0} / ${FREE_DOC_LIMIT} belge kullanıldı`;
+
+  const settingsForm = document.getElementById('settingsForm');
+  settingsForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = settingsForm.querySelector('[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Kaydediliyor...';
+
+    const { error } = await getSB().auth.updateUser({
+      data: {
+        first_name: firstEl?.value.trim() || firstName,
+        last_name:  lastEl?.value.trim()  || lastName,
+      }
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="save"></i> Kaydet';
+    initIcons(btn);
+
+    if (error) {
+      showToast('Güncelleme başarısız: ' + error.message, 'error');
+    } else {
+      showToast('Profil güncellendi!', 'success');
+      await populateUserInfo();
+    }
   });
 }
 
@@ -365,8 +642,34 @@ async function initCreatePage() {
   let selectedAudience = 'teacher';
   let generatedContent = '';
   let generatedTitle   = '';
+  let generatedImageData = null;
 
-  // Toggles
+  // Pre-fill from URL params (from templates)
+  const urlP = new URLSearchParams(window.location.search);
+  if (urlP.get('type'))     selectedType     = urlP.get('type');
+  if (urlP.get('audience')) selectedAudience = urlP.get('audience');
+  if (urlP.get('topic')) {
+    const ti = document.getElementById('topicInput');
+    if (ti) { ti.value = urlP.get('topic'); ti.dispatchEvent(new Event('input')); }
+  }
+  if (urlP.get('subject')) {
+    const si = document.getElementById('docSubject');
+    if (si) si.value = urlP.get('subject');
+  }
+  if (urlP.get('language')) {
+    const li = document.getElementById('docLanguage');
+    if (li) li.value = urlP.get('language');
+  }
+
+  // Sync toggles with pre-selected values
+  document.querySelectorAll('[data-doc-type]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.docType === selectedType);
+  });
+  document.querySelectorAll('[data-audience]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.audience === selectedAudience);
+  });
+
+  // Toggle interactions
   document.querySelectorAll('[data-doc-type]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-doc-type]').forEach(b => b.classList.remove('active'));
@@ -385,9 +688,18 @@ async function initCreatePage() {
 
   const pageRange = document.getElementById('pageCount');
   const pageValue = document.getElementById('pageCountValue');
-  pageRange?.addEventListener('input', () => { if (pageValue) pageValue.textContent = pageRange.value; });
+  pageRange?.addEventListener('input', () => {
+    if (pageValue) pageValue.textContent = pageRange.value;
+    // Warn about free plan page limit
+    if (parseInt(pageRange.value) > FREE_PAGE_LIMIT) {
+      const hint = document.getElementById('pageLimitHint');
+      if (hint) { hint.style.display = 'block'; }
+    } else {
+      const hint = document.getElementById('pageLimitHint');
+      if (hint) { hint.style.display = 'none'; }
+    }
+  });
 
-  // Form submit
   const createForm  = document.getElementById('createForm');
   const generateBtn = document.getElementById('generateBtn');
 
@@ -399,45 +711,83 @@ async function initCreatePage() {
     const topic = topicInput.value.trim();
     if (topic.length < 5) { showFieldError(topicInput, 'Konu en az 5 karakter olmalıdır.'); return; }
 
-    const extraNotes = document.getElementById('extraNotes')?.value || '';
-    const pages      = pageRange?.value || '5';
-    const gradeLevel = document.getElementById('gradeLevel')?.value || '';
-    const language   = document.getElementById('docLanguage')?.value || 'tr';
-    const tone       = document.getElementById('docTone')?.value || 'formal';
+    const pages     = parseInt(pageRange?.value || '5', 10);
+    const language  = document.getElementById('docLanguage')?.value || 'tr';
 
-    generatedTitle = topic.slice(0, 60);
-    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, session });
+    // FREE PLAN LIMIT CHECK
+    const sb = getSB();
+    const { count } = await sb
+      .from('documents')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', session.user.id);
+
+    if ((count || 0) >= FREE_DOC_LIMIT) {
+      showUpgradeModal(`Ücretsiz planda en fazla ${FREE_DOC_LIMIT} belge oluşturabilirsiniz. Pro plana geçerek sınırsız belge oluşturun.`);
+      return;
+    }
+
+    if (pages > FREE_PAGE_LIMIT) {
+      showToast(`Ücretsiz planda en fazla ${FREE_PAGE_LIMIT} sayfa oluşturabilirsiniz.`, 'error', 4000);
+      if (pageRange) pageRange.value = FREE_PAGE_LIMIT;
+      if (pageValue) pageValue.textContent = FREE_PAGE_LIMIT;
+      return;
+    }
+
+    const extraNotes = document.getElementById('extraNotes')?.value || '';
+    const gradeLevel = document.getElementById('gradeLevel')?.value  || '';
+    const tone       = document.getElementById('docTone')?.value     || 'formal';
+    const subject    = document.getElementById('docSubject')?.value  || '';
+    const addVisuals = document.getElementById('addVisuals')?.checked || false;
+
+    generatedTitle     = topic.slice(0, 60);
+    generatedImageData = null;
+
+    // Fetch image in background if requested
+    let imageFetchPromise = Promise.resolve(null);
+    if (addVisuals) {
+      imageFetchPromise = fetchEducationalImage(topic, language).then(url => url ? imageUrlToBase64(url) : null);
+    }
+
+    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, imageFetchPromise, session });
   });
 
   // Download buttons
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-action="download"]');
     if (btn && generatedContent) {
-      downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5');
+      const icon = btn.querySelector('i[data-lucide]');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      try {
+        await downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5', generatedImageData);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+        initIcons(btn);
+      }
     }
   });
 
   initIcons();
 
   async function runGeneration(params) {
-    const panel       = document.getElementById('generationPanel');
-    const resultPanel = document.getElementById('generationResult');
+    const panel        = document.getElementById('generationPanel');
+    const resultPanel  = document.getElementById('generationResult');
     const progressFill = document.getElementById('progressFill');
     const resultTitle  = document.getElementById('resultTitle');
     const resultMeta   = document.getElementById('resultMeta');
-
-    const steps = ['step-analyze', 'step-outline', 'step-content', 'step-format', 'step-export'];
+    const steps        = ['step-analyze', 'step-outline', 'step-content', 'step-format', 'step-export'];
 
     // Reset UI
     generateBtn.disabled = true;
     generateBtn.innerHTML = `<span class="spinner"></span> Oluşturuluyor...`;
     resultPanel?.classList.remove('visible');
     if (progressFill) progressFill.style.width = '0%';
-    steps.forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('active','done'); } });
+    steps.forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('active', 'done'); });
     panel?.classList.add('visible');
     panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-    // Animate steps while waiting for API
     let stepIdx = 0;
     const stepTimer = setInterval(() => {
       if (stepIdx > 0) {
@@ -450,41 +800,44 @@ async function initCreatePage() {
         if (progressFill) progressFill.style.width = `${Math.round(((stepIdx + 1) / steps.length) * 80)}%`;
         stepIdx++;
       }
-    }, 1400);
+    }, 1600);
 
     try {
-      const response = await fetch('/.netlify/functions/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic:      params.topic,
-          extraNotes: params.extraNotes,
-          type:       params.type,
-          audience:   params.audience,
-          pages:      params.pages,
-          gradeLevel: params.gradeLevel,
-          language:   params.language,
-          tone:       params.tone,
-        })
-      });
+      const [response, imgData] = await Promise.all([
+        fetch('/.netlify/functions/generate', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic:      params.topic,
+            extraNotes: params.extraNotes,
+            type:       params.type,
+            audience:   params.audience,
+            pages:      params.pages,
+            gradeLevel: params.gradeLevel,
+            language:   params.language,
+            tone:       params.tone,
+            subject:    params.subject,
+          })
+        }),
+        params.imageFetchPromise,
+      ]);
 
       clearInterval(stepTimer);
 
       if (!response.ok) throw new Error('Sunucu hatası. Lütfen tekrar deneyin.');
-
       const json = await response.json();
       if (json.error) throw new Error(json.error);
 
-      generatedContent = json.content;
+      generatedContent   = json.content;
+      generatedImageData = imgData;
 
-      // Complete all steps
       steps.forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('active'); el.classList.add('done'); } });
       if (progressFill) progressFill.style.width = '100%';
 
       setTimeout(async () => {
         const typeLabels = { pdf: 'PDF', word: 'Word', pptx: 'PowerPoint' };
         if (resultTitle) resultTitle.textContent = `${generatedTitle}.${params.type === 'word' ? 'docx' : params.type}`;
-        if (resultMeta)  resultMeta.textContent  = `${typeLabels[params.type]} • ${params.pages} sayfa • ${params.audience === 'teacher' ? 'Öğretmen' : 'Öğrenci'} hedefli`;
+        if (resultMeta)  resultMeta.textContent  = `${typeLabels[params.type]} • ${params.pages} sayfa • ${params.audience === 'teacher' ? 'Öğretmen' : 'Öğrenci'} hedefli${imgData ? ' • Görsel eklendi' : ''}`;
         resultPanel?.classList.add('visible');
         showToast('Belgeniz başarıyla oluşturuldu!', 'success');
 
@@ -492,13 +845,12 @@ async function initCreatePage() {
         generateBtn.innerHTML = `<i data-lucide="sparkles"></i> Yeni Belge Oluştur`;
         initIcons(generateBtn);
 
-        // Supabase'e kaydet
         await getSB().from('documents').insert({
           user_id:  params.session.user.id,
           title:    generatedTitle,
           type:     params.type,
           content:  generatedContent,
-          pages:    parseInt(params.pages, 10),
+          pages:    params.pages,
           audience: params.audience,
         });
       }, 400);
@@ -517,13 +869,17 @@ async function initCreatePage() {
 /* =====================================================
    DOCUMENT DOWNLOAD
 ===================================================== */
-function downloadDocument(title, type, content, pages) {
-  if (type === 'pdf')  generatePDF(title, content);
-  else if (type === 'word')  generateWord(title, content);
-  else if (type === 'pptx')  generatePPTX(title, content, pages);
+async function downloadDocument(title, type, content, pages, imageData) {
+  if (type === 'pdf')        await generatePDF(title, content, imageData);
+  else if (type === 'word')  await generateWord(title, content, imageData);
+  else if (type === 'pptx')  await generatePPTX(title, content, pages, imageData);
 }
 
-function generatePDF(title, content) {
+async function generatePDF(title, content, imageData) {
+  const imgHtml = imageData
+    ? `<div style="text-align:center;margin:0 0 28px;"><img src="${imageData}" style="max-width:100%;max-height:260px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="İlgili görsel" /></div>`
+    : '';
+
   const body = `<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -532,7 +888,7 @@ function generatePDF(title, content) {
 <style>
   * { box-sizing: border-box; }
   body { font-family: Arial, Helvetica, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #222; font-size: 12pt; line-height: 1.7; }
-  h1 { font-size: 20pt; color: #1a1a2e; border-bottom: 2px solid #7990f8; padding-bottom: 10px; margin: 0 0 24px; }
+  h1 { font-size: 20pt; color: #1a1a2e; border-bottom: 2px solid #e8855a; padding-bottom: 10px; margin: 0 0 24px; }
   h2 { font-size: 14pt; color: #2d2d4e; margin: 24px 0 8px; }
   h3 { font-size: 12pt; color: #444; margin: 16px 0 6px; }
   p  { margin: 0 0 10px; }
@@ -544,6 +900,7 @@ function generatePDF(title, content) {
 </style>
 </head>
 <body>
+${imgHtml}
 ${markdownToHtml(content)}
 <div class="footer">EgitimAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</div>
 <script>setTimeout(() => { window.print(); }, 600);<\/script>
@@ -556,13 +913,17 @@ ${markdownToHtml(content)}
   if (!win) showToast('Açılır pencere engellendi. Tarayıcı ayarlarından izin verin.', 'error');
 }
 
-function generateWord(title, content) {
+async function generateWord(title, content, imageData) {
+  const imgHtml = imageData
+    ? `<p style="text-align:center;"><img src="${imageData}" style="max-width:100%;max-height:240px;border-radius:8px;" /></p><br>`
+    : '';
+
   const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
 <meta charset="UTF-8">
 <style>
   body   { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
-  h1     { font-size: 18pt; color: #1a1a2e; border-bottom: 1px solid #7990f8; padding-bottom: 6pt; }
+  h1     { font-size: 18pt; color: #1a1a2e; border-bottom: 1px solid #e8855a; padding-bottom: 6pt; }
   h2     { font-size: 14pt; color: #2d2d4e; }
   h3     { font-size: 12pt; color: #444; }
   p      { margin-bottom: 8pt; }
@@ -572,6 +933,7 @@ function generateWord(title, content) {
 </style>
 </head>
 <body>
+${imgHtml}
 ${markdownToHtml(content)}
 <p class="footer">EgitimAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</p>
 </body>
@@ -587,7 +949,7 @@ ${markdownToHtml(content)}
   showToast('Word belgesi indiriliyor...', 'success');
 }
 
-function generatePPTX(title, content, pages) {
+async function generatePPTX(title, content, pages, imageData) {
   if (!window.PptxGenJS) {
     showToast('PowerPoint kütüphanesi henüz yüklenmedi. Lütfen bekleyin ve tekrar deneyin.', 'error');
     return;
@@ -595,62 +957,82 @@ function generatePPTX(title, content, pages) {
 
   const slides = parseSlidecontent(content);
   const pptx   = new PptxGenJS();
+  pptx.layout  = 'LAYOUT_WIDE';
 
-  slides.forEach((slide, i) => {
-    const s = pptx.addSlide();
+  for (let i = 0; i < slides.length; i++) {
+    const slide = slides[i];
+    const s     = pptx.addSlide();
 
     if (i === 0) {
-      // Kapak slaydı
+      // Cover slide
       s.background = { color: '1a1a2e' };
+      // Add image to cover if available
+      if (imageData) {
+        try {
+          s.addImage({ data: imageData, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 });
+        } catch (_) {}
+      }
       s.addText(slide.title, {
-        x: 0.5, y: 2.2, w: 9, h: 1.4,
-        fontSize: 28, bold: true, color: 'FFFFFF', align: 'center',
+        x: 0.5, y: 2.0, w: 12.3, h: 1.6,
+        fontSize: 32, bold: true, color: 'FFFFFF', align: 'center',
       });
       if (slide.bullets[0]) {
         s.addText(slide.bullets[0], {
-          x: 0.5, y: 3.8, w: 9, h: 0.7,
-          fontSize: 14, color: 'aaaacc', align: 'center',
+          x: 0.5, y: 3.8, w: 12.3, h: 0.8,
+          fontSize: 16, color: 'ddcccc', align: 'center',
         });
       }
       s.addText('EgitimAI', {
-        x: 0.5, y: 6.8, w: 9, h: 0.4,
-        fontSize: 9, color: '555577', align: 'center',
+        x: 0.5, y: 7.0, w: 12.3, h: 0.3,
+        fontSize: 9, color: '556688', align: 'center',
       });
     } else {
-      // Normal slayt
+      // Content slide — with optional image on right side
+      const hasImg = imageData && i === 1; // add image only to first content slide
+      const contentW = hasImg ? 7.5 : 12.3;
+
       s.background = { color: 'f8f9ff' };
-      s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 10, h: 0.06, fill: { color: '7990f8' } });
+      s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.33, h: 0.08, fill: { color: 'e8855a' } });
       s.addText(slide.title, {
-        x: 0.4, y: 0.2, w: 9.2, h: 0.8,
-        fontSize: 18, bold: true, color: '1a1a2e',
+        x: 0.4, y: 0.18, w: 12.5, h: 0.85,
+        fontSize: 20, bold: true, color: '1a1a2e',
       });
+
+      if (hasImg) {
+        try {
+          s.addImage({ data: imageData, x: 8.1, y: 1.1, w: 4.8, h: 3.4, rounding: true });
+        } catch (_) {}
+      }
+
       if (slide.bullets.length > 0) {
-        const bulletItems = slide.bullets.map(b => ({ text: b, options: { bullet: { type: 'bullet' }, paraSpaceAfter: 6 } }));
+        const bulletItems = slide.bullets.map(b => ({
+          text: b,
+          options: { bullet: { type: 'bullet' }, paraSpaceAfter: 8 }
+        }));
         s.addText(bulletItems, {
-          x: 0.4, y: 1.2, w: 9.2, h: 5.8,
-          fontSize: 13, color: '333344', valign: 'top',
+          x: 0.4, y: 1.15, w: contentW, h: 5.9,
+          fontSize: 14, color: '333344', valign: 'top',
         });
       }
       s.addText(`${i + 1} / ${slides.length}`, {
-        x: 8.5, y: 7.1, w: 1.2, h: 0.3,
-        fontSize: 8, color: 'aaaaaa', align: 'right',
+        x: 11.8, y: 7.1, w: 1.2, h: 0.3,
+        fontSize: 8, color: 'bbbbbb', align: 'right',
       });
     }
-  });
+  }
 
-  pptx.writeFile({ fileName: `${sanitizeFilename(title)}.pptx` });
+  await pptx.writeFile({ fileName: `${sanitizeFilename(title)}.pptx` });
   showToast('PowerPoint indiriliyor...', 'success');
 }
 
 function parseSlidecontent(content) {
-  const slides  = [];
-  const lines   = content.split('\n');
-  let current   = null;
+  const slides = [];
+  const lines  = content.split('\n');
+  let current  = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-
     const match = trimmed.match(/^SLAYT\s*\d+\s*[:：]\s*(.+)/i);
     if (match) {
       if (current) slides.push(current);
@@ -666,11 +1048,9 @@ function parseSlidecontent(content) {
   }
   if (current) slides.push(current);
 
-  // Fallback
   if (slides.length === 0) {
     slides.push({ title: 'Sunum', bullets: content.split('\n').filter(l => l.trim()).slice(0, 6) });
   }
-
   return slides;
 }
 
@@ -678,10 +1058,10 @@ function parseSlidecontent(content) {
    MARKDOWN → HTML
 ===================================================== */
 function markdownToHtml(text) {
-  const lines  = text.split('\n');
-  let html     = '';
-  let inUL     = false;
-  let inOL     = false;
+  const lines = text.split('\n');
+  let html    = '';
+  let inUL    = false;
+  let inOL    = false;
 
   const closeList = () => {
     if (inUL) { html += '</ul>\n'; inUL = false; }
@@ -695,11 +1075,10 @@ function markdownToHtml(text) {
   for (const line of lines) {
     const t = line.trim();
     if (!t) { closeList(); html += '\n'; continue; }
-
-    if (t.startsWith('# '))       { closeList(); html += `<h1>${inline(t.slice(2))}</h1>\n`; }
-    else if (t.startsWith('## ')) { closeList(); html += `<h2>${inline(t.slice(3))}</h2>\n`; }
-    else if (t.startsWith('### ')){ closeList(); html += `<h3>${inline(t.slice(4))}</h3>\n`; }
-    else if (/^[-*•] /.test(t))  {
+    if (t.startsWith('# '))        { closeList(); html += `<h1>${inline(t.slice(2))}</h1>\n`; }
+    else if (t.startsWith('## '))  { closeList(); html += `<h2>${inline(t.slice(3))}</h2>\n`; }
+    else if (t.startsWith('### ')) { closeList(); html += `<h3>${inline(t.slice(4))}</h3>\n`; }
+    else if (/^[-*•] /.test(t)) {
       if (inOL) { html += '</ol>\n'; inOL = false; }
       if (!inUL){ html += '<ul>\n'; inUL = true; }
       html += `<li>${inline(t.replace(/^[-*•] /, ''))}</li>\n`;
@@ -739,4 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuthPage();
   initDashboard();
   initCreatePage();
+  initHistoryPage();
+  initTemplatesPage();
+  initSettingsPage();
 });

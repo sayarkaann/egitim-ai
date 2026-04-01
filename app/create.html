@@ -41,25 +41,30 @@
       </a>
 
       <div class="sidebar__section-label">Kütüphane</div>
-      <a href="#" class="sidebar__link">
+      <a href="history.html" class="sidebar__link">
         <i data-lucide="clock"></i>
         <span>Geçmiş</span>
       </a>
-      <a href="#" class="sidebar__link">
+      <a href="templates.html" class="sidebar__link">
         <i data-lucide="bookmark"></i>
         <span>Şablonlar</span>
       </a>
-      <a href="#" class="sidebar__link">
+      <a href="pricing.html" class="sidebar__link">
         <i data-lucide="folder"></i>
         <span>Klasörlerim</span>
+        <span class="sidebar__pro-badge">Pro</span>
       </a>
 
       <div class="sidebar__section-label">Hesap</div>
-      <a href="#" class="sidebar__link">
+      <a href="pricing.html" class="sidebar__link">
+        <i data-lucide="crown"></i>
+        <span>Planlar</span>
+      </a>
+      <a href="settings.html" class="sidebar__link">
         <i data-lucide="settings"></i>
         <span>Ayarlar</span>
       </a>
-      <a href="#" class="sidebar__link">
+      <a href="help.html" class="sidebar__link">
         <i data-lucide="help-circle"></i>
         <span>Yardım</span>
       </a>
@@ -186,6 +191,31 @@
 
           <div class="options-grid">
             <div class="form-group">
+              <label class="form-label" for="docSubject">Ders</label>
+              <select id="docSubject" class="form-select">
+                <option value="">Genel / Belirtme</option>
+                <option value="Matematik">Matematik</option>
+                <option value="Türkçe">Türkçe</option>
+                <option value="Fen Bilimleri">Fen Bilimleri</option>
+                <option value="Sosyal Bilgiler">Sosyal Bilgiler</option>
+                <option value="Tarih">Tarih</option>
+                <option value="Coğrafya">Coğrafya</option>
+                <option value="İngilizce">İngilizce</option>
+                <option value="Almanca">Almanca</option>
+                <option value="Fransızca">Fransızca</option>
+                <option value="Fizik">Fizik</option>
+                <option value="Kimya">Kimya</option>
+                <option value="Biyoloji">Biyoloji</option>
+                <option value="Felsefe">Felsefe</option>
+                <option value="Din Kültürü">Din Kültürü</option>
+                <option value="Beden Eğitimi">Beden Eğitimi</option>
+                <option value="Müzik">Müzik</option>
+                <option value="Görsel Sanatlar">Görsel Sanatlar</option>
+                <option value="Bilişim Teknolojileri">Bilişim Teknolojileri</option>
+              </select>
+            </div>
+
+            <div class="form-group">
               <label class="form-label" for="gradeLevel">Sınıf Seviyesi</label>
               <select id="gradeLevel" class="form-select">
                 <option value="">Seçin...</option>
@@ -245,6 +275,21 @@
               <input type="range" id="pageCount" class="form-range" min="1" max="30" value="5" />
               <span class="text-muted text-sm">30</span>
             </div>
+            <p id="pageLimitHint" class="text-sm" style="display:none;color:var(--warning);margin-top:6px;">
+              <i data-lucide="alert-triangle" style="width:13px;height:13px;vertical-align:middle;"></i>
+              Ücretsiz planda en fazla 5 sayfa. <a href="pricing.html" style="color:var(--accent);">Pro'ya geç →</a>
+            </p>
+          </div>
+
+          <!-- Görsel Ekleme -->
+          <div class="form-group">
+            <label class="checkbox-wrap" style="cursor:pointer;gap:10px;display:flex;align-items:center;">
+              <input type="checkbox" id="addVisuals" />
+              <span>
+                <strong>Otomatik görsel ekle</strong>
+                <span class="text-muted text-sm" style="display:block;">Wikipedia'dan konuyla ilgili eğitsel görseller</span>
+              </span>
+            </label>
           </div>
         </div>
 
