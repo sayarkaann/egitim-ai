@@ -7,7 +7,7 @@ const SUPABASE_URL      = 'https://bkeiwcxrdunicjvikfin.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWl3Y3hyZHVuaWNqdmlrZmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTI1MTQsImV4cCI6MjA5MDU2ODUxNH0.GX97jQJbnGynrC09uJUTTOse_J7ZlAmpEu0AZr6jBAU';
 
 /* Free plan limits */
-const FREE_DOC_LIMIT  = 5;   // per month
+const FREE_DOC_LIMIT  = 10;  // trial: 3 days
 const FREE_PAGE_LIMIT = 5;
 
 let _sb = null;
@@ -179,8 +179,7 @@ function initLogout() {
 ===================================================== */
 async function requireAuth() {
   const { data: { session } } = await getSB().auth.getSession();
-  if (!session) { window.location.href = 'auth.html'; return null; }
-  return session;
+  return session; // no redirect — pages handle null session gracefully
 }
 
 /* =====================================================
@@ -720,7 +719,7 @@ async function initCreatePage() {
   if (!document.getElementById('createPage')) return;
 
   const session = await requireAuth();
-  if (!session) return;
+  if (!session) { /* show guest UI */ }
 
   await populateUserInfo();
   initSidebar();
@@ -821,19 +820,30 @@ async function initCreatePage() {
     const pages     = parseInt(pageRange?.value || '5', 10);
     const language  = document.getElementById('docLanguage')?.value || 'tr';
 
-    // FREE PLAN LIMIT CHECK (monthly)
-    const sb = getSB();
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const { count } = await sb
-      .from('documents')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
-      .gte('created_at', monthStart);
+    // FREE PLAN LIMIT CHECK (3-day trial)
+    if (session) {
+      const sb = getSB();
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const { count } = await sb
+        .from('documents')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.user.id)
+        .gte('created_at', monthStart);
 
-    if ((count || 0) >= FREE_DOC_LIMIT) {
-      showUpgradeModal(`Bu ay ${FREE_DOC_LIMIT} belge limitine ulaştınız. Pro plana geçerek aylık 150 belge oluşturun.`);
-      return;
+      // 3-day trial check
+      const TRIAL_DAYS = 3;
+      const createdAt = new Date(session?.user?.created_at || Date.now());
+      const trialExpired = (Date.now() - createdAt.getTime()) > TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
+      if (trialExpired) {
+        showUpgradeModal('3 günlük ücretsiz deneme süreniz doldu. Pro plana geçerek sınırsız belge oluşturun.');
+        return;
+      }
+      if ((count || 0) >= FREE_DOC_LIMIT) {
+        showUpgradeModal(`${FREE_DOC_LIMIT} belge hakkınızı kullandınız. Pro plana geçerek daha fazla belge oluşturun.`);
+        return;
+      }
     }
 
     if (pages > FREE_PAGE_LIMIT) {
@@ -945,16 +955,18 @@ async function initCreatePage() {
         generateBtn.innerHTML = `<i data-lucide="sparkles"></i> Yeni Belge Oluştur`;
         initIcons(generateBtn);
 
-        const docInsert = {
-          user_id:  params.session.user.id,
-          title:    generatedTitle,
-          type:     params.type,
-          content:  generatedContent,
-          pages:    params.pages,
-          audience: params.audience,
-        };
-        if (params.folderId) docInsert.folder_id = params.folderId;
-        await getSB().from('documents').insert(docInsert);
+        if (params.session) {
+          const docInsert = {
+            user_id:  params.session.user.id,
+            title:    generatedTitle,
+            type:     params.type,
+            content:  generatedContent,
+            pages:    params.pages,
+            audience: params.audience,
+          };
+          if (params.folderId) docInsert.folder_id = params.folderId;
+          await getSB().from('documents').insert(docInsert);
+        }
       }, 400);
 
     } catch (err) {
