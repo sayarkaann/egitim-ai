@@ -7,7 +7,7 @@ const SUPABASE_URL      = 'https://bkeiwcxrdunicjvikfin.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWl3Y3hyZHVuaWNqdmlrZmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTI1MTQsImV4cCI6MjA5MDU2ODUxNH0.GX97jQJbnGynrC09uJUTTOse_J7ZlAmpEu0AZr6jBAU';
 
 /* Free plan limits */
-const FREE_DOC_LIMIT  = 3;
+const FREE_DOC_LIMIT  = 10;   // per month
 const FREE_PAGE_LIMIT = 5;
 
 let _sb = null;
@@ -386,7 +386,7 @@ function animateCounter(el, target) {
   requestAnimationFrame(tick);
 }
 
-function renderDocsTable(docs, showDelete = false) {
+function renderDocsTable(docs, showDelete = false, folders = [], onFolderChange = null) {
   const table = document.querySelector('.docs-table');
   if (!table) return;
 
@@ -412,6 +412,9 @@ function renderDocsTable(docs, showDelete = false) {
     const deleteBtn = showDelete
       ? `<button class="btn btn--icon btn--ghost" title="Sil" data-delete-id="${doc.id}" style="color:var(--danger)"><i data-lucide="trash-2"></i></button>`
       : '';
+    const folderBtn = (showDelete && folders.length && onFolderChange)
+      ? `<button class="btn btn--icon btn--ghost" title="Klasöre taşı" data-folder-move-id="${doc.id}" data-current-folder="${doc.folder_id || ''}"><i data-lucide="folder-input"></i></button>`
+      : '';
     row.innerHTML = `
       <div class="docs-table__name">
         <div class="doc-icon doc-icon--${doc.type}">${typeIcon[doc.type] || 'DOC'}</div>
@@ -424,6 +427,7 @@ function renderDocsTable(docs, showDelete = false) {
         <button class="btn btn--icon btn--ghost" title="İndir" data-doc-id="${doc.id}">
           <i data-lucide="download"></i>
         </button>
+        ${folderBtn}
         ${deleteBtn}
       </div>`;
     table.appendChild(row);
@@ -452,6 +456,48 @@ function renderDocsTable(docs, showDelete = false) {
       });
     });
   }
+
+  if (onFolderChange && folders.length) {
+    table.querySelectorAll('[data-folder-move-id]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showFolderPickerMenu(btn, btn.dataset.folderMoveId, btn.dataset.currentFolder, folders, onFolderChange);
+      });
+    });
+  }
+}
+
+function showFolderPickerMenu(anchorEl, docId, currentFolderId, folders, onFolderChange) {
+  document.getElementById('folderPickerMenu')?.remove();
+
+  const menu = document.createElement('div');
+  menu.id = 'folderPickerMenu';
+  menu.className = 'context-menu';
+
+  const noneItem = `<button class="context-menu__item ${!currentFolderId ? 'context-menu__item--active' : ''}" data-pick-folder=""><i data-lucide="x"></i> Klasör yok</button>`;
+  const folderItems = folders.map(f =>
+    `<button class="context-menu__item ${currentFolderId === f.id ? 'context-menu__item--active' : ''}" data-pick-folder="${f.id}"><i data-lucide="folder"></i> ${escapeHtml(f.name)}</button>`
+  ).join('');
+
+  menu.innerHTML = `<div class="context-menu__header">Klasöre Taşı</div>${noneItem}${folderItems}`;
+
+  const rect = anchorEl.getBoundingClientRect();
+  menu.style.cssText = `position:fixed;top:${rect.bottom + 4}px;right:${window.innerWidth - rect.right}px;z-index:1000;min-width:180px;`;
+  document.body.appendChild(menu);
+  initIcons(menu);
+
+  const close = () => menu.remove();
+  setTimeout(() => document.addEventListener('click', close, { once: true }), 0);
+
+  menu.querySelectorAll('[data-pick-folder]').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      close();
+      const fid = item.dataset.pickFolder || null;
+      anchorEl.dataset.currentFolder = fid || '';
+      onFolderChange(docId, fid);
+    });
+  });
 }
 
 /* =====================================================
@@ -470,6 +516,13 @@ async function initHistoryPage() {
 
   const sb = getSB();
 
+  // Load folders for "move to folder" dropdown
+  let userFolders = [];
+  (async () => {
+    const { data } = await sb.from('folders').select('id, name').eq('user_id', session.user.id).order('name');
+    userFolders = data || [];
+  })();
+
   async function loadDocs(searchQuery = '') {
     let query = sb
       .from('documents')
@@ -482,7 +535,10 @@ async function initHistoryPage() {
     }
 
     const { data: docs } = await query;
-    renderDocsTable(docs || [], true);
+    renderDocsTable(docs || [], true, userFolders, async (docId, folderId) => {
+      await sb.from('documents').update({ folder_id: folderId || null }).eq('id', docId);
+      showToast(folderId ? 'Klasöre taşındı.' : 'Klasörden çıkarıldı.', 'success');
+    });
   }
 
   await loadDocs();
@@ -586,17 +642,20 @@ async function initSettingsPage() {
   if (lastEl)  lastEl.value  = lastName;
   if (emailEl) emailEl.value = session.user.email;
 
-  // Get doc count for plan display
+  // Get monthly doc count for plan display
   const sb = getSB();
+  const settingsNow = new Date();
+  const settingsMonthStart = new Date(settingsNow.getFullYear(), settingsNow.getMonth(), 1).toISOString();
   const { count } = await sb
     .from('documents')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', session.user.id);
+    .eq('user_id', session.user.id)
+    .gte('created_at', settingsMonthStart);
 
   const usageBar = document.getElementById('planUsageBar');
   const usageText = document.getElementById('planUsageText');
   if (usageBar)  usageBar.style.width  = `${Math.min(100, ((count || 0) / FREE_DOC_LIMIT) * 100)}%`;
-  if (usageText) usageText.textContent = `${count || 0} / ${FREE_DOC_LIMIT} belge kullanıldı`;
+  if (usageText) usageText.textContent = `${count || 0} / ${FREE_DOC_LIMIT} belge bu ay kullanıldı`;
 
   const settingsForm = document.getElementById('settingsForm');
   settingsForm?.addEventListener('submit', async (e) => {
@@ -643,6 +702,25 @@ async function initCreatePage() {
   let generatedContent = '';
   let generatedTitle   = '';
   let generatedImageData = null;
+
+  // Load user folders into dropdown
+  (async () => {
+    const folderSelect = document.getElementById('docFolder');
+    if (!folderSelect) return;
+    const { data: folders } = await getSB()
+      .from('folders')
+      .select('id, name, color')
+      .eq('user_id', session.user.id)
+      .order('name');
+    if (folders?.length) {
+      folders.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = f.name;
+        folderSelect.appendChild(opt);
+      });
+    }
+  })();
 
   // Pre-fill from URL params (from templates)
   const urlP = new URLSearchParams(window.location.search);
@@ -714,15 +792,18 @@ async function initCreatePage() {
     const pages     = parseInt(pageRange?.value || '5', 10);
     const language  = document.getElementById('docLanguage')?.value || 'tr';
 
-    // FREE PLAN LIMIT CHECK
+    // FREE PLAN LIMIT CHECK (monthly)
     const sb = getSB();
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const { count } = await sb
       .from('documents')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id);
+      .eq('user_id', session.user.id)
+      .gte('created_at', monthStart);
 
     if ((count || 0) >= FREE_DOC_LIMIT) {
-      showUpgradeModal(`Ücretsiz planda en fazla ${FREE_DOC_LIMIT} belge oluşturabilirsiniz. Pro plana geçerek sınırsız belge oluşturun.`);
+      showUpgradeModal(`Bu ay ${FREE_DOC_LIMIT} belge limitine ulaştınız. Pro plana geçerek aylık 150 belge oluşturun.`);
       return;
     }
 
@@ -738,6 +819,7 @@ async function initCreatePage() {
     const tone       = document.getElementById('docTone')?.value     || 'formal';
     const subject    = document.getElementById('docSubject')?.value  || '';
     const addVisuals = document.getElementById('addVisuals')?.checked || false;
+    const folderId   = document.getElementById('docFolder')?.value   || null;
 
     generatedTitle     = topic.slice(0, 60);
     generatedImageData = null;
@@ -750,7 +832,7 @@ async function initCreatePage() {
         .catch(() => null);
     }
 
-    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, imageFetchPromise, session });
+    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, imageFetchPromise, session, folderId });
   });
 
   // Download buttons
@@ -848,14 +930,16 @@ async function initCreatePage() {
         generateBtn.innerHTML = `<i data-lucide="sparkles"></i> Yeni Belge Oluştur`;
         initIcons(generateBtn);
 
-        await getSB().from('documents').insert({
+        const docInsert = {
           user_id:  params.session.user.id,
           title:    generatedTitle,
           type:     params.type,
           content:  generatedContent,
           pages:    params.pages,
           audience: params.audience,
-        });
+        };
+        if (params.folderId) docInsert.folder_id = params.folderId;
+        await getSB().from('documents').insert(docInsert);
       }, 400);
 
     } catch (err) {
@@ -1125,6 +1209,289 @@ function escapeHtml(str) {
 }
 
 /* =====================================================
+   FOLDERS PAGE
+===================================================== */
+async function initFoldersPage() {
+  if (!document.getElementById('foldersPage')) return;
+
+  const session = await requireAuth();
+  if (!session) return;
+
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  const sb = getSB();
+  let activeFolderId = null;
+
+  const foldersGrid  = document.getElementById('foldersGrid');
+  const folderDocs   = document.getElementById('folderDocsSection');
+  const folderDocsTitle = document.getElementById('folderDocsTitle');
+  const newFolderBtn = document.getElementById('newFolderBtn');
+
+  // ── Load folders ──
+  async function loadFolders() {
+    const { data: folders } = await sb
+      .from('folders')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    // Count docs per folder
+    const counts = {};
+    if (folders?.length) {
+      const { data: countRows } = await sb
+        .from('documents')
+        .select('folder_id')
+        .eq('user_id', session.user.id)
+        .in('folder_id', folders.map(f => f.id));
+      (countRows || []).forEach(r => { counts[r.folder_id] = (counts[r.folder_id] || 0) + 1; });
+    }
+
+    if (!foldersGrid) return;
+    foldersGrid.innerHTML = '';
+
+    if (!folders || folders.length === 0) {
+      foldersGrid.innerHTML = `<div class="folders-empty"><i data-lucide="folder-open"></i><p>Henüz klasör oluşturmadınız.</p><button class="btn btn--primary btn--sm" id="emptyNewFolderBtn"><i data-lucide="plus"></i> Yeni Klasör</button></div>`;
+      initIcons(foldersGrid);
+      document.getElementById('emptyNewFolderBtn')?.addEventListener('click', openNewFolderModal);
+      return;
+    }
+
+    folders.forEach(folder => {
+      const card = document.createElement('div');
+      card.className = 'folder-card' + (activeFolderId === folder.id ? ' folder-card--active' : '');
+      card.dataset.folderId = folder.id;
+      const count = counts[folder.id] || 0;
+      card.innerHTML = `
+        <div class="folder-card__icon" style="color:${folder.color || '#e8855a'}">
+          <i data-lucide="folder"></i>
+        </div>
+        <div class="folder-card__body">
+          <div class="folder-card__name">${escapeHtml(folder.name)}</div>
+          <div class="folder-card__count">${count} belge</div>
+        </div>
+        <div class="folder-card__menu">
+          <button class="btn btn--icon btn--ghost folder-card__menu-btn" title="Seçenekler" data-folder-id="${folder.id}" data-folder-name="${escapeHtml(folder.name)}">
+            <i data-lucide="more-vertical"></i>
+          </button>
+        </div>`;
+      foldersGrid.appendChild(card);
+    });
+
+    initIcons(foldersGrid);
+
+    // Click on card body → open folder
+    foldersGrid.querySelectorAll('.folder-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.folder-card__menu-btn')) return;
+        const fid = card.dataset.folderId;
+        const fname = card.querySelector('.folder-card__name').textContent;
+        openFolderDocs(fid, fname);
+        foldersGrid.querySelectorAll('.folder-card').forEach(c => c.classList.remove('folder-card--active'));
+        card.classList.add('folder-card--active');
+      });
+    });
+
+    // "..." menu
+    foldersGrid.querySelectorAll('.folder-card__menu-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showFolderMenu(btn, btn.dataset.folderId, btn.dataset.folderName);
+      });
+    });
+
+    // Re-open active folder if any
+    if (activeFolderId) {
+      const activeCard = foldersGrid.querySelector(`[data-folder-id="${activeFolderId}"]`);
+      if (activeCard) {
+        activeCard.classList.add('folder-card--active');
+        const fname = activeCard.querySelector('.folder-card__name').textContent;
+        openFolderDocs(activeFolderId, fname);
+      }
+    }
+  }
+
+  // ── Open folder docs ──
+  async function openFolderDocs(folderId, folderName) {
+    activeFolderId = folderId;
+    if (folderDocsTitle) folderDocsTitle.textContent = folderName;
+    if (folderDocs) folderDocs.style.display = 'block';
+
+    const { data: docs } = await sb
+      .from('documents')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('folder_id', folderId)
+      .order('created_at', { ascending: false });
+
+    const table = document.getElementById('folderDocsTable');
+    if (!table) return;
+
+    table.innerHTML = '';
+
+    if (!docs || docs.length === 0) {
+      table.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text-3);">Bu klasörde henüz belge yok.<br><a href="create.html" style="color:var(--accent);">Belge oluşturun →</a></div>`;
+      return;
+    }
+
+    const typeIcon  = { pdf: 'PDF', word: 'DOC', pptx: 'PPT' };
+    const typeLabel = { pdf: 'PDF', word: 'DOCX', pptx: 'PPTX' };
+    docs.forEach(doc => {
+      const row = document.createElement('div');
+      row.className = 'docs-table__row';
+      const date = new Date(doc.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+      row.innerHTML = `
+        <div class="docs-table__name">
+          <div class="doc-icon doc-icon--${doc.type}">${typeIcon[doc.type] || 'DOC'}</div>
+          <span>${escapeHtml(doc.title)}</span>
+        </div>
+        <div class="docs-table__type"><span class="badge badge--${doc.type}">${typeLabel[doc.type] || doc.type.toUpperCase()}</span></div>
+        <div class="docs-table__size">${doc.pages} sayfa</div>
+        <div class="docs-table__date">${date}</div>
+        <div class="docs-table__actions">
+          <button class="btn btn--icon btn--ghost" title="İndir" data-doc-id="${doc.id}"><i data-lucide="download"></i></button>
+          <button class="btn btn--icon btn--ghost" title="Klasörden çıkar" data-remove-id="${doc.id}" style="color:var(--text-3)"><i data-lucide="folder-minus"></i></button>
+        </div>`;
+      table.appendChild(row);
+    });
+    initIcons(table);
+
+    table.querySelectorAll('[data-doc-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const doc = docs.find(d => d.id === btn.dataset.docId);
+        if (doc) downloadDocument(doc.title, doc.type, doc.content, doc.pages, null);
+      });
+    });
+
+    table.querySelectorAll('[data-remove-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await sb.from('documents').update({ folder_id: null }).eq('id', btn.dataset.removeId);
+        btn.closest('.docs-table__row').remove();
+        showToast('Belge klasörden çıkarıldı.', 'success');
+        await loadFolders(); // refresh counts
+      });
+    });
+  }
+
+  // ── New folder modal ──
+  function openNewFolderModal() {
+    const existing = document.getElementById('folderModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'folderModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-box" style="max-width:400px;">
+        <h2 class="modal-title" style="font-size:1.1rem;margin-bottom:16px;">Yeni Klasör</h2>
+        <div class="form-group">
+          <label class="form-label">Klasör adı</label>
+          <input type="text" id="folderNameInput" class="form-input" placeholder="ör. 7. Sınıf Matematik" maxlength="50" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Renk</label>
+          <div class="folder-color-picker" id="folderColorPicker">
+            <button class="folder-color-btn folder-color-btn--active" data-color="#e8855a" style="background:#e8855a"></button>
+            <button class="folder-color-btn" data-color="#7990f8" style="background:#7990f8"></button>
+            <button class="folder-color-btn" data-color="#4ade80" style="background:#4ade80"></button>
+            <button class="folder-color-btn" data-color="#fbbf24" style="background:#fbbf24"></button>
+            <button class="folder-color-btn" data-color="#c4b5fd" style="background:#c4b5fd"></button>
+            <button class="folder-color-btn" data-color="#f87171" style="background:#f87171"></button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn--primary" id="saveFolderBtn"><i data-lucide="folder-plus"></i> Oluştur</button>
+          <button class="btn btn--ghost" id="cancelFolderBtn">İptal</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    initIcons(modal);
+
+    let selectedColor = '#e8855a';
+    modal.querySelectorAll('.folder-color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.querySelectorAll('.folder-color-btn').forEach(b => b.classList.remove('folder-color-btn--active'));
+        btn.classList.add('folder-color-btn--active');
+        selectedColor = btn.dataset.color;
+      });
+    });
+
+    document.getElementById('cancelFolderBtn')?.addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+    const saveBtn = document.getElementById('saveFolderBtn');
+    saveBtn?.addEventListener('click', async () => {
+      const name = document.getElementById('folderNameInput')?.value.trim();
+      if (!name) { showToast('Klasör adı girin.', 'error'); return; }
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner"></span>';
+      const { error } = await sb.from('folders').insert({ user_id: session.user.id, name, color: selectedColor });
+      if (error) {
+        showToast('Klasör oluşturulamadı.', 'error');
+      } else {
+        showToast('Klasör oluşturuldu!', 'success');
+        modal.remove();
+        await loadFolders();
+      }
+      saveBtn.disabled = false;
+    });
+
+    setTimeout(() => document.getElementById('folderNameInput')?.focus(), 100);
+  }
+
+  // ── Folder context menu ──
+  function showFolderMenu(anchorEl, folderId, folderName) {
+    document.getElementById('folderContextMenu')?.remove();
+
+    const menu = document.createElement('div');
+    menu.id = 'folderContextMenu';
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+      <button class="context-menu__item" id="renameFolder"><i data-lucide="pencil"></i> Yeniden Adlandır</button>
+      <button class="context-menu__item context-menu__item--danger" id="deleteFolder"><i data-lucide="trash-2"></i> Sil</button>`;
+
+    const rect = anchorEl.getBoundingClientRect();
+    menu.style.cssText = `position:fixed;top:${rect.bottom + 4}px;left:${rect.left - 140}px;z-index:1000;`;
+    document.body.appendChild(menu);
+    initIcons(menu);
+
+    const close = () => menu.remove();
+    setTimeout(() => document.addEventListener('click', close, { once: true }), 0);
+
+    document.getElementById('renameFolder')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      close();
+      const newName = prompt('Klasör adı:', folderName);
+      if (newName && newName.trim()) {
+        sb.from('folders').update({ name: newName.trim() }).eq('id', folderId).then(() => {
+          showToast('Klasör yeniden adlandırıldı.', 'success');
+          loadFolders();
+        });
+      }
+    });
+
+    document.getElementById('deleteFolder')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      close();
+      if (!confirm(`"${folderName}" klasörünü silmek istediğinize emin misiniz? Belgeler silinmez, sadece klasörden çıkarılır.`)) return;
+      await sb.from('documents').update({ folder_id: null }).eq('folder_id', folderId);
+      await sb.from('folders').delete().eq('id', folderId);
+      if (activeFolderId === folderId) {
+        activeFolderId = null;
+        if (folderDocs) folderDocs.style.display = 'none';
+      }
+      showToast('Klasör silindi.', 'success');
+      await loadFolders();
+    });
+  }
+
+  newFolderBtn?.addEventListener('click', openNewFolderModal);
+  await loadFolders();
+}
+
+/* =====================================================
    INIT
 ===================================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -1135,4 +1502,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initHistoryPage();
   initTemplatesPage();
   initSettingsPage();
+  initFoldersPage();
 });

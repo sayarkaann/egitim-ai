@@ -49,10 +49,9 @@
         <i data-lucide="bookmark"></i>
         <span>Şablonlar</span>
       </a>
-      <a href="pricing.html" class="sidebar__link">
+      <a href="folders.html" class="sidebar__link">
         <i data-lucide="folder"></i>
         <span>Klasörlerim</span>
-        <span class="sidebar__pro-badge">Pro</span>
       </a>
 
       <div class="sidebar__section-label">Hesap</div>
@@ -290,6 +289,17 @@
                 <span class="text-muted text-sm" style="display:block;">Wikipedia'dan konuyla ilgili eğitsel görseller</span>
               </span>
             </label>
+          </div>
+
+          <!-- Klasör seçimi -->
+          <div class="form-group">
+            <label class="form-label" for="docFolder">
+              <i data-lucide="folder" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>
+              Klasöre Kaydet <span style="color:var(--text-3);font-weight:400;">(isteğe bağlı)</span>
+            </label>
+            <select id="docFolder" class="form-select">
+              <option value="">Klasör seçme</option>
+            </select>
           </div>
         </div>
 

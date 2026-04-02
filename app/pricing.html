@@ -32,7 +32,7 @@
       <div class="sidebar__section-label">Kütüphane</div>
       <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span>Geçmiş</span></a>
       <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
-      <a href="pricing.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span><span class="sidebar__pro-badge">Pro</span></a>
+      <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
       <div class="sidebar__section-label">Hesap</div>
       <a href="pricing.html" class="sidebar__link sidebar__link--active"><i data-lucide="crown"></i><span>Planlar</span></a>
       <a href="settings.html" class="sidebar__link"><i data-lucide="settings"></i><span>Ayarlar</span></a>
@@ -62,12 +62,18 @@
   </header>
 
   <main class="app-content">
-    <div class="create-header fade-up" style="text-align:center;max-width:560px;margin:0 auto 40px;">
+    <div class="create-header fade-up" style="text-align:center;max-width:600px;margin:0 auto 48px;">
       <h1>Planınızı Seçin</h1>
-      <p>Öğretmenler ve öğrenciler için uygun fiyatlı planlar. İstediğiniz zaman iptal edebilirsiniz.</p>
+      <p>Öğretmenler, öğrenciler ve kurumlar için uygun fiyatlı planlar. İstediğiniz zaman iptal edebilirsiniz.</p>
+
+      <!-- Billing toggle -->
+      <div class="pricing-toggle fade-up fade-up--1">
+        <button class="pricing-toggle__btn pricing-toggle__btn--active" id="toggleMonthly">Aylık</button>
+        <button class="pricing-toggle__btn" id="toggleYearly">Yıllık <span class="pricing-toggle__badge">%33 tasarruf</span></button>
+      </div>
     </div>
 
-    <div class="pricing-grid fade-up fade-up--1">
+    <div class="pricing-grid pricing-grid--4 fade-up fade-up--1">
 
       <!-- Ücretsiz -->
       <div class="pricing-card">
@@ -78,10 +84,11 @@
         </div>
         <p class="pricing-card__desc">Başlamak için ideal. Kredi kartı gerekmez.</p>
         <ul class="pricing-card__features">
-          <li><i data-lucide="check"></i> 3 belge/ay</li>
-          <li><i data-lucide="check"></i> Maks. 5 sayfa</li>
+          <li><i data-lucide="check"></i> <strong>10 belge</strong>/ay</li>
+          <li><i data-lucide="check"></i> Maks. 5 sayfa/belge</li>
           <li><i data-lucide="check"></i> PDF, Word, PPTX</li>
           <li><i data-lucide="check"></i> Türkçe & İngilizce</li>
+          <li><i data-lucide="check"></i> Temel 20 şablon</li>
           <li class="pricing-card__feature--muted"><i data-lucide="x"></i> Otomatik görsel ekleme</li>
           <li class="pricing-card__feature--muted"><i data-lucide="x"></i> Klasörler</li>
           <li class="pricing-card__feature--muted"><i data-lucide="x"></i> Öncelikli destek</li>
@@ -89,44 +96,71 @@
         <button class="btn btn--ghost btn--full" disabled>Mevcut Planınız</button>
       </div>
 
+      <!-- Öğrenci -->
+      <div class="pricing-card">
+        <div class="pricing-card__badge" style="background:rgba(167,243,208,.15);color:#6ee7b7;">Öğrenci</div>
+        <div class="pricing-card__price">
+          <span class="pricing-card__amount" data-monthly="79₺" data-yearly="53₺">79₺</span>
+          <span class="pricing-card__period">/ay</span>
+        </div>
+        <p class="pricing-card__desc" id="studentYearlyNote" style="display:none;font-size:12px;color:var(--accent);margin-bottom:4px;">599₺/yıl faturalandırılır</p>
+        <p class="pricing-card__desc">Ödevler, projeler ve özetler için.</p>
+        <ul class="pricing-card__features">
+          <li><i data-lucide="check"></i> <strong>60 belge</strong>/ay</li>
+          <li><i data-lucide="check"></i> Maks. 20 sayfa/belge</li>
+          <li><i data-lucide="check"></i> PDF, Word, PPTX</li>
+          <li><i data-lucide="check"></i> Türkçe & İngilizce</li>
+          <li><i data-lucide="check"></i> Otomatik görsel ekleme</li>
+          <li><i data-lucide="check"></i> Tüm şablonlar</li>
+          <li class="pricing-card__feature--muted"><i data-lucide="x"></i> MEB müfredat entegrasyonu</li>
+          <li class="pricing-card__feature--muted"><i data-lucide="x"></i> Öncelikli destek</li>
+        </ul>
+        <button class="btn btn--ghost btn--full" onclick="showToast('Ödeme sistemi çok yakında aktif olacak!','info')">
+          <i data-lucide="graduation-cap"></i> Öğrenci Planı Al
+        </button>
+        <p style="font-size:11px;text-align:center;margin-top:8px;color:var(--text-3);">.edu.tr e-posta ile doğrulama gerekir</p>
+      </div>
+
       <!-- Pro -->
       <div class="pricing-card pricing-card--featured">
         <div class="pricing-card__popular">En Popüler</div>
         <div class="pricing-card__badge" style="background:linear-gradient(135deg,#e8855a,#c96840);color:#fff;">Pro</div>
         <div class="pricing-card__price">
-          <span class="pricing-card__amount">59₺</span>
+          <span class="pricing-card__amount" data-monthly="149₺" data-yearly="99₺">149₺</span>
           <span class="pricing-card__period">/ay</span>
         </div>
+        <p class="pricing-card__desc" id="proYearlyNote" style="display:none;font-size:12px;color:var(--accent);margin-bottom:4px;">1.199₺/yıl faturalandırılır</p>
         <p class="pricing-card__desc">Yoğun kullanan öğretmenler için.</p>
         <ul class="pricing-card__features">
-          <li><i data-lucide="check"></i> <strong>Sınırsız</strong> belge</li>
-          <li><i data-lucide="check"></i> Maks. <strong>30 sayfa</strong></li>
+          <li><i data-lucide="check"></i> <strong>150 belge</strong>/ay</li>
+          <li><i data-lucide="check"></i> Maks. <strong>30 sayfa</strong>/belge</li>
           <li><i data-lucide="check"></i> PDF, Word, PPTX</li>
           <li><i data-lucide="check"></i> <strong>Tüm diller</strong> (5 dil)</li>
           <li><i data-lucide="check"></i> Otomatik görsel ekleme</li>
+          <li><i data-lucide="check"></i> <strong>MEB müfredat entegrasyonu</strong></li>
           <li><i data-lucide="check"></i> Klasörler ve organizasyon</li>
-          <li><i data-lucide="check"></i> Öncelikli destek</li>
+          <li><i data-lucide="check"></i> Öncelikli e-posta desteği</li>
         </ul>
         <button class="btn btn--primary btn--full" onclick="showToast('Ödeme sistemi çok yakında aktif olacak!','info')">
           <i data-lucide="crown"></i> Pro'ya Geç
         </button>
       </div>
 
-      <!-- Okul -->
+      <!-- Kurumsal -->
       <div class="pricing-card">
-        <div class="pricing-card__badge" style="background:rgba(196,181,253,.15);color:#c4b5fd;">Okul</div>
+        <div class="pricing-card__badge" style="background:rgba(196,181,253,.15);color:#c4b5fd;">Kurumsal</div>
         <div class="pricing-card__price">
-          <span class="pricing-card__amount">199₺</span>
-          <span class="pricing-card__period">/ay</span>
+          <span class="pricing-card__amount" style="font-size:22px;line-height:1.2;">Fiyat<br>görüşmeye<br>göre</span>
         </div>
-        <p class="pricing-card__desc">Tüm öğretmen kadrosu için kurumsal plan.</p>
+        <p class="pricing-card__desc">Tüm öğretmen kadrosu için okul lisansı.</p>
         <ul class="pricing-card__features">
-          <li><i data-lucide="check"></i> <strong>10 öğretmen</strong> hesabı</li>
+          <li><i data-lucide="check"></i> Min. <strong>10 öğretmen</strong> hesabı</li>
+          <li><i data-lucide="check"></i> 100–200₺/öğretmen/ay</li>
           <li><i data-lucide="check"></i> Sınırsız belge</li>
-          <li><i data-lucide="check"></i> Maks. 30 sayfa</li>
-          <li><i data-lucide="check"></i> Tüm diller</li>
-          <li><i data-lucide="check"></i> Görsel ekleme</li>
+          <li><i data-lucide="check"></i> Tüm formatlar & diller</li>
+          <li><i data-lucide="check"></i> Okul logosu & özel şablonlar</li>
           <li><i data-lucide="check"></i> Merkezi yönetim paneli</li>
+          <li><i data-lucide="check"></i> Faturalı ödeme seçeneği</li>
           <li><i data-lucide="check"></i> 7/24 öncelikli destek</li>
         </ul>
         <button class="btn btn--ghost btn--full" onclick="window.location.href='help.html'">
@@ -141,6 +175,34 @@
       Güvenli ödeme &nbsp;•&nbsp; İstediğiniz zaman iptal &nbsp;•&nbsp; KDV dahil fiyatlar
     </div>
 
+    <!-- Comparison table -->
+    <div class="form-card fade-up fade-up--3" style="margin-top:48px;overflow-x:auto;">
+      <div class="form-card__title"><i data-lucide="table-2"></i> Plan Karşılaştırması</div>
+      <table class="pricing-compare-table">
+        <thead>
+          <tr>
+            <th>Özellik</th>
+            <th>Ücretsiz</th>
+            <th>Öğrenci</th>
+            <th class="pricing-compare-table__featured">Pro</th>
+            <th>Kurumsal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Aylık belge</td><td>10</td><td>60</td><td class="pricing-compare-table__featured">150</td><td>Sınırsız</td></tr>
+          <tr><td>Maks. sayfa/belge</td><td>5</td><td>20</td><td class="pricing-compare-table__featured">30</td><td>30</td></tr>
+          <tr><td>PDF / Word / PPTX</td><td>✅</td><td>✅</td><td class="pricing-compare-table__featured">✅</td><td>✅</td></tr>
+          <tr><td>Dil desteği</td><td>2 dil</td><td>2 dil</td><td class="pricing-compare-table__featured">5 dil</td><td>5 dil</td></tr>
+          <tr><td>Otomatik görsel ekleme</td><td>❌</td><td>✅</td><td class="pricing-compare-table__featured">✅</td><td>✅</td></tr>
+          <tr><td>MEB müfredat entegrasyonu</td><td>❌</td><td>❌</td><td class="pricing-compare-table__featured">✅</td><td>✅</td></tr>
+          <tr><td>Klasörler ve organizasyon</td><td>❌</td><td>❌</td><td class="pricing-compare-table__featured">✅</td><td>✅</td></tr>
+          <tr><td>Okul logosu & özel şablonlar</td><td>❌</td><td>❌</td><td class="pricing-compare-table__featured">❌</td><td>✅</td></tr>
+          <tr><td>Yönetim paneli</td><td>❌</td><td>❌</td><td class="pricing-compare-table__featured">❌</td><td>✅</td></tr>
+          <tr><td>Destek</td><td>SSS</td><td>E-posta</td><td class="pricing-compare-table__featured">Öncelikli e-posta</td><td>7/24 özel</td></tr>
+        </tbody>
+      </table>
+    </div>
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -149,6 +211,35 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+
+      // Billing toggle
+      const monthlyBtn = document.getElementById('toggleMonthly');
+      const yearlyBtn  = document.getElementById('toggleYearly');
+      let isYearly = false;
+
+      function updatePrices(yearly) {
+        document.querySelectorAll('[data-monthly]').forEach(el => {
+          el.textContent = yearly ? el.dataset.yearly : el.dataset.monthly;
+        });
+        const studentNote = document.getElementById('studentYearlyNote');
+        const proNote     = document.getElementById('proYearlyNote');
+        if (studentNote) studentNote.style.display = yearly ? 'block' : 'none';
+        if (proNote)     proNote.style.display     = yearly ? 'block' : 'none';
+      }
+
+      monthlyBtn?.addEventListener('click', () => {
+        isYearly = false;
+        monthlyBtn.classList.add('pricing-toggle__btn--active');
+        yearlyBtn.classList.remove('pricing-toggle__btn--active');
+        updatePrices(false);
+      });
+
+      yearlyBtn?.addEventListener('click', () => {
+        isYearly = true;
+        yearlyBtn.classList.add('pricing-toggle__btn--active');
+        monthlyBtn.classList.remove('pricing-toggle__btn--active');
+        updatePrices(true);
+      });
     });
   </script>
 </body>

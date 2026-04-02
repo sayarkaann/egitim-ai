@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EgitimAI — Geçmiş</title>
+  <title>EgitimAI — Klasörlerim</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles/app.css?v=3" />
 </head>
-<body id="historyPage">
+<body id="foldersPage">
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -30,9 +30,9 @@
       <a href="index.html" class="sidebar__link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
       <a href="create.html" class="sidebar__link"><i data-lucide="plus-circle"></i><span>Yeni Oluştur</span></a>
       <div class="sidebar__section-label">Kütüphane</div>
-      <a href="history.html" class="sidebar__link sidebar__link--active"><i data-lucide="clock"></i><span>Geçmiş</span></a>
+      <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span>Geçmiş</span></a>
       <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
-      <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
+      <a href="folders.html" class="sidebar__link sidebar__link--active"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
       <div class="sidebar__section-label">Hesap</div>
       <a href="pricing.html" class="sidebar__link"><i data-lucide="crown"></i><span>Planlar</span></a>
       <a href="settings.html" class="sidebar__link"><i data-lucide="settings"></i><span>Ayarlar</span></a>
@@ -56,36 +56,42 @@
       <div class="topbar__breadcrumb">
         <span>EgitimAI</span>
         <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <a href="index.html" style="color:var(--text-2)">Dashboard</a>
-        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <span style="color:var(--text)">Geçmiş</span>
+        <span style="color:var(--text)">Klasörlerim</span>
       </div>
     </div>
     <div class="topbar__right">
-      <a href="create.html" class="btn btn--primary btn--sm"><i data-lucide="plus"></i> Yeni Belge</a>
+      <button class="btn btn--primary btn--sm" id="newFolderBtn">
+        <i data-lucide="folder-plus"></i> Yeni Klasör
+      </button>
     </div>
   </header>
 
   <main class="app-content">
     <div class="create-header fade-up">
-      <h1>Belge Geçmişi</h1>
-      <p>Oluşturduğunuz tüm belgeleri görüntüleyin, indirin veya silin.</p>
+      <h1>Klasörlerim</h1>
+      <p>Belgelerinizi klasörlere ayırarak düzenleyin.</p>
     </div>
 
-    <div class="fade-up fade-up--1" style="margin-bottom:16px;">
-      <div class="input-wrap" style="max-width:360px;">
-        <span class="input-wrap__icon"><i data-lucide="search"></i></span>
-        <input type="text" id="historySearch" class="form-input" placeholder="Belge ara..." />
+    <!-- Klasör kartları -->
+    <div class="folders-grid fade-up fade-up--1" id="foldersGrid">
+      <!-- JS ile doldurulur -->
+    </div>
+
+    <!-- Seçili klasörün belgeleri -->
+    <div class="folder-docs-section fade-up fade-up--2" id="folderDocsSection" style="display:none;margin-top:32px;">
+      <div class="folder-docs-header">
+        <i data-lucide="folder-open" style="color:var(--accent);width:18px;height:18px;"></i>
+        <h2 id="folderDocsTitle" style="font-size:1rem;font-weight:600;"></h2>
       </div>
-    </div>
-
-    <div class="docs-table fade-up fade-up--2">
-      <div class="docs-table__header">
-        <div>Belge Adı</div>
-        <div>Tür</div>
-        <div>Boyut</div>
-        <div>Tarih</div>
-        <div></div>
+      <div class="docs-table" style="margin-top:12px;">
+        <div class="docs-table__header">
+          <div>Belge Adı</div>
+          <div>Tür</div>
+          <div>Boyut</div>
+          <div>Tarih</div>
+          <div></div>
+        </div>
+        <div id="folderDocsTable"></div>
       </div>
     </div>
   </main>

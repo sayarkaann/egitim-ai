@@ -78,7 +78,7 @@ function callGroq(apiKey, body) {
 function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject) {
   // Language configuration — output language enforcement
   const LANG_CONFIG = {
-    tr: { name: 'Turkish',  enforce: '' },
+    tr: { name: 'Turkish',  enforce: 'DİL TALİMATI: Belgeyi doğal, akıcı pedagojik Türkçe ile yaz. Makine çevirisi tarzı ifadeler, klişe giriş cümleleri ("Bu belgede...", "Bu derste...") ve tekrar eden kalıplardan kaçın. Öğretmenin sınıfta kullanacağı gerçekçi, uygulanabilir bir dil kullan.\n\n' },
     en: { name: 'English',  enforce: 'CRITICAL REQUIREMENT: You MUST write 100% of this document in English. Every single word, heading, bullet, and sentence must be in English. Absolutely no Turkish allowed anywhere in the response.\n\n' },
     de: { name: 'German',   enforce: 'WICHTIGE ANFORDERUNG: Das gesamte Dokument muss ausschließlich auf Deutsch verfasst werden. Kein Wort Türkisch im gesamten Text.\n\n' },
     fr: { name: 'French',   enforce: 'EXIGENCE CRITIQUE: Rédigez l\'intégralité de ce document en français. Aucun mot en turc n\'est autorisé.\n\n' },
@@ -93,6 +93,8 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
 
   const toneMap  = { formal: 'formal', friendly: 'friendly and engaging', academic: 'academic', simple: 'simple and accessible' };
   const toneStr  = toneMap[tone] || 'formal';
+
+  const depthBlock = `DERİNLİK TALİMATI: Genel bilgi verme. Seçilen konu (${subject || topic}), sınıf seviyesi (${gradeLevel || 'genel'}) ve hedef kitleye özel, müfredatla uyumlu, uygulanabilir içerik üret. Soyut açıklamalar yerine somut örnekler ve etkinlikler kullan. İçerik yüzeysel veya tekrarcı olmasın.`;
 
   // Audience-specific instructions
   const audienceBlock = isTeacher
@@ -122,29 +124,32 @@ TONE: ${toneStr}
 CONTEXT: ${subjectStr}${gradeStr}
 ${audienceBlock}
 
+${depthBlock}
+
 Create a ${pages}-slide educational PowerPoint presentation about:
 "${topic}"
 ${notes}
 
 MANDATORY SLIDE FORMAT (use exactly this, do not deviate):
 SLAYT 1: [Cover Title]
-- [Subtitle or presenter info]
-- [Key theme]
-- [Date or grade level]
+- [Subtitle or key theme]
+- [Grade level or audience]
 
 SLAYT 2: [Section Title]
-- [Bullet point]
-- [Bullet point]
-- [Bullet point]
+- [Bullet point — max 12 words]
+- [Bullet point — max 12 words]
+- [Bullet point — max 12 words]
 
 (continue this pattern for all ${pages} slides)
 
-RULES:
-- Slide 1 = cover/title slide
-- Last slide = summary or Q&A
-- Every slide: 3–5 concise bullet points
-- Total slides: exactly ${pages}
-- All text in ${langCfg.name}`;
+SLAYT KURALLARI:
+- Her slayt YALNIZCA bir konuya odaklanmalı
+- Her slaytta maksimum 5 madde (tercihen 3-4)
+- Her madde maksimum 12 kelime — kısa ve öz
+- SLAYT 1 = kapak slaytı, sadece başlık ve 2 kısa alt madde
+- Son slayt = özet veya tartışma soruları
+- Toplamda TAM OLARAK ${pages} slayt üret — ne fazla ne az
+- Tüm metin ${langCfg.name} dilinde olmalı`;
   }
 
   /* ── PDF / WORD ── */
@@ -155,6 +160,8 @@ TONE: ${toneStr}
 CONTEXT: ${subjectStr}${gradeStr}
 TARGET LENGTH: approximately ${pages} pages
 ${audienceBlock}
+
+${depthBlock}
 
 Create a comprehensive educational document about:
 "${topic}"
