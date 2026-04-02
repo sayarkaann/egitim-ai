@@ -1,0 +1,12 @@
+{
+  "outputDirectory": ".",
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    { "src": "/app/(.*)", "dest": "/app/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}

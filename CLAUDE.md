@@ -7,13 +7,13 @@ AI destekli eğitim belgesi üretici SaaS. Öğretmenler ve öğrenciler için P
 ## Teknoloji Yığını
 
 - **Frontend:** Vanilla HTML/CSS/JS — framework yok, React yok
-- **AI API:** Groq (`llama-3.3-70b-versatile`) — Netlify serverless function üzerinden
+- **AI API:** Groq (`llama-3.3-70b-versatile`) — Vercel serverless function üzerinden
 - **Auth + DB:** Supabase (Auth, PostgreSQL, RLS açık)
-- **Deployment:** Netlify (static hosting + serverless functions)
+- **Deployment:** Vercel (static hosting + serverless functions)
 - **PPTX:** PptxGenJS v3.12.0 (CDN, client-side)
 - **Font:** DM Sans (Google Fonts)
 - **İkonlar:** Lucide Icons (CDN)
-- **Görseller:** Wikipedia / Wikimedia Commons API (no API key, CORS açık)
+- **Görseller:** Pexels API (server-side, `PEXELS_API_KEY` env var)
 
 ## Dosya Yapısı
 
