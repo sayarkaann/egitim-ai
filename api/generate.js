@@ -10,10 +10,9 @@ module.exports = async (req, res) => {
 
   try {
     const body = req.body || {};
-    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject, addVisuals } = body;
+    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject } = body;
 
-    const GROQ_API_KEY   = process.env.GROQ_API_KEY;
-    const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
     if (!GROQ_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
@@ -28,19 +27,13 @@ module.exports = async (req, res) => {
       temperature: 0.7,
     });
 
-    // Run AI generation + image fetch in parallel
-    const [content, imageUrl] = await Promise.all([
-      callGroq(GROQ_API_KEY, requestBody),
-      (addVisuals && PEXELS_API_KEY)
-        ? fetchPexelsImage(PEXELS_API_KEY, subject ? `${subject} ${topic}` : topic)
-        : Promise.resolve(null),
-    ]);
+    const content = await callGroq(GROQ_API_KEY, requestBody);
 
     if (!content) {
       return res.status(500).json({ error: 'İçerik üretilemedi, tekrar deneyin.' });
     }
 
-    return res.status(200).json({ content, imageUrl });
+    return res.status(200).json({ content });
 
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Bilinmeyen hata' });
@@ -79,31 +72,6 @@ function callGroq(apiKey, body) {
     req.setTimeout(28000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
     req.write(body);
     req.end();
-  });
-}
-
-/* ── Pexels Image API ── */
-function fetchPexelsImage(apiKey, query) {
-  return new Promise((resolve) => {
-    const path = `/v1/search?query=${encodeURIComponent(query)}&per_page=3&orientation=landscape&locale=tr-TR`;
-    const options = {
-      hostname: 'api.pexels.com',
-      path,
-      headers: { Authorization: apiKey },
-    };
-    https.get(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          const photo = json.photos?.[0];
-          resolve(photo?.src?.large || photo?.src?.medium || null);
-        } catch {
-          resolve(null);
-        }
-      });
-    }).on('error', () => resolve(null));
   });
 }
 

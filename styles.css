@@ -5,31 +5,31 @@
 
 /* ---- CUSTOM PROPERTIES ---- */
 :root {
-  --bg:        #0c0a08;
-  --bg-2:      #131009;
-  --bg-3:      #1a160f;
-  --bg-card:   #110e0a;
-  --border:    rgba(255,220,170,.07);
-  --border-h:  rgba(255,220,170,.14);
-  --text:      #f5ede4;
-  --text-2:    #a8957e;
-  --text-3:    #6b5947;
-  --accent:    #e8855a;
-  --accent-d:  #c96840;
-  --accent-l:  #f0a882;
-  --accent-glow: rgba(232,133,90,.35);
-  --teacher:      #5db896;
-  --teacher-d:    #3fa07a;
-  --teacher-l:    #85d4b5;
-  --teacher-glow: rgba(93,184,150,.3);
-  --student:      #f5b731;
-  --student-d:    #d49a18;
-  --student-l:    #fdd06a;
-  --student-glow: rgba(245,183,49,.3);
+  --bg:        #070a14;
+  --bg-2:      #0b0e1c;
+  --bg-3:      #101525;
+  --bg-card:   #0d1122;
+  --border:    rgba(99,102,241,.1);
+  --border-h:  rgba(99,102,241,.22);
+  --text:      #e8eeff;
+  --text-2:    #8892c4;
+  --text-3:    #424d78;
+  --accent:    #6366f1;
+  --accent-d:  #4f46e5;
+  --accent-l:  #a5b4fc;
+  --accent-glow: rgba(99,102,241,.38);
+  --teacher:      #22d3a5;
+  --teacher-d:    #16b58c;
+  --teacher-l:    #5eead4;
+  --teacher-glow: rgba(34,211,165,.3);
+  --student:      #f59e0b;
+  --student-d:    #d97706;
+  --student-l:    #fcd34d;
+  --student-glow: rgba(245,158,11,.3);
   --radius:    16px;
   --radius-sm: 10px;
   --radius-lg: 24px;
-  --shadow:    0 4px 32px rgba(0,0,0,.6);
+  --shadow:    0 4px 32px rgba(0,0,0,.65);
   --transition: 0.25s cubic-bezier(.4,0,.2,1);
 }
 

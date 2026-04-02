@@ -701,7 +701,7 @@ async function initCreatePage() {
   let selectedAudience = 'teacher';
   let generatedContent  = '';
   let generatedTitle    = '';
-  let generatedImageUrl = null;
+  let generatedImageUrl = null;  // reserved for future use
 
   // Load user folders into dropdown
   (async () => {
@@ -816,15 +816,14 @@ async function initCreatePage() {
 
     const extraNotes = document.getElementById('extraNotes')?.value || '';
     const gradeLevel = document.getElementById('gradeLevel')?.value  || '';
-    const tone       = document.getElementById('docTone')?.value     || 'formal';
-    const subject    = document.getElementById('docSubject')?.value  || '';
-    const addVisuals = document.getElementById('addVisuals')?.checked || false;
-    const folderId   = document.getElementById('docFolder')?.value   || null;
+    const tone     = document.getElementById('docTone')?.value    || 'formal';
+    const subject  = document.getElementById('docSubject')?.value || '';
+    const folderId = document.getElementById('docFolder')?.value  || null;
 
     generatedTitle    = topic.slice(0, 60);
     generatedImageUrl = null;
 
-    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, addVisuals, session, folderId });
+    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, session, folderId });
   });
 
   // Download buttons
@@ -890,9 +889,8 @@ async function initCreatePage() {
           pages:      params.pages,
           gradeLevel: params.gradeLevel,
           language:   params.language,
-          tone:       params.tone,
-          subject:    params.subject,
-          addVisuals: params.addVisuals,
+          tone:    params.tone,
+          subject: params.subject,
         })
       });
 
@@ -902,9 +900,7 @@ async function initCreatePage() {
       const json = await response.json();
       if (json.error) throw new Error(json.error);
 
-      generatedContent   = json.content;
-      generatedImageUrl = json.imageUrl || null;
-      const imgData = generatedImageUrl;
+      generatedContent = json.content;
 
       steps.forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('active'); el.classList.add('done'); } });
       if (progressFill) progressFill.style.width = '100%';
@@ -912,7 +908,7 @@ async function initCreatePage() {
       setTimeout(async () => {
         const typeLabels = { pdf: 'PDF', word: 'Word', pptx: 'PowerPoint' };
         if (resultTitle) resultTitle.textContent = `${generatedTitle}.${params.type === 'word' ? 'docx' : params.type}`;
-        if (resultMeta)  resultMeta.textContent  = `${typeLabels[params.type]} • ${params.pages} sayfa • ${params.audience === 'teacher' ? 'Öğretmen' : 'Öğrenci'} hedefli${imgData ? ' • Görsel eklendi' : ''}`;
+        if (resultMeta)  resultMeta.textContent  = `${typeLabels[params.type]} • ${params.pages} sayfa • ${params.audience === 'teacher' ? 'Öğretmen' : 'Öğrenci'} hedefli`;
         resultPanel?.classList.add('visible');
         showToast('Belgeniz başarıyla oluşturuldu!', 'success');
 
