@@ -12,9 +12,11 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body);
-    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject } = body;
+    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject, addVisuals } = body;
 
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const GROQ_API_KEY   = process.env.GROQ_API_KEY;
+    const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
+
     if (!GROQ_API_KEY) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'API anahtarı eksik.' }) };
     }
@@ -28,19 +30,26 @@ exports.handler = async (event) => {
       temperature: 0.7,
     });
 
-    const content = await callGroq(GROQ_API_KEY, requestBody);
+    // Run AI generation + image fetch in parallel
+    const [content, imageUrl] = await Promise.all([
+      callGroq(GROQ_API_KEY, requestBody),
+      (addVisuals && PEXELS_API_KEY)
+        ? fetchPexelsImage(PEXELS_API_KEY, subject ? `${subject} ${topic}` : topic)
+        : Promise.resolve(null),
+    ]);
 
     if (!content) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'İçerik üretilemedi, tekrar deneyin.' }) };
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify({ content }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ content, imageUrl }) };
 
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || 'Bilinmeyen hata' }) };
   }
 };
 
+/* ── Groq API ── */
 function callGroq(apiKey, body) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -75,97 +84,161 @@ function callGroq(apiKey, body) {
   });
 }
 
+/* ── Pexels Image API ── */
+function fetchPexelsImage(apiKey, query) {
+  return new Promise((resolve) => {
+    const path = `/v1/search?query=${encodeURIComponent(query)}&per_page=3&orientation=landscape&locale=tr-TR`;
+    const options = {
+      hostname: 'api.pexels.com',
+      path,
+      headers: { Authorization: apiKey },
+    };
+    https.get(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          const photo = json.photos?.[0];
+          resolve(photo?.src?.large || photo?.src?.medium || null);
+        } catch {
+          resolve(null);
+        }
+      });
+    }).on('error', () => resolve(null));
+  });
+}
+
+/* ── MEB Müfredat Haritası ── */
+function getCurriculumHint(subject, gradeLevel) {
+  const map = {
+    'Matematik': {
+      '5': 'Doğal sayılar, kesirler, ondalık sayılar, alan-çevre hesapları, temel geometri',
+      '6': 'Tam sayılar, oran-orantı, yüzdeler, çember ve daire, veri toplama',
+      '7': 'Rasyonel sayılar, denklemler, eşitsizlikler, üçgenler, istatistik',
+      '8': 'Kareköklü sayılar, çarpanlara ayırma, ikinci dereceden denklemler, Pisagor teoremi, olasılık, LGS hazırlık soruları',
+      '9': 'Kümeler, mantık, fonksiyonlar, polinomlar, trigonometri temelleri',
+      '10': 'Logaritma, trigonometri, analitik geometri, olasılık',
+      '11': 'Türev, integral temelleri, karmaşık sayılar, dizi-seri',
+      '12': 'İntegral, TYT/AYT matematik soruları, limit ve süreklilik',
+    },
+    'Fen Bilimleri': {
+      '5': 'Besin zinciri, madde ve değişim, kuvvet, ışık ve ses',
+      '6': 'Hücre ve organeller, maddenin tanecikli yapısı, kuvvet ve hareket, elektrik',
+      '7': 'Bitki ve hayvan hücreleri, saf madde-karışım, enerji dönüşümleri, basınç',
+      '8': 'DNA ve genetik, hücre bölünmesi (mitoz/mayoz), kuvvet-hareket-enerji, sürtünme, basit makineler, asit-baz, elektrik yükleri, LGS fen soruları',
+      '9': 'Bilimin doğası, kimyasal bağlar, hücre biyolojisi, kuvvet ve hareket yasaları',
+    },
+    'Türkçe': {
+      '5': 'Okuma anlama, yazım kuralları, sözcük türleri, paragraf oluşturma',
+      '6': 'Metin türleri, dil bilgisi (isim-sıfat-zarf), cümle bilgisi',
+      '7': 'Anlatım biçimleri, söz sanatları, fiiller, bağlaçlar',
+      '8': 'Yazılı ve sözlü anlatım türleri, dil bilgisi (cümle ögeleri, fiil çatısı, yapı), LGS Türkçe soru tipleri',
+      '9': 'Türk dili tarihi, metin türleri, dil bilgisi, söylem analizi',
+    },
+    'İngilizce': {
+      '5': 'Greetings, colors, numbers, family, daily routines — A1 level',
+      '6': 'Present tense, school life, free time — A1-A2 level',
+      '7': 'Past tense, travels, health — A2 level',
+      '8': 'Present perfect, passive voice, technology, environment — B1 level, LGS English',
+      '9': 'Grammar review, reading comprehension, B1-B2 level',
+    },
+    'Tarih': {
+      '8': 'İnkılap Tarihi: Kurtuluş Savaşı, Atatürk dönemi reformları, çok partili hayata geçiş',
+      '9': 'Tarih yazımı, uygarlıkların doğuşu, Türk ve dünya tarihi',
+      '10': 'Osmanlı tarihi, dünya savaşları, Türkiye Cumhuriyeti tarihi',
+      '11': 'Yakın dönem dünya tarihi, soğuk savaş, Türkiye\'nin modernleşmesi',
+      '12': 'AYT Tarih konuları, çağdaş dünya tarihi',
+    },
+    'Coğrafya': {
+      '9': 'Harita bilgisi, iklim, Türkiye\'nin fiziki coğrafyası',
+      '10': 'Türkiye\'nin beşeri coğrafyası, nüfus, ekonomi',
+      '11': 'Kıtalar coğrafyası, doğal afetler, çevre sorunları',
+      '12': 'AYT Coğrafya, küresel sorunlar, bölgesel coğrafya',
+    },
+  };
+
+  const subjectMap = map[subject] || {};
+  const hint = subjectMap[gradeLevel];
+  return hint ? `\nBu sınıf için müfredat konuları: ${hint}` : '';
+}
+
 function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject) {
-  // Language configuration — output language enforcement
   const LANG_CONFIG = {
-    tr: { name: 'Turkish',  enforce: 'DİL TALİMATI: Belgeyi doğal, akıcı pedagojik Türkçe ile yaz. Makine çevirisi tarzı ifadeler, klişe giriş cümleleri ("Bu belgede...", "Bu derste...") ve tekrar eden kalıplardan kaçın. Öğretmenin sınıfta kullanacağı gerçekçi, uygulanabilir bir dil kullan.\n\n' },
-    en: { name: 'English',  enforce: 'CRITICAL REQUIREMENT: You MUST write 100% of this document in English. Every single word, heading, bullet, and sentence must be in English. Absolutely no Turkish allowed anywhere in the response.\n\n' },
-    de: { name: 'German',   enforce: 'WICHTIGE ANFORDERUNG: Das gesamte Dokument muss ausschließlich auf Deutsch verfasst werden. Kein Wort Türkisch im gesamten Text.\n\n' },
-    fr: { name: 'French',   enforce: 'EXIGENCE CRITIQUE: Rédigez l\'intégralité de ce document en français. Aucun mot en turc n\'est autorisé.\n\n' },
-    ar: { name: 'Arabic',   enforce: 'متطلب حرج: يجب كتابة هذا المستند بالكامل باللغة العربية. لا يسمح بأي كلمة تركية.\n\n' },
+    tr: { name: 'Türkçe', enforce: 'Belgeyi doğal, akıcı Türkçe ile yaz. Klişe giriş cümleleri ("Bu belgede...") kullanma.\n\n' },
+    en: { name: 'English', enforce: 'CRITICAL: Write 100% in English. No Turkish anywhere.\n\n' },
+    de: { name: 'Deutsch', enforce: 'Nur auf Deutsch schreiben. Kein Türkisch.\n\n' },
+    fr: { name: 'Français', enforce: 'Écrivez entièrement en français. Pas de turc.\n\n' },
+    ar: { name: 'العربية', enforce: 'اكتب بالعربية فقط. لا تركية.\n\n' },
   };
 
-  const langCfg  = LANG_CONFIG[language] || LANG_CONFIG.tr;
-  const notes    = extraNotes ? `\nEk talimatlar: ${extraNotes}` : '';
+  const langCfg = LANG_CONFIG[language] || LANG_CONFIG.tr;
+  const notes   = extraNotes ? `\nEk talimatlar: ${extraNotes}` : '';
+  const toneMap = { formal: 'resmi', friendly: 'samimi', academic: 'akademik', simple: 'sade' };
+  const toneStr = toneMap[tone] || 'resmi';
 
-  const toneMap  = { formal: 'resmi', friendly: 'samimi ve sıcak', academic: 'akademik', simple: 'sade ve anlaşılır' };
-  const toneStr  = toneMap[tone] || 'resmi';
-
-  // Grade level → Turkish MEB curriculum context
-  const gradeContextMap = {
-    '1': '1. sınıf (6-7 yaş, temel okuma-yazma seviyesi)',
-    '2': '2. sınıf (7-8 yaş)',
-    '3': '3. sınıf (8-9 yaş)',
-    '4': '4. sınıf (9-10 yaş)',
-    '5': '5. sınıf (10-11 yaş, ortaokul başlangıcı)',
-    '6': '6. sınıf (11-12 yaş)',
-    '7': '7. sınıf (12-13 yaş)',
-    '8': '8. sınıf (13-14 yaş, LGS hazırlık dönemi)',
-    '9': '9. sınıf (14-15 yaş, lise 1)',
-    '10': '10. sınıf (15-16 yaş, lise 2)',
-    '11': '11. sınıf (16-17 yaş, lise 3)',
-    '12': '12. sınıf (17-18 yaş, YKS/TYT/AYT hazırlık)',
-    'university': 'Üniversite seviyesi',
+  // Grade level context
+  const gradeLabels = {
+    '1':'1. sınıf', '2':'2. sınıf', '3':'3. sınıf', '4':'4. sınıf',
+    '5':'5. sınıf', '6':'6. sınıf', '7':'7. sınıf',
+    '8':'8. sınıf (LGS hazırlık)',
+    '9':'9. sınıf (Lise 1)', '10':'10. sınıf (Lise 2)',
+    '11':'11. sınıf (Lise 3)', '12':'12. sınıf (YKS/TYT/AYT hazırlık)',
+    'university':'Üniversite',
   };
-  const gradeCtx = gradeLevel ? (gradeContextMap[gradeLevel] || `${gradeLevel}. sınıf`) : 'genel seviye';
-  const gradeStr = gradeLevel ? `${gradeCtx}` : 'genel seviye';
-  const subjectStr = subject ? `${subject} dersi, ` : '';
+  const gradeLabel = gradeLevel ? (gradeLabels[gradeLevel] || `${gradeLevel}. sınıf`) : '';
+  const curriculumHint = getCurriculumHint(subject, gradeLevel);
 
-  const depthBlock = `KONU VE SEVİYE: ${subjectStr}${gradeStr}.
-Belge tamamen bu sınıf seviyesine uygun olmalı: dil, soru zorluğu, kavramlar ve örnekler ${gradeCtx} için uygun olsun. Türkiye MEB müfredatını esas al.`;
-
-  const langNote = `OUTPUT LANGUAGE: ${langCfg.name}. Write everything in ${langCfg.name}.`;
+  const contextBlock = [
+    gradeLabel  ? `Sınıf: ${gradeLabel}` : '',
+    subject     ? `Ders: ${subject}` : '',
+    toneStr     ? `Ton: ${toneStr}` : '',
+    curriculumHint,
+  ].filter(Boolean).join('\n');
 
   /* ── PPTX ── */
   if (type === 'pptx') {
-    return `${langCfg.enforce}${depthBlock}
+    return `${langCfg.enforce}${contextBlock}
 
-${langNote}
+UYARI: Sorular ve içerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı. Daha basit sınıf konuları kullanma.
 
-"${topic}" konusunda ${pages} slaytlık bir sunum hazırla.
-${notes}
+"${topic}" konusunda ${pages} slaytlık sunum hazırla.${notes}
 
-ZORUNLU FORMAT (değiştirme):
+ZORUNLU FORMAT:
 SLAYT 1: [Başlık]
 - [Alt başlık]
-- [Sınıf/seviye bilgisi]
+- [${gradeLabel}]
 
 SLAYT 2: [Bölüm Başlığı]
-- [Madde — max 12 kelime]
-- [Madde — max 12 kelime]
-- [Madde — max 12 kelime]
+- [Madde]
+- [Madde]
+- [Madde]
 
-(tüm ${pages} slayt bu formatta devam eder)
+(${pages} slayta kadar devam et)
 
 KURALLAR:
-- Her slayt tek konuya odaklan
-- Slaytta maksimum 5 madde, tercihen 3-4
-- SLAYT 1 = kapak slaytı
-- Son slayt = özet veya sorular
-- TAM OLARAK ${pages} slayt üret
-- Tüm metin ${langCfg.name} dilinde`;
+- Her slayt tek konuya odaklan, max 5 madde
+- Maddeler kısa ve öz (max 10 kelime)
+- TAM OLARAK ${pages} slayt
+- Tüm metin ${langCfg.name} dilinde
+- Özel karakter, ok işareti veya markdown sembolleri kullanma`;
   }
 
   /* ── PDF / WORD ── */
-  return `${langCfg.enforce}${depthBlock}
+  return `${langCfg.enforce}${contextBlock}
 
-${langNote}
+UYARI: Sorular ve içerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı. Daha basit veya daha zor sınıf konuları kullanma.
 
-"${topic}" konusunda bir belge hazırla. Hedef uzunluk: yaklaşık ${pages} sayfa.
-${notes}
+"${topic}" konusunda belge hazırla. Uzunluk: yaklaşık ${pages} sayfa.${notes}
 
 FORMAT:
-# [Belge Başlığı]
-
-## [Bölüm 1]
-[İçerik]
-
-## [Bölüm 2]
+# [Başlık]
+## [Bölüm]
 [İçerik]
 
 KURALLAR:
-- Sınav/test ise: soruları numaralandır, en sona cevap anahtarı koy
-- Sadece belge içeriğini yaz — açıklama, yorum veya pedagojik not ekleme
-- Yaklaşık ${pages} sayfayı dolduracak kadar içerik üret
-- Tüm içerik ${langCfg.name} dilinde olmalı`;
+- Sınav ise: soruları numaralandır, en sona cevap anahtarı ekle
+- Sadece içerik yaz, pedagojik açıklama veya meta-yorum ekleme
+- ${pages} sayfa dolduracak kadar içerik üret
+- Tüm içerik ${langCfg.name} dilinde`;
 }

@@ -824,15 +824,7 @@ async function initCreatePage() {
     generatedTitle     = topic.slice(0, 60);
     generatedImageData = null;
 
-    // Fetch image in background if requested — errors always resolve to null, never reject
-    let imageFetchPromise = Promise.resolve(null);
-    if (addVisuals) {
-      imageFetchPromise = fetchEducationalImage(topic, language)
-        .then(url => url ? imageUrlToBase64(url) : null)
-        .catch(() => null);
-    }
-
-    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, imageFetchPromise, session, folderId });
+    await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, addVisuals, session, folderId });
   });
 
   // Download buttons
@@ -887,25 +879,22 @@ async function initCreatePage() {
     }, 1600);
 
     try {
-      const [response, imgData] = await Promise.all([
-        fetch('/.netlify/functions/generate', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            topic:      params.topic,
-            extraNotes: params.extraNotes,
-            type:       params.type,
-            audience:   params.audience,
-            pages:      params.pages,
-            gradeLevel: params.gradeLevel,
-            language:   params.language,
-            tone:       params.tone,
-            subject:    params.subject,
-          })
-        }),
-        // Image promise always resolves (never rejects) — CORS errors silently become null
-        Promise.resolve(params.imageFetchPromise).catch(() => null),
-      ]);
+      const response = await fetch('/.netlify/functions/generate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic:      params.topic,
+          extraNotes: params.extraNotes,
+          type:       params.type,
+          audience:   params.audience,
+          pages:      params.pages,
+          gradeLevel: params.gradeLevel,
+          language:   params.language,
+          tone:       params.tone,
+          subject:    params.subject,
+          addVisuals: params.addVisuals,
+        })
+      });
 
       clearInterval(stepTimer);
 
@@ -914,7 +903,12 @@ async function initCreatePage() {
       if (json.error) throw new Error(json.error);
 
       generatedContent   = json.content;
-      generatedImageData = imgData;
+      // Convert Pexels image URL to base64 for embedding in PPTX/Word
+      generatedImageData = null;
+      if (json.imageUrl) {
+        generatedImageData = await imageUrlToBase64(json.imageUrl).catch(() => null);
+      }
+      const imgData = generatedImageData;
 
       steps.forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('active'); el.classList.add('done'); } });
       if (progressFill) progressFill.style.width = '100%';
@@ -1112,14 +1106,22 @@ async function generatePPTX(title, content, pages, imageData) {
   showToast('PowerPoint indiriliyor...', 'success');
 }
 
-/* Remove **bold**, *italic*, __bold__, _italic_ markers from plain text */
+/* Remove markdown markers and problematic symbols from plain text (for PPTX) */
 function stripMarkdown(text) {
   return text
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g,     '$1')
-    .replace(/__(.+?)__/g,     '$1')
-    .replace(/_(.+?)_/g,       '$1')
-    .replace(/`(.+?)`/g,       '$1')
+    .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
+    .replace(/\*(.+?)\*/g,     '$1')   // *italic*
+    .replace(/__(.+?)__/g,     '$1')   // __bold__
+    .replace(/_(.+?)_/g,       '$1')   // _italic_
+    .replace(/`(.+?)`/g,       '$1')   // `code`
+    .replace(/#{1,6}\s*/g,     '')     // ## headings
+    .replace(/[→⇒⟹➜➡►▶]/g,  '>')   // arrows
+    .replace(/[—–]/g,          '-')    // em/en dash
+    .replace(/[""]/g,          '"')    // curly double quotes
+    .replace(/['']/g,          "'")    // curly single quotes
+    .replace(/[•◦▸▹◆◇■□●○▪▫]/g, '') // bullet symbols
+    .replace(/\[|\]/g,         '')     // brackets
+    .replace(/\|/g,            ' ')    // pipe
     .trim();
 }
 
