@@ -86,13 +86,10 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
   };
 
   const langCfg  = LANG_CONFIG[language] || LANG_CONFIG.tr;
-  const isTeacher = audience === 'teacher';
-  const gradeStr  = gradeLevel ? `grade ${gradeLevel}` : 'general level';
-  const subjectStr = subject ? `${subject}, ` : '';
-  const notes    = extraNotes ? `\nExtra instructions: ${extraNotes}` : '';
+  const notes    = extraNotes ? `\nEk talimatlar: ${extraNotes}` : '';
 
-  const toneMap  = { formal: 'formal', friendly: 'friendly and engaging', academic: 'academic', simple: 'simple and accessible' };
-  const toneStr  = toneMap[tone] || 'formal';
+  const toneMap  = { formal: 'resmi', friendly: 'samimi ve sıcak', academic: 'akademik', simple: 'sade ve anlaşılır' };
+  const toneStr  = toneMap[tone] || 'resmi';
 
   // Grade level → Turkish MEB curriculum context
   const gradeContextMap = {
