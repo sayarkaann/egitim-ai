@@ -7,7 +7,7 @@ const SUPABASE_URL      = 'https://bkeiwcxrdunicjvikfin.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWl3Y3hyZHVuaWNqdmlrZmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTI1MTQsImV4cCI6MjA5MDU2ODUxNH0.GX97jQJbnGynrC09uJUTTOse_J7ZlAmpEu0AZr6jBAU';
 
 /* Free plan limits */
-const FREE_DOC_LIMIT  = 10;   // per month
+const FREE_DOC_LIMIT  = 5;   // per month
 const FREE_PAGE_LIMIT = 5;
 
 let _sb = null;
@@ -23,6 +23,34 @@ function initIcons(root) {
   if (!window.lucide) return;
   if (root) lucide.createIcons({ nodes: [root] });
   else lucide.createIcons();
+}
+
+/* =====================================================
+   THEME TOGGLE
+===================================================== */
+function initTheme() {
+  const saved = localStorage.getItem('egitim-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon(saved);
+}
+
+function toggleTheme() {
+  const curr = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('egitim-theme', next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const icon = btn.querySelector('i');
+  if (icon) {
+    icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+    if (window.lucide) lucide.createIcons({ nodes: [btn] });
+  }
+  btn.onclick = toggleTheme;
 }
 
 /* =====================================================
@@ -369,7 +397,8 @@ async function initDashboard() {
   animateCounter(document.getElementById('statDocs'),      total);
   animateCounter(document.getElementById('statDownloads'), total);
   animateCounter(document.getElementById('statHours'),     Math.ceil(total * 0.5));
-  animateCounter(document.getElementById('statCredits'),   Math.max(0, FREE_DOC_LIMIT - total));
+  const remaining = document.getElementById('statRemaining');
+  if (remaining) remaining.textContent = Math.max(0, FREE_DOC_LIMIT - total);
 
   renderDocsTable(docs || []);
 }
@@ -1152,6 +1181,8 @@ function parseSlidecontent(content) {
    MARKDOWN → HTML
 ===================================================== */
 function markdownToHtml(text) {
+  // Merge blank lines between consecutive numbered list items so numbering stays continuous
+  text = text.replace(/(\n\d+\.\s[^\n]+)\n\n+(\d+\.\s)/g, '$1\n$2');
   const lines = text.split('\n');
   let html    = '';
   let inUL    = false;
@@ -1491,8 +1522,12 @@ async function initFoldersPage() {
 /* =====================================================
    INIT
 ===================================================== */
+// Apply theme before paint to avoid flash
+initTheme();
+
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
+  updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'dark');
   initAuthPage();
   initDashboard();
   initCreatePage();

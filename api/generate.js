@@ -203,7 +203,7 @@ FORMAT:
 [İçerik]
 
 KURALLAR:
-- Sınav ise: soruları numaralandır, en sona cevap anahtarı ekle
+- Sınav ise: soruları 1'den başlayarak art arda numaralandır (1. 2. 3. ...), numarayı sıfırlama, en sona cevap anahtarı ekle
 - Sadece içerik yaz, pedagojik açıklama veya meta-yorum ekleme
 - ${pages} sayfa dolduracak kadar içerik üret
 - Tüm içerik ${langCfg.name} dilinde`;

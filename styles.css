@@ -5,32 +5,47 @@
 
 /* ---- CUSTOM PROPERTIES ---- */
 :root {
-  --bg:        #070a14;
-  --bg-2:      #0b0e1c;
-  --bg-3:      #101525;
-  --bg-card:   #0d1122;
-  --border:    rgba(99,102,241,.1);
-  --border-h:  rgba(99,102,241,.22);
-  --text:      #e8eeff;
-  --text-2:    #8892c4;
-  --text-3:    #424d78;
-  --accent:    #6366f1;
-  --accent-d:  #4f46e5;
-  --accent-l:  #a5b4fc;
-  --accent-glow: rgba(99,102,241,.38);
-  --teacher:      #22d3a5;
-  --teacher-d:    #16b58c;
-  --teacher-l:    #5eead4;
-  --teacher-glow: rgba(34,211,165,.3);
-  --student:      #f59e0b;
-  --student-d:    #d97706;
-  --student-l:    #fcd34d;
-  --student-glow: rgba(245,158,11,.3);
+  --bg:        #0e0c09;
+  --bg-2:      #151108;
+  --bg-3:      #1d1710;
+  --bg-card:   #131009;
+  --border:    rgba(255,200,140,.08);
+  --border-h:  rgba(255,200,140,.17);
+  --text:      #f5e8dc;
+  --text-2:    #a89278;
+  --text-3:    #6a5038;
+  --accent:    #e8855a;
+  --accent-d:  #c96840;
+  --accent-l:  #f0a882;
+  --accent-glow: rgba(232,133,90,.3);
+  --teacher:      #4ade80;
+  --teacher-d:    #22c55e;
+  --teacher-l:    #86efac;
+  --teacher-glow: rgba(74,222,128,.3);
+  --student:      #fbbf24;
+  --student-d:    #f59e0b;
+  --student-l:    #fde68a;
+  --student-glow: rgba(251,191,36,.3);
   --radius:    16px;
   --radius-sm: 10px;
   --radius-lg: 24px;
-  --shadow:    0 4px 32px rgba(0,0,0,.65);
+  --shadow:    0 4px 32px rgba(0,0,0,.6);
   --transition: 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="light"] {
+  --bg:        #fdf9f5;
+  --bg-2:      #f5ede2;
+  --bg-3:      #ede0cc;
+  --bg-card:   #ffffff;
+  --border:    rgba(160,100,55,.13);
+  --border-h:  rgba(160,100,55,.26);
+  --text:      #26130a;
+  --text-2:    #7a5030;
+  --text-3:    #c08050;
+  --accent-l:  #c96840;
+  --accent-glow: rgba(232,133,90,.2);
+  --shadow:    0 4px 24px rgba(0,0,0,.1);
 }
 
 /* ---- RESET ---- */
