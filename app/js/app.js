@@ -699,9 +699,9 @@ async function initCreatePage() {
 
   let selectedType     = 'pdf';
   let selectedAudience = 'teacher';
-  let generatedContent = '';
-  let generatedTitle   = '';
-  let generatedImageData = null;
+  let generatedContent  = '';
+  let generatedTitle    = '';
+  let generatedImageUrl = null;
 
   // Load user folders into dropdown
   (async () => {
@@ -821,8 +821,8 @@ async function initCreatePage() {
     const addVisuals = document.getElementById('addVisuals')?.checked || false;
     const folderId   = document.getElementById('docFolder')?.value   || null;
 
-    generatedTitle     = topic.slice(0, 60);
-    generatedImageData = null;
+    generatedTitle    = topic.slice(0, 60);
+    generatedImageUrl = null;
 
     await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, addVisuals, session, folderId });
   });
@@ -836,7 +836,7 @@ async function initCreatePage() {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
       try {
-        await downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5', generatedImageData);
+        await downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5', generatedImageUrl);
       } finally {
         btn.disabled = false;
         btn.innerHTML = origHtml;
@@ -903,12 +903,8 @@ async function initCreatePage() {
       if (json.error) throw new Error(json.error);
 
       generatedContent   = json.content;
-      // Convert Pexels image URL to base64 for embedding in PPTX/Word
-      generatedImageData = null;
-      if (json.imageUrl) {
-        generatedImageData = await imageUrlToBase64(json.imageUrl).catch(() => null);
-      }
-      const imgData = generatedImageData;
+      generatedImageUrl = json.imageUrl || null;
+      const imgData = generatedImageUrl;
 
       steps.forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('active'); el.classList.add('done'); } });
       if (progressFill) progressFill.style.width = '100%';
@@ -950,15 +946,15 @@ async function initCreatePage() {
 /* =====================================================
    DOCUMENT DOWNLOAD
 ===================================================== */
-async function downloadDocument(title, type, content, pages, imageData) {
-  if (type === 'pdf')        await generatePDF(title, content, imageData);
-  else if (type === 'word')  await generateWord(title, content, imageData);
-  else if (type === 'pptx')  await generatePPTX(title, content, pages, imageData);
+async function downloadDocument(title, type, content, pages, imageUrl) {
+  if (type === 'pdf')        await generatePDF(title, content, imageUrl);
+  else if (type === 'word')  await generateWord(title, content, imageUrl);
+  else if (type === 'pptx')  await generatePPTX(title, content, pages, imageUrl);
 }
 
-async function generatePDF(title, content, imageData) {
-  const imgHtml = imageData
-    ? `<div style="text-align:center;margin:0 0 28px;"><img src="${imageData}" style="max-width:100%;max-height:260px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="İlgili görsel" /></div>`
+async function generatePDF(title, content, imageUrl) {
+  const imgHtml = imageUrl
+    ? `<div style="text-align:center;margin:0 0 28px;"><img src="${imageUrl}" style="max-width:100%;max-height:260px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="İlgili görsel" /></div>`
     : '';
 
   const body = `<!DOCTYPE html>
@@ -994,9 +990,9 @@ ${markdownToHtml(content)}
   if (!win) showToast('Açılır pencere engellendi. Tarayıcı ayarlarından izin verin.', 'error');
 }
 
-async function generateWord(title, content, imageData) {
-  const imgHtml = imageData
-    ? `<p style="text-align:center;"><img src="${imageData}" style="max-width:100%;max-height:240px;border-radius:8px;" /></p><br>`
+async function generateWord(title, content, imageUrl) {
+  const imgHtml = imageUrl
+    ? `<p style="text-align:center;"><img src="${imageUrl}" style="max-width:100%;max-height:240px;border-radius:8px;" /></p><br>`
     : '';
 
   const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -1030,7 +1026,7 @@ ${markdownToHtml(content)}
   showToast('Word belgesi indiriliyor...', 'success');
 }
 
-async function generatePPTX(title, content, pages, imageData) {
+async function generatePPTX(title, content, pages, imageUrl) {
   if (!window.PptxGenJS) {
     showToast('PowerPoint kütüphanesi henüz yüklenmedi. Lütfen bekleyin ve tekrar deneyin.', 'error');
     return;
@@ -1048,9 +1044,9 @@ async function generatePPTX(title, content, pages, imageData) {
       // Cover slide
       s.background = { color: '1a1a2e' };
       // Add image to cover if available
-      if (imageData) {
+      if (imageUrl) {
         try {
-          s.addImage({ data: imageData, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 });
+          s.addImage({ path: imageUrl, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 });
         } catch (_) {}
       }
       s.addText(slide.title, {
@@ -1069,7 +1065,7 @@ async function generatePPTX(title, content, pages, imageData) {
       });
     } else {
       // Content slide — with optional image on right side
-      const hasImg = imageData && i === 1; // add image only to first content slide
+      const hasImg = imageUrl && i === 1; // add image only to first content slide
       const contentW = hasImg ? 7.5 : 12.3;
 
       s.background = { color: 'f8f9ff' };
@@ -1081,7 +1077,7 @@ async function generatePPTX(title, content, pages, imageData) {
 
       if (hasImg) {
         try {
-          s.addImage({ data: imageData, x: 8.1, y: 1.1, w: 4.8, h: 3.4, rounding: true });
+          s.addImage({ path: imageUrl, x: 8.1, y: 1.1, w: 4.8, h: 3.4, rounding: true });
         } catch (_) {}
       }
 
@@ -1108,6 +1104,7 @@ async function generatePPTX(title, content, pages, imageData) {
 
 /* Remove markdown markers and problematic symbols from plain text (for PPTX) */
 function stripMarkdown(text) {
+  const supMap = '⁰¹²³⁴⁵⁶⁷⁸⁹';
   return text
     .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
     .replace(/\*(.+?)\*/g,     '$1')   // *italic*
@@ -1115,6 +1112,7 @@ function stripMarkdown(text) {
     .replace(/_(.+?)_/g,       '$1')   // _italic_
     .replace(/`(.+?)`/g,       '$1')   // `code`
     .replace(/#{1,6}\s*/g,     '')     // ## headings
+    .replace(/\^(\d+)/g, (_, n) => n.split('').map(d => supMap[+d]).join(''))  // ^2 → ²
     .replace(/[→⇒⟹➜➡►▶]/g,  '>')   // arrows
     .replace(/[—–]/g,          '-')    // em/en dash
     .replace(/[""]/g,          '"')    // curly double quotes
@@ -1170,7 +1168,8 @@ function markdownToHtml(text) {
 
   const inline = (s) => s
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em>$1</em>');
+    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+    .replace(/\^(\d+)/g,       '<sup>$1</sup>');
 
   for (const line of lines) {
     const t = line.trim();
