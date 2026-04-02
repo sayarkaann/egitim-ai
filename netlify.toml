@@ -8,3 +8,20 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+# HTML dosyaları asla cache'lenmesin
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# CSS ve JS kısa cache — her deploy'da güncellenir
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
