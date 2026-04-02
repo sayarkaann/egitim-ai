@@ -78,7 +78,7 @@ function callGroq(apiKey, body) {
     });
 
     req.on('error', (err) => reject(err));
-    req.setTimeout(28000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
+    req.setTimeout(9000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
     req.write(body);
     req.end();
   });
