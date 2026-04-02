@@ -94,94 +94,81 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
   const toneMap  = { formal: 'formal', friendly: 'friendly and engaging', academic: 'academic', simple: 'simple and accessible' };
   const toneStr  = toneMap[tone] || 'formal';
 
-  const depthBlock = `DERİNLİK TALİMATI: Genel bilgi verme. Seçilen konu (${subject || topic}), sınıf seviyesi (${gradeLevel || 'genel'}) ve hedef kitleye özel, müfredatla uyumlu, uygulanabilir içerik üret. Soyut açıklamalar yerine somut örnekler ve etkinlikler kullan. İçerik yüzeysel veya tekrarcı olmasın.`;
+  // Grade level → Turkish MEB curriculum context
+  const gradeContextMap = {
+    '1': '1. sınıf (6-7 yaş, temel okuma-yazma seviyesi)',
+    '2': '2. sınıf (7-8 yaş)',
+    '3': '3. sınıf (8-9 yaş)',
+    '4': '4. sınıf (9-10 yaş)',
+    '5': '5. sınıf (10-11 yaş, ortaokul başlangıcı)',
+    '6': '6. sınıf (11-12 yaş)',
+    '7': '7. sınıf (12-13 yaş)',
+    '8': '8. sınıf (13-14 yaş, LGS hazırlık dönemi)',
+    '9': '9. sınıf (14-15 yaş, lise 1)',
+    '10': '10. sınıf (15-16 yaş, lise 2)',
+    '11': '11. sınıf (16-17 yaş, lise 3)',
+    '12': '12. sınıf (17-18 yaş, YKS/TYT/AYT hazırlık)',
+    'university': 'Üniversite seviyesi',
+  };
+  const gradeCtx = gradeLevel ? (gradeContextMap[gradeLevel] || `${gradeLevel}. sınıf`) : 'genel seviye';
+  const gradeStr = gradeLevel ? `${gradeCtx}` : 'genel seviye';
+  const subjectStr = subject ? `${subject} dersi, ` : '';
 
-  // Audience-specific instructions
-  const audienceBlock = isTeacher
-    ? `AUDIENCE: This is for a TEACHER.
-- Include clear learning objectives and outcomes
-- Add pedagogical methods and teaching strategies
-- Provide assessment and evaluation criteria
-- Include timing estimates for each activity
-- Suggest materials, resources, and differentiation tips
-- Add classroom management considerations`
-    : `AUDIENCE: This is for a STUDENT.
-- Use age-appropriate, encouraging, and motivating language
-- Include many concrete examples and visual descriptions
-- Add practice exercises and self-check questions
-- Highlight key terms and important concepts (use bold)
-- Include a summary section at the end
-- Add study tips and memory techniques`;
+  const depthBlock = `KONU VE SEVİYE: ${subjectStr}${gradeStr}.
+Belge tamamen bu sınıf seviyesine uygun olmalı: dil, soru zorluğu, kavramlar ve örnekler ${gradeCtx} için uygun olsun. Türkiye MEB müfredatını esas al.`;
 
   const langNote = `OUTPUT LANGUAGE: ${langCfg.name}. Write everything in ${langCfg.name}.`;
 
   /* ── PPTX ── */
   if (type === 'pptx') {
-    return `${langCfg.enforce}You are an expert educational content creator.
+    return `${langCfg.enforce}${depthBlock}
 
 ${langNote}
-TONE: ${toneStr}
-CONTEXT: ${subjectStr}${gradeStr}
-${audienceBlock}
 
-${depthBlock}
-
-Create a ${pages}-slide educational PowerPoint presentation about:
-"${topic}"
+"${topic}" konusunda ${pages} slaytlık bir sunum hazırla.
 ${notes}
 
-MANDATORY SLIDE FORMAT (use exactly this, do not deviate):
-SLAYT 1: [Cover Title]
-- [Subtitle or key theme]
-- [Grade level or audience]
+ZORUNLU FORMAT (değiştirme):
+SLAYT 1: [Başlık]
+- [Alt başlık]
+- [Sınıf/seviye bilgisi]
 
-SLAYT 2: [Section Title]
-- [Bullet point — max 12 words]
-- [Bullet point — max 12 words]
-- [Bullet point — max 12 words]
+SLAYT 2: [Bölüm Başlığı]
+- [Madde — max 12 kelime]
+- [Madde — max 12 kelime]
+- [Madde — max 12 kelime]
 
-(continue this pattern for all ${pages} slides)
+(tüm ${pages} slayt bu formatta devam eder)
 
-SLAYT KURALLARI:
-- Her slayt YALNIZCA bir konuya odaklanmalı
-- Her slaytta maksimum 5 madde (tercihen 3-4)
-- Her madde maksimum 12 kelime — kısa ve öz
-- SLAYT 1 = kapak slaytı, sadece başlık ve 2 kısa alt madde
-- Son slayt = özet veya tartışma soruları
-- Toplamda TAM OLARAK ${pages} slayt üret — ne fazla ne az
-- Tüm metin ${langCfg.name} dilinde olmalı`;
+KURALLAR:
+- Her slayt tek konuya odaklan
+- Slaytta maksimum 5 madde, tercihen 3-4
+- SLAYT 1 = kapak slaytı
+- Son slayt = özet veya sorular
+- TAM OLARAK ${pages} slayt üret
+- Tüm metin ${langCfg.name} dilinde`;
   }
 
   /* ── PDF / WORD ── */
-  return `${langCfg.enforce}You are an expert educational content creator.
+  return `${langCfg.enforce}${depthBlock}
 
 ${langNote}
-TONE: ${toneStr}
-CONTEXT: ${subjectStr}${gradeStr}
-TARGET LENGTH: approximately ${pages} pages
-${audienceBlock}
 
-${depthBlock}
-
-Create a comprehensive educational document about:
-"${topic}"
+"${topic}" konusunda bir belge hazırla. Hedef uzunluk: yaklaşık ${pages} sayfa.
 ${notes}
 
 FORMAT:
-# [Document Title]
+# [Belge Başlığı]
 
-## [Section 1 Title]
-[Content]
+## [Bölüm 1]
+[İçerik]
 
-## [Section 2 Title]
-[Content]
+## [Bölüm 2]
+[İçerik]
 
-(continue for ${pages} pages worth of content)
-
-RULES:
-- If exam/test: number all questions; put full answer key at the very end
-- If lesson plan: include objectives, timeline, methods, and assessment rubric
-- If worksheet: mix explanation with practice questions
-- Write enough content to fill approximately ${pages} pages
-- All content must be in ${langCfg.name}`;
+KURALLAR:
+- Sınav/test ise: soruları numaralandır, en sona cevap anahtarı koy
+- Sadece belge içeriğini yaz — açıklama, yorum veya pedagojik not ekleme
+- Yaklaşık ${pages} sayfayı dolduracak kadar içerik üret
+- Tüm içerik ${langCfg.name} dilinde olmalı`;
 }
