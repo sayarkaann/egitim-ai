@@ -35,8 +35,7 @@
       </nav>
 
       <div class="nav__actions">
-        <a href="app/auth.html" class="btn btn--ghost btn--sm">Giriş Yap</a>
-        <a href="app/auth.html?mode=register" class="btn btn--primary btn--sm">Ücretsiz Başla</a>
+        <a href="app/create.html" class="btn btn--primary btn--sm">Ücretsiz Başla</a>
       </div>
 
       <button class="nav__hamburger" id="hamburger" aria-label="Menüyü Aç">
@@ -53,8 +52,7 @@
       <a href="#scenarios" class="mobile-menu__link">Senaryolar</a>
       <a href="#pricing" class="mobile-menu__link">Fiyatlar</a>
       <div class="mobile-menu__actions">
-        <a href="app/auth.html" class="btn btn--ghost btn--full">Giriş Yap</a>
-        <a href="app/auth.html?mode=register" class="btn btn--primary btn--full">Ücretsiz Başla</a>
+        <a href="app/create.html" class="btn btn--primary btn--full">Ücretsiz Başla</a>
       </div>
     </div>
   </div>
@@ -88,7 +86,7 @@
         </p>
 
         <div class="hero__cta fade-in fade-in--delay-3">
-          <a href="app/auth.html?mode=register" class="btn btn--primary btn--lg">
+          <a href="app/create.html" class="btn btn--primary btn--lg">
             <i data-lucide="zap"></i>
             Ücretsiz Başla
           </a>
@@ -100,18 +98,18 @@
 
         <div class="hero__stats fade-in fade-in--delay-4">
           <div class="hero__stat">
-            <strong>50.000+</strong>
+            <strong>124</strong>
             <span>Belge Üretildi</span>
           </div>
           <div class="hero__stat-sep"></div>
           <div class="hero__stat">
-            <strong>12.000+</strong>
+            <strong>41</strong>
             <span>Aktif Kullanıcı</span>
           </div>
           <div class="hero__stat-sep"></div>
           <div class="hero__stat">
-            <strong>4.9/5</strong>
-            <span>Kullanıcı Puanı</span>
+            <strong>3</strong>
+            <span>Dakikada Belge</span>
           </div>
         </div>
 
@@ -246,6 +244,21 @@
               <li><i data-lucide="check" width="14" height="14"></i> Konu özeti sunumlar</li>
             </ul>
             <div class="feature-card__badge">Öğrenci</div>
+          </div>
+
+          <div class="feature-card feature-card--coming reveal reveal--delay-4" style="opacity:.65;pointer-events:none;">
+            <div class="feature-card__glow"></div>
+            <div class="feature-card__icon" style="background:rgba(232,133,90,.08);">
+              <i data-lucide="presentation"></i>
+            </div>
+            <h3 class="feature-card__title">PowerPoint Desteği</h3>
+            <p class="feature-card__desc">Yapay zeka ile slayt slayt profesyonel sunumlar oluşturun. Otomatik görseller, şema ve içerikle etkileyici PowerPoint dosyaları indirin.</p>
+            <ul class="feature-card__list">
+              <li><i data-lucide="clock" width="14" height="14"></i> Otomatik görsel yerleşimi</li>
+              <li><i data-lucide="clock" width="14" height="14"></i> Tema ve renk seçimi</li>
+              <li><i data-lucide="clock" width="14" height="14"></i> PPTX indirme desteği</li>
+            </ul>
+            <div class="feature-card__badge" style="background:rgba(232,133,90,.15);color:var(--accent);">Yakında</div>
           </div>
 
         </div>
@@ -555,17 +568,18 @@
               <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> Süresiz kullanım</li>
               <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> Öncelikli destek</li>
             </ul>
-            <a href="app/auth.html?mode=register" class="btn btn--outline btn--full">Ücretsiz Dene</a>
+            <a href="app/create.html" class="btn btn--outline btn--full">Ücretsiz Dene</a>
           </div>
 
           <!-- Başlangıç -->
           <div class="pricing-card reveal reveal--delay-2">
             <div class="pricing-card__header">
-              <div class="pricing-card__plan">Başlangıç</div>
+              <div class="pricing-card__plan">Öğrenci</div>
               <div class="pricing-card__price">
-                <span class="pricing-card__amount" data-monthly="89" data-yearly="69">₺89</span>
+                <span class="pricing-card__amount" data-monthly="79" data-yearly="63">₺79</span>
                 <span class="pricing-card__period">/ay</span>
               </div>
+              <p class="pricing-card__yearly-note" id="studentYearlyNote" style="display:none;font-size:12px;color:var(--accent);margin-bottom:4px;">599₺/yıl faturalandırılır</p>
               <p class="pricing-card__desc">Düzenli kullananlar için ideal.</p>
             </div>
             <ul class="pricing-card__features">
@@ -576,7 +590,7 @@
               <li><i data-lucide="check" width="16" height="16"></i> E-posta desteği</li>
               <li class="pricing-card__feature--disabled"><i data-lucide="x" width="16" height="16"></i> Sınırsız belge</li>
             </ul>
-            <a href="app/auth.html?mode=register&plan=baslangic" class="btn btn--outline btn--full">Başla</a>
+            <a href="app/create.html" class="btn btn--outline btn--full">Başla</a>
           </div>
 
           <!-- Pro - Featured -->
@@ -585,9 +599,10 @@
             <div class="pricing-card__header">
               <div class="pricing-card__plan">Pro</div>
               <div class="pricing-card__price">
-                <span class="pricing-card__amount" data-monthly="179" data-yearly="139">₺179</span>
+                <span class="pricing-card__amount" data-monthly="149" data-yearly="119">₺149</span>
                 <span class="pricing-card__period">/ay</span>
               </div>
+              <p class="pricing-card__yearly-note" id="proYearlyNote" style="display:none;font-size:12px;color:var(--accent);margin-bottom:4px;">1.199₺/yıl faturalandırılır</p>
               <p class="pricing-card__desc">Öğretmenler ve öğrenciler için tam güç.</p>
             </div>
             <ul class="pricing-card__features">
@@ -598,7 +613,7 @@
               <li><i data-lucide="check" width="16" height="16"></i> Öncelikli e-posta desteği</li>
               <li><i data-lucide="check" width="16" height="16"></i> Yeni özellikler önce sizde</li>
             </ul>
-            <a href="app/auth.html?mode=register&plan=pro" class="btn btn--primary btn--full">Pro'ya Geç</a>
+            <a href="app/create.html" class="btn btn--primary btn--full">Pro'ya Geç</a>
           </div>
 
           <!-- Kurumsal -->
@@ -606,28 +621,23 @@
             <div class="pricing-card__header">
               <div class="pricing-card__plan">Kurumsal</div>
               <div class="pricing-card__price">
-                <span class="pricing-card__amount" data-monthly="449" data-yearly="359">₺449</span>
-                <span class="pricing-card__period">/ay</span>
+                <span class="pricing-card__amount" style="font-size:22px;line-height:1.2;">Fiyat<br>görüşmeye<br>göre</span>
               </div>
               <p class="pricing-card__desc">Okullar ve kurumlar için tüm özellikler.</p>
             </div>
             <ul class="pricing-card__features">
-              <li><i data-lucide="check" width="16" height="16"></i> Sınırsız belge üretimi</li>
-              <li><i data-lucide="check" width="16" height="16"></i> Belge başına 30 sayfa</li>
-              <li><i data-lucide="check" width="16" height="16"></i> Tüm dil seçenekleri</li>
-              <li><i data-lucide="check" width="16" height="16"></i> Çoklu kullanıcı yönetimi</li>
-              <li><i data-lucide="check" width="16" height="16"></i> 7/24 öncelikli destek</li>
-              <li><i data-lucide="check" width="16" height="16"></i> Özel API erişimi</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Min. <strong>10 öğretmen</strong> hesabı</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Sınırsız belge</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Tüm formatlar & diller</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Okul logosu & özel şablonlar</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Merkezi yönetim paneli</li>
+              <li><i data-lucide="check" width="16" height="16"></i> Faturalı ödeme seçeneği</li>
             </ul>
             <a href="mailto:info@egitimai.com" class="btn btn--outline btn--full">Teklif Al</a>
           </div>
 
         </div>
 
-        <div class="pricing__note reveal">
-          <i data-lucide="shield" width="16" height="16"></i>
-          Tüm ücretli planlarda 7 gün para iade garantisi. İstediğiniz zaman iptal edin.
-        </div>
       </div>
     </section>
 
@@ -638,13 +648,13 @@
           <div class="cta-banner__glow"></div>
           <div class="cta-banner__content">
             <h2>Bugün başlayın, <em>zaman kazanmaya</em> başlayın</h2>
-            <p>12.000'den fazla öğretmen ve öğrenci zaten EgitimAI kullanıyor. Siz de katılın.</p>
+            <p>Öğretmenler ve öğrenciler EgitimAI ile zaman kazanıyor. Siz de katılın.</p>
             <div class="cta-banner__actions">
-              <a href="#" class="btn btn--primary btn--lg">
+              <a href="app/create.html" class="btn btn--primary btn--lg">
                 <i data-lucide="zap"></i>
-                Ücretsiz Hesap Oluştur
+                Ücretsiz Başla
               </a>
-              <a href="#" class="btn btn--ghost btn--lg">
+              <a href="#pricing" class="btn btn--ghost btn--lg">
                 Planları Karşılaştır
                 <i data-lucide="arrow-right"></i>
               </a>

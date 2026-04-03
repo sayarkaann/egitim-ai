@@ -173,9 +173,15 @@ function initPricingToggle() {
     toggleBtn.classList.toggle('on', yearly);
     toggleBtn.setAttribute('aria-checked', yearly.toString());
 
+    const studentNote = document.getElementById('studentYearlyNote');
+    const proNote     = document.getElementById('proYearlyNote');
+    if (studentNote) studentNote.style.display = yearly ? 'block' : 'none';
+    if (proNote)     proNote.style.display     = yearly ? 'block' : 'none';
+
     amounts.forEach(el => {
       const monthly = parseInt(el.dataset.monthly, 10);
       const yearlyV = parseInt(el.dataset.yearly, 10);
+      if (isNaN(monthly) || isNaN(yearlyV)) return;
       const value   = yearly ? yearlyV : monthly;
       const formatted = value === 0 ? '₺0' : `₺${value}`;
 

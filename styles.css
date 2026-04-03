@@ -47,6 +47,9 @@
   --accent-glow: rgba(232,133,90,.2);
   --shadow:    0 4px 24px rgba(0,0,0,.1);
 }
+[data-theme="light"] .nav.scrolled {
+  background: rgba(253,249,245,.92);
+}
 
 /* ---- RESET ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
