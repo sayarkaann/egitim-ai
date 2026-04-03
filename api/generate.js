@@ -131,17 +131,23 @@ function getCurriculumHint(subject, gradeLevel) {
 
 function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject) {
   const LANG_CONFIG = {
-    tr: { name: 'Türkçe', enforce: 'Belgeyi doğal, akıcı Türkçe ile yaz. Klişe giriş cümleleri ("Bu belgede...") kullanma.\n\n' },
-    en: { name: 'English', enforce: 'CRITICAL: Write 100% in English. No Turkish anywhere.\n\n' },
-    de: { name: 'Deutsch', enforce: 'Nur auf Deutsch schreiben. Kein Türkisch.\n\n' },
-    fr: { name: 'Français', enforce: 'Écrivez entièrement en français. Pas de turc.\n\n' },
-    ar: { name: 'العربية', enforce: 'اكتب بالعربية فقط. لا تركية.\n\n' },
+    tr: { name: 'Türkçe',   enforce: 'Tüm çıktıyı doğal, akıcı Türkçe ile yaz. Klişe giriş cümleleri ("Bu belgede...") kullanma.' },
+    en: { name: 'English',  enforce: 'CRITICAL: The entire output MUST be in English only — including all headings, bullets, and explanations. The topic may be in Turkish but your response must be 100% English. No Turkish words anywhere.' },
+    de: { name: 'Deutsch',  enforce: 'WICHTIG: Die gesamte Ausgabe muss auf Deutsch sein. Das Thema kann auf Türkisch sein, aber deine Antwort muss vollständig auf Deutsch sein. Kein Türkisch.' },
+    fr: { name: 'Français', enforce: 'IMPORTANT: Toute la sortie doit être en français. Le sujet peut être en turc, mais votre réponse doit être entièrement en français. Pas de turc.' },
+    ar: { name: 'العربية',  enforce: 'مهم: يجب أن يكون كل الناتج باللغة العربية فقط. الموضوع قد يكون بالتركية لكن إجابتك يجب أن تكون بالعربية الكاملة.' },
   };
 
   const langCfg = LANG_CONFIG[language] || LANG_CONFIG.tr;
-  const notes   = extraNotes ? `\nEk talimatlar: ${extraNotes}` : '';
-  const toneMap = { formal: 'resmi', friendly: 'samimi', academic: 'akademik', simple: 'sade' };
-  const toneStr = toneMap[tone] || 'resmi';
+  const notes   = extraNotes ? `\nAdditional instructions: ${extraNotes}` : '';
+
+  const toneInstructions = {
+    formal:   'Writing style: FORMAL and institutional. Short, precise sentences. No personal expressions. Passive constructions where appropriate. Professional vocabulary.',
+    friendly: 'Writing style: FRIENDLY and warm. Active sentences, direct address. Encouraging, approachable language. Avoid overly technical terms.',
+    academic: 'Writing style: ACADEMIC. Use subject-specific terminology correctly. Objective, evidence-based writing. Structured sections with clear headings. No colloquial language. Cite facts, use logical argumentation.',
+    simple:   'Writing style: SIMPLE and clear. Short sentences, everyday language. If technical terms appear, explain them immediately in plain language.',
+  };
+  const toneStr = toneInstructions[tone] || toneInstructions.formal;
 
   // Grade level context
   const gradeLabels = {
@@ -156,9 +162,8 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
   const curriculumHint = getCurriculumHint(subject, gradeLevel);
 
   const contextBlock = [
-    gradeLabel  ? `Sınıf: ${gradeLabel}` : '',
-    subject     ? `Ders: ${subject}` : '',
-    toneStr     ? `Ton: ${toneStr}` : '',
+    gradeLabel  ? `Grade level: ${gradeLabel}` : '',
+    subject     ? `Subject: ${subject}` : '',
     curriculumHint,
   ].filter(Boolean).join('\n');
 
@@ -183,53 +188,61 @@ Dil: Anlaşılır, motive edici, öğrenci dostu`;
     const pptxAudience = isTeacher
       ? `- Slaytlar öğretmen sunumu için: her slaytta öğretim notu/ipucu ekle parantez içinde\n- Son slayt: Değerlendirme soruları veya tartışma noktaları`
       : `- Slaytlar öğrenci sunumu için: sade, görsel, akılda kalıcı\n- Son slayt: Temel kavramlar özeti veya hatırlatıcı sorular`;
-    return `${langCfg.enforce}${audienceBlock}
+    return `${langCfg.enforce}
+
+${toneStr}
+
+${audienceBlock}
 
 ${contextBlock}
 
-UYARI: İçerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı.
+IMPORTANT: Content must be appropriate for ${gradeLabel || 'the selected'} level only.
 
-"${topic}" konusunda ${pages} slaytlık sunum hazırla.${notes}
+Prepare a ${pages}-slide presentation on: "${topic}".${notes}
 
 ${pptxAudience}
 
-ZORUNLU FORMAT:
-SLAYT 1: [Başlık]
-- [Alt başlık]
+REQUIRED FORMAT:
+SLAYT 1: [Title]
+- [Subtitle]
 - [${gradeLabel}]
 
-SLAYT 2: [Bölüm Başlığı]
-- [Madde]
-- [Madde]
-- [Madde]
+SLAYT 2: [Section Title]
+- [Bullet]
+- [Bullet]
+- [Bullet]
 
-(${pages} slayta kadar devam et)
+(continue up to ${pages} slides)
 
-KURALLAR:
-- Her slayt tek konuya odaklan, max 5 madde
-- Maddeler kısa ve öz (max 10 kelime)
-- TAM OLARAK ${pages} slayt
-- Tüm metin ${langCfg.name} dilinde
-- Özel karakter, ok işareti veya markdown sembolleri kullanma`;
+RULES:
+- Each slide focuses on one topic, max 5 bullets
+- Bullets short and concise (max 10 words)
+- EXACTLY ${pages} slides
+- ALL text in ${langCfg.name}
+- No special characters, arrows or markdown symbols`;
   }
 
   /* ── PDF / WORD ── */
-  return `${langCfg.enforce}${audienceBlock}
+  return `${langCfg.enforce}
+
+${toneStr}
+
+${audienceBlock}
 
 ${contextBlock}
 
-UYARI: Sorular ve içerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı.
+IMPORTANT: Content must be appropriate for ${gradeLabel || 'the selected'} level only.
 
-"${topic}" konusunda belge hazırla. Uzunluk: yaklaşık ${pages} sayfa.${notes}
+Write a document on: "${topic}". Length: approximately ${pages} pages.${notes}
 
 FORMAT:
-# [Başlık]
-## [Bölüm]
-[İçerik]
+# [Title]
+## [Section]
+[Content]
 
-KURALLAR:
-- Sınav ise: soruları 1'den başlayarak art arda numaralandır (1. 2. 3. ...), numarayı sıfırlama, en sona cevap anahtarı ekle
-- Sadece içerik yaz, pedagojik açıklama veya meta-yorum ekleme
-- ${pages} sayfa dolduracak kadar içerik üret
-- Tüm içerik ${langCfg.name} dilinde`;
+RULES:
+- If exam/test: number questions sequentially from 1, add answer key at the end
+- Write content only, no meta-commentary or pedagogical explanations
+- Fill approximately ${pages} pages
+- CRITICAL: ALL content must be written in ${langCfg.name} — no exceptions`;
 }
