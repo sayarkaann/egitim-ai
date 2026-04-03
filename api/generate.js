@@ -162,13 +162,36 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
     curriculumHint,
   ].filter(Boolean).join('\n');
 
+  const isTeacher = audience === 'teacher';
+
+  const audienceBlock = isTeacher
+    ? `Hedef kullanıcı: ÖĞRETMEN
+Materyal türüne göre format:
+- Ders planı: Kazanımlar → Ön Bilgi Kontrolü → Öğretim Yöntemi → Etkinlikler → Değerlendirme
+- Sınav/Test: Kolay/orta/zor soru dağılımı belirt, cevap anahtarı ekle
+- Konu anlatımı: Kavramsal açıklama, sınıf içi tartışma soruları, öğretim ipuçları
+Dil: Mesleki, net, uygulanabilir`
+    : `Hedef kullanıcı: ÖĞRENCİ
+Materyal türüne göre format:
+- Konu özeti: Sade dil, temel kavramlar kutusu, akılda kalıcı örnekler
+- Ödev/Proje: Adım adım yönlendirme, ipuçları
+- Çalışma notu: Anahtar kavramlar listesi, kendi kendine test soruları
+Dil: Anlaşılır, motive edici, öğrenci dostu`;
+
   /* ── PPTX ── */
   if (type === 'pptx') {
-    return `${langCfg.enforce}${contextBlock}
+    const pptxAudience = isTeacher
+      ? `- Slaytlar öğretmen sunumu için: her slaytta öğretim notu/ipucu ekle parantez içinde\n- Son slayt: Değerlendirme soruları veya tartışma noktaları`
+      : `- Slaytlar öğrenci sunumu için: sade, görsel, akılda kalıcı\n- Son slayt: Temel kavramlar özeti veya hatırlatıcı sorular`;
+    return `${langCfg.enforce}${audienceBlock}
 
-UYARI: Sorular ve içerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı. Daha basit sınıf konuları kullanma.
+${contextBlock}
+
+UYARI: İçerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı.
 
 "${topic}" konusunda ${pages} slaytlık sunum hazırla.${notes}
+
+${pptxAudience}
 
 ZORUNLU FORMAT:
 SLAYT 1: [Başlık]
@@ -191,9 +214,11 @@ KURALLAR:
   }
 
   /* ── PDF / WORD ── */
-  return `${langCfg.enforce}${contextBlock}
+  return `${langCfg.enforce}${audienceBlock}
 
-UYARI: Sorular ve içerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı. Daha basit veya daha zor sınıf konuları kullanma.
+${contextBlock}
+
+UYARI: Sorular ve içerik YALNIZCA ${gradeLabel || 'seçilen'} seviyesine uygun olmalı.
 
 "${topic}" konusunda belge hazırla. Uzunluk: yaklaşık ${pages} sayfa.${notes}
 

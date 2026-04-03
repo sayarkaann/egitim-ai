@@ -18,10 +18,18 @@
   --text:        #f5e8dc;
   --text-2:      #a89278;
   --text-3:      #6a5038;
-  --accent:      #e8855a;
-  --accent-d:    #c96840;
-  --accent-l:    #f0a882;
-  --accent-glow: rgba(232,133,90,.28);
+  --accent:      #f07848;
+  --accent-d:    #d45e2e;
+  --accent-l:    #f5a07a;
+  --accent-glow: rgba(240,120,72,.32);
+  --teacher:     #4ade80;
+  --teacher-d:   #22c55e;
+  --teacher-l:   #86efac;
+  --teacher-glow:rgba(74,222,128,.3);
+  --student:     #fbbf24;
+  --student-d:   #f59e0b;
+  --student-l:   #fde68a;
+  --student-glow:rgba(251,191,36,.3);
   --success:     #4ade80;
   --success-bg:  rgba(74,222,128,.1);
   --warning:     #fbbf24;
@@ -677,6 +685,12 @@ em { font-style: italic; }
 .toggle-btn--word.active svg { color: #4ade80; }
 .toggle-btn--pptx.active { border-color: #fbbf24; background: rgba(251,191,36,.1); color: #fbbf24; }
 .toggle-btn--pptx.active svg { color: #fbbf24; }
+.toggle-btn--teacher.active { border-color: var(--teacher); background: rgba(74,222,128,.12); color: var(--teacher-l); }
+.toggle-btn--teacher.active svg,
+.toggle-btn--teacher.active i { color: var(--teacher); }
+.toggle-btn--student.active { border-color: var(--student); background: rgba(251,191,36,.12); color: var(--student-l); }
+.toggle-btn--student.active svg,
+.toggle-btn--student.active i { color: var(--student); }
 
 /* Range input */
 .range-group {

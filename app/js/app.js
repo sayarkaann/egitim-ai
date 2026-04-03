@@ -862,6 +862,10 @@ async function initCreatePage() {
     generatedTitle    = topic.slice(0, 60);
     generatedImageUrl = null;
 
+    if (selectedType === 'pptx') {
+      generatedImageUrl = await fetchEducationalImage(topic, language);
+    }
+
     await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, session, folderId });
   });
 
