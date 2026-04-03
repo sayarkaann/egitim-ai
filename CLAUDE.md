@@ -47,7 +47,7 @@ egitim-ai/
 | Ücretsiz   | 0₺             | 10       | 5           |
 | Öğrenci    | 79₺/ay         | 60       | 20          |
 | Pro        | 149₺/ay        | 150      | 30          |
-| Kurumsal   | Görüşmeye göre | Sınırsız | 30   |
+| Kurumsal   | Görüşmeye göre | 200      | 30   |
 
 - `FREE_DOC_LIMIT = 10` (aylık, `created_at >= ay başı` ile filtrelenir)
 - `FREE_PAGE_LIMIT = 5`

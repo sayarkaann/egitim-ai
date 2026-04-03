@@ -365,6 +365,47 @@ async function initAuthPage() {
     }
   });
 
+  // FORGOT PASSWORD
+  const forgotLink   = document.getElementById('forgotLink');
+  const forgotModal  = document.getElementById('forgotModal');
+  const forgotCancel = document.getElementById('forgotCancel');
+  const forgotSubmit = document.getElementById('forgotSubmit');
+  const forgotMsg    = document.getElementById('forgotMsg');
+
+  forgotLink?.addEventListener('click', (e) => {
+    e.preventDefault();
+    forgotModal.style.display = 'flex';
+    document.getElementById('forgotEmail').value = '';
+    forgotMsg.style.display = 'none';
+  });
+
+  forgotCancel?.addEventListener('click', () => { forgotModal.style.display = 'none'; });
+  forgotModal?.addEventListener('click', (e) => { if (e.target === forgotModal) forgotModal.style.display = 'none'; });
+
+  forgotSubmit?.addEventListener('click', async () => {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!isValidEmail(email)) {
+      forgotMsg.style.cssText = 'display:block;color:var(--danger)';
+      forgotMsg.textContent = 'Geçerli bir e-posta adresi girin.';
+      return;
+    }
+    forgotSubmit.disabled = true;
+    forgotSubmit.innerHTML = '<span class="spinner"></span>';
+    const { error } = await getSB().auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/app/auth.html?reset=1'
+    });
+    forgotSubmit.disabled = false;
+    forgotSubmit.innerHTML = 'Bağlantı Gönder';
+    if (error) {
+      forgotMsg.style.cssText = 'display:block;color:var(--danger)';
+      forgotMsg.textContent = error.message;
+    } else {
+      forgotMsg.style.cssText = 'display:block;color:var(--success)';
+      forgotMsg.textContent = 'Sıfırlama bağlantısı e-postanıza gönderildi!';
+      setTimeout(() => { forgotModal.style.display = 'none'; }, 3000);
+    }
+  });
+
   document.querySelectorAll('[data-action="google-auth"]').forEach(btn => {
     btn.addEventListener('click', () => showToast('Google girişi yakında aktif olacak.', 'info'));
   });

@@ -170,6 +170,8 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
     de: { name: 'Deutsch',  enforce: 'WICHTIG: Die gesamte Ausgabe muss auf Deutsch sein. Das Thema kann auf Türkisch sein, aber deine Antwort muss vollständig auf Deutsch sein. Kein Türkisch.' },
     fr: { name: 'Français', enforce: 'IMPORTANT: Toute la sortie doit être en français. Le sujet peut être en turc, mais votre réponse doit être entièrement en français. Pas de turc.' },
     ar: { name: 'العربية',  enforce: 'مهم: يجب أن يكون كل الناتج باللغة العربية فقط. الموضوع قد يكون بالتركية لكن إجابتك يجب أن تكون بالعربية الكاملة.' },
+    es: { name: 'Español',  enforce: 'IMPORTANTE: Todo el contenido debe estar en español únicamente. El tema puede estar en turco pero tu respuesta debe ser 100% en español.' },
+    ru: { name: 'Русский',  enforce: 'ВАЖНО: Весь контент должен быть исключительно на русском языке. Тема может быть на турецком, но ответ должен быть полностью на русском.' },
   };
 
   const langCfg = LANG_CONFIG[language] || LANG_CONFIG.tr;
