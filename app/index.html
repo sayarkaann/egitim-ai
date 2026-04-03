@@ -30,42 +30,42 @@
     </div>
 
     <nav class="sidebar__nav">
-      <div class="sidebar__section-label">Genel</div>
+      <div class="sidebar__section-label" data-i18n="nav_section_general">Genel</div>
       <a href="index.html" class="sidebar__link sidebar__link--active">
         <i data-lucide="layout-dashboard"></i>
-        <span>Dashboard</span>
+        <span data-i18n="nav_dashboard">Dashboard</span>
       </a>
       <a href="create.html" class="sidebar__link">
         <i data-lucide="plus-circle"></i>
-        <span>Yeni Oluştur</span>
+        <span data-i18n="nav_new_create">Yeni Oluştur</span>
       </a>
 
-      <div class="sidebar__section-label">Kütüphane</div>
+      <div class="sidebar__section-label" data-i18n="nav_section_library">Kütüphane</div>
       <a href="history.html" class="sidebar__link">
         <i data-lucide="clock"></i>
-        <span>Geçmiş</span>
+        <span data-i18n="nav_history">Geçmiş</span>
       </a>
       <a href="templates.html" class="sidebar__link">
         <i data-lucide="bookmark"></i>
-        <span>Şablonlar</span>
+        <span data-i18n="nav_templates">Şablonlar</span>
       </a>
       <a href="folders.html" class="sidebar__link">
         <i data-lucide="folder"></i>
-        <span>Klasörlerim</span>
+        <span data-i18n="nav_folders">Klasörlerim</span>
       </a>
 
-      <div class="sidebar__section-label">Hesap</div>
+      <div class="sidebar__section-label" data-i18n="nav_section_account">Hesap</div>
       <a href="pricing.html" class="sidebar__link">
         <i data-lucide="crown"></i>
-        <span>Planlar</span>
+        <span data-i18n="nav_pricing">Planlar</span>
       </a>
       <a href="settings.html" class="sidebar__link">
         <i data-lucide="settings"></i>
-        <span>Ayarlar</span>
+        <span data-i18n="nav_settings">Ayarlar</span>
       </a>
       <a href="help.html" class="sidebar__link">
         <i data-lucide="help-circle"></i>
-        <span>Yardım</span>
+        <span data-i18n="nav_help">Yardım</span>
       </a>
     </nav>
 
@@ -74,9 +74,9 @@
         <div class="sidebar__avatar" data-user-avatar>?</div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name" data-user-name>Yükleniyor...</div>
-          <div class="sidebar__user-plan" data-user-plan>Ücretsiz Plan</div>
+          <div class="sidebar__user-plan" data-user-plan data-i18n="free_plan">Ücretsiz Plan</div>
         </div>
-        <button class="btn btn--icon" data-action="logout" title="Çıkış Yap">
+        <button class="btn btn--icon" data-action="logout" data-i18n-title="nav_logout" title="Çıkış Yap">
           <i data-lucide="log-out"></i>
         </button>
       </div>
@@ -92,7 +92,7 @@
       <div class="topbar__breadcrumb">
         <span>EgitimAI</span>
         <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <span style="color:var(--text)">Dashboard</span>
+        <span style="color:var(--text)" data-i18n="nav_dashboard">Dashboard</span>
       </div>
     </div>
     <div class="topbar__right">
@@ -105,7 +105,7 @@
       </span>
       <a href="create.html" class="btn btn--primary btn--sm">
         <i data-lucide="plus"></i>
-        Yeni Belge
+        <span data-i18n="nav_new_create">Yeni Belge</span>
       </a>
     </div>
   </header>
@@ -116,7 +116,7 @@
     <!-- Greeting -->
     <div class="dashboard__greeting fade-up">
       <h1>Merhaba, <span data-user-first>kullanıcı</span>! 👋</h1>
-      <p>Bugün ne oluşturmak istersiniz?</p>
+      <p data-i18n="dash_greeting_sub">Bugün ne oluşturmak istersiniz?</p>
     </div>
 
     <!-- Stats -->
@@ -124,22 +124,22 @@
       <div class="stat-card fade-up fade-up--1">
         <div class="stat-card__icon"><i data-lucide="file-text"></i></div>
         <div class="stat-card__value" data-target="24" id="statDocs">0</div>
-        <div class="stat-card__label">Oluşturulan Belge</div>
+        <div class="stat-card__label" data-i18n="stat_docs">Oluşturulan Belge</div>
       </div>
       <div class="stat-card fade-up fade-up--2">
         <div class="stat-card__icon" style="background:rgba(74,222,128,.1);color:#4ade80;"><i data-lucide="download"></i></div>
         <div class="stat-card__value" data-target="18" id="statDownloads">0</div>
-        <div class="stat-card__label">İndirilen Dosya</div>
+        <div class="stat-card__label" data-i18n="stat_downloads">İndirilen Dosya</div>
       </div>
       <div class="stat-card fade-up fade-up--3">
         <div class="stat-card__icon" style="background:rgba(251,191,36,.1);color:#fbbf24;"><i data-lucide="clock"></i></div>
         <div class="stat-card__value" data-target="3" id="statHours">0</div>
-        <div class="stat-card__label">Tasarruf Edilen Saat</div>
+        <div class="stat-card__label" data-i18n="stat_hours">Tasarruf Edilen Saat</div>
       </div>
       <div class="stat-card fade-up fade-up--4">
         <div class="stat-card__icon" style="background:rgba(232,133,90,.1);color:#e8855a;"><i data-lucide="file-check"></i></div>
         <div class="stat-card__value" id="statRemaining">—</div>
-        <div class="stat-card__label">Kalan Belge Hakkı</div>
+        <div class="stat-card__label" data-i18n="stat_remaining">Kalan Belge Hakkı</div>
       </div>
     </div>
 
@@ -147,7 +147,7 @@
     <div class="fade-up fade-up--2">
       <p class="section-title">
         <i data-lucide="plus-circle"></i>
-        Yeni Belge Oluştur
+        <span data-i18n="new_doc_section">Yeni Belge Oluştur</span>
       </p>
       <div class="create-cards">
         <a href="create.html?type=pdf" class="create-card create-card--pdf">
@@ -181,7 +181,7 @@
     <div class="fade-up fade-up--3">
       <p class="section-title" style="margin-bottom:14px;">
         <i data-lucide="clock"></i>
-        Son Oluşturulan Belgeler
+        <span data-i18n="recent_docs">Son Oluşturulan Belgeler</span>
       </p>
 
       <div class="docs-table">
@@ -202,7 +202,7 @@
           <div class="docs-table__size">142 KB</div>
           <div class="docs-table__date">31 Mar 2025</div>
           <div class="docs-table__actions">
-            <button class="btn btn--icon btn--ghost" title="İndir" data-action="download"><i data-lucide="download"></i></button>
+            <button class="btn btn--icon btn--ghost" data-i18n-title="download" title="İndir" data-action="download"><i data-lucide="download"></i></button>
           </div>
         </div>
 
@@ -215,7 +215,7 @@
           <div class="docs-table__size">2.4 MB</div>
           <div class="docs-table__date">30 Mar 2025</div>
           <div class="docs-table__actions">
-            <button class="btn btn--icon btn--ghost" title="İndir" data-action="download"><i data-lucide="download"></i></button>
+            <button class="btn btn--icon btn--ghost" data-i18n-title="download" title="İndir" data-action="download"><i data-lucide="download"></i></button>
           </div>
         </div>
 
@@ -228,7 +228,7 @@
           <div class="docs-table__size">88 KB</div>
           <div class="docs-table__date">28 Mar 2025</div>
           <div class="docs-table__actions">
-            <button class="btn btn--icon btn--ghost" title="İndir" data-action="download"><i data-lucide="download"></i></button>
+            <button class="btn btn--icon btn--ghost" data-i18n-title="download" title="İndir" data-action="download"><i data-lucide="download"></i></button>
           </div>
         </div>
 
@@ -241,7 +241,7 @@
           <div class="docs-table__size">218 KB</div>
           <div class="docs-table__date">27 Mar 2025</div>
           <div class="docs-table__actions">
-            <button class="btn btn--icon btn--ghost" title="İndir" data-action="download"><i data-lucide="download"></i></button>
+            <button class="btn btn--icon btn--ghost" data-i18n-title="download" title="İndir" data-action="download"><i data-lucide="download"></i></button>
           </div>
         </div>
 
@@ -254,7 +254,7 @@
           <div class="docs-table__size">3.1 MB</div>
           <div class="docs-table__date">25 Mar 2025</div>
           <div class="docs-table__actions">
-            <button class="btn btn--icon btn--ghost" title="İndir" data-action="download"><i data-lucide="download"></i></button>
+            <button class="btn btn--icon btn--ghost" data-i18n-title="download" title="İndir" data-action="download"><i data-lucide="download"></i></button>
           </div>
         </div>
 
@@ -266,6 +266,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <!-- i18n MUST load before app.js -->
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initI18n();
+    });
+  </script>
 </body>
 </html>

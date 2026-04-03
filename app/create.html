@@ -30,42 +30,42 @@
     </div>
 
     <nav class="sidebar__nav">
-      <div class="sidebar__section-label">Genel</div>
+      <div class="sidebar__section-label" data-i18n="nav_section_general">Genel</div>
       <a href="index.html" class="sidebar__link">
         <i data-lucide="layout-dashboard"></i>
-        <span>Dashboard</span>
+        <span data-i18n="nav_dashboard">Dashboard</span>
       </a>
       <a href="create.html" class="sidebar__link sidebar__link--active">
         <i data-lucide="plus-circle"></i>
-        <span>Yeni Oluştur</span>
+        <span data-i18n="nav_new_create">Yeni Oluştur</span>
       </a>
 
-      <div class="sidebar__section-label">Kütüphane</div>
+      <div class="sidebar__section-label" data-i18n="nav_section_library">Kütüphane</div>
       <a href="history.html" class="sidebar__link">
         <i data-lucide="clock"></i>
-        <span>Geçmiş</span>
+        <span data-i18n="nav_history">Geçmiş</span>
       </a>
       <a href="templates.html" class="sidebar__link">
         <i data-lucide="bookmark"></i>
-        <span>Şablonlar</span>
+        <span data-i18n="nav_templates">Şablonlar</span>
       </a>
       <a href="folders.html" class="sidebar__link">
         <i data-lucide="folder"></i>
-        <span>Klasörlerim</span>
+        <span data-i18n="nav_folders">Klasörlerim</span>
       </a>
 
-      <div class="sidebar__section-label">Hesap</div>
+      <div class="sidebar__section-label" data-i18n="nav_section_account">Hesap</div>
       <a href="pricing.html" class="sidebar__link">
         <i data-lucide="crown"></i>
-        <span>Planlar</span>
+        <span data-i18n="nav_pricing">Planlar</span>
       </a>
       <a href="settings.html" class="sidebar__link">
         <i data-lucide="settings"></i>
-        <span>Ayarlar</span>
+        <span data-i18n="nav_settings">Ayarlar</span>
       </a>
       <a href="help.html" class="sidebar__link">
         <i data-lucide="help-circle"></i>
-        <span>Yardım</span>
+        <span data-i18n="nav_help">Yardım</span>
       </a>
     </nav>
 
@@ -74,9 +74,9 @@
         <div class="sidebar__avatar" data-user-avatar>?</div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name" data-user-name>Yükleniyor...</div>
-          <div class="sidebar__user-plan" data-user-plan>Ücretsiz Plan</div>
+          <div class="sidebar__user-plan" data-user-plan data-i18n="free_plan">Ücretsiz Plan</div>
         </div>
-        <button class="btn btn--icon" data-action="logout" title="Çıkış Yap">
+        <button class="btn btn--icon" data-action="logout" data-i18n-title="nav_logout" title="Çıkış Yap">
           <i data-lucide="log-out"></i>
         </button>
       </div>
@@ -92,9 +92,9 @@
       <div class="topbar__breadcrumb">
         <span>EgitimAI</span>
         <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <a href="index.html" style="color:var(--text-2)">Dashboard</a>
+        <a href="index.html" style="color:var(--text-2)" data-i18n="nav_dashboard">Dashboard</a>
         <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <span style="color:var(--text)">Yeni Oluştur</span>
+        <span style="color:var(--text)" data-i18n="nav_new_create">Yeni Oluştur</span>
       </div>
     </div>
     <div class="topbar__right">
@@ -113,8 +113,8 @@
     <div class="create-layout">
 
       <div class="create-header fade-up">
-        <h1>Belge Oluştur</h1>
-        <p>Konuyu girin, ayarları seçin ve yapay zeka sizin için profesyonel bir belge hazırlasın.</p>
+        <h1 data-i18n="create_title">Belge Oluştur</h1>
+        <p data-i18n="create_subtitle">Konuyu girin, ayarları seçin ve yapay zeka sizin için profesyonel bir belge hazırlasın.</p>
       </div>
 
       <form id="createForm" novalidate>
@@ -123,27 +123,32 @@
         <div class="form-card fade-up fade-up--1">
           <div class="form-card__title">
             <i data-lucide="pencil"></i>
-            Konu / Başlık
+            <span data-i18n="topic_label">Konu / Başlık</span>
           </div>
           <div class="form-group">
             <input
               type="text"
               id="topicInput"
               class="form-input form-input--lg"
+              data-i18n-placeholder="topic_label"
               placeholder="Örn: 8. sınıf matematik kesirler konusu sınavı, 20 soru"
               autocomplete="off"
               maxlength="200"
             />
             <div style="display:flex;justify-content:space-between;margin-top:6px;">
-              <span class="text-muted text-sm">Ne oluşturmak istediğinizi kısaca açıklayın</span>
+              <span class="text-muted text-sm" data-i18n="topic_hint">Ne oluşturmak istediğinizi kısaca açıklayın</span>
               <span class="text-muted text-sm" id="topicCharCount">0 / 200</span>
             </div>
           </div>
           <div class="form-group" style="margin-top:4px;">
-            <label class="form-label">Ek açıklama <span style="color:var(--text-3);font-weight:400;">(isteğe bağlı)</span></label>
+            <label class="form-label">
+              <span data-i18n="extra_notes_label">Ek Açıklama</span>
+              <span style="color:var(--text-3);font-weight:400;"> (<span data-i18n="extra_notes_optional">isteğe bağlı</span>)</span>
+            </label>
             <textarea
               id="extraNotes"
               class="form-textarea"
+              data-i18n-placeholder="extra_notes_label"
               placeholder="Belge hakkında ek notlar, özel istekler veya kapsanmasını istediğiniz konular..."
               rows="3"
             ></textarea>
@@ -154,20 +159,20 @@
         <div class="form-card fade-up fade-up--2">
           <div class="form-card__title">
             <i data-lucide="file"></i>
-            Belge Türü
+            <span data-i18n="doc_type_label">Belge Türü</span>
           </div>
           <div class="toggle-group">
             <button type="button" class="toggle-btn toggle-btn--pdf active" data-doc-type="pdf">
               <i data-lucide="file-text"></i>
-              PDF
+              <span data-i18n="pdf">PDF</span>
             </button>
             <button type="button" class="toggle-btn toggle-btn--word" data-doc-type="word">
               <i data-lucide="file-type"></i>
-              Word (DOCX)
+              <span data-i18n="word_docx">Word (DOCX)</span>
             </button>
             <button type="button" class="toggle-btn toggle-btn--pptx" data-doc-type="pptx">
               <i data-lucide="presentation"></i>
-              PowerPoint
+              <span data-i18n="powerpoint">PowerPoint</span>
             </button>
           </div>
         </div>
@@ -176,24 +181,24 @@
         <div class="form-card fade-up fade-up--3">
           <div class="form-card__title">
             <i data-lucide="users"></i>
-            Hedef Kitle
+            <span data-i18n="audience_label">Hedef Kitle</span>
           </div>
           <div class="form-group">
             <div class="toggle-group">
               <button type="button" class="toggle-btn toggle-btn--teacher active" data-audience="teacher">
                 <i data-lucide="graduation-cap"></i>
-                Öğretmen
+                <span data-i18n="teacher">Öğretmen</span>
               </button>
               <button type="button" class="toggle-btn toggle-btn--student" data-audience="student">
                 <i data-lucide="user"></i>
-                Öğrenci
+                <span data-i18n="student">Öğrenci</span>
               </button>
             </div>
           </div>
 
           <div class="options-grid">
             <div class="form-group">
-              <label class="form-label" for="docSubject">Ders</label>
+              <label class="form-label" for="docSubject" data-i18n="subject_label">Ders</label>
               <select id="docSubject" class="form-select">
                 <option value="">Genel / Belirtme</option>
                 <option value="Matematik">Matematik</option>
@@ -218,9 +223,9 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="gradeLevel">Sınıf Seviyesi</label>
+              <label class="form-label" for="gradeLevel" data-i18n="grade_label">Sınıf Seviyesi</label>
               <select id="gradeLevel" class="form-select">
-                <option value="">Seçin...</option>
+                <option value="" data-i18n="select_placeholder">Seçin...</option>
                 <optgroup label="İlkokul">
                   <option value="1">1. Sınıf</option>
                   <option value="2">2. Sınıf</option>
@@ -247,7 +252,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="docLanguage">Dil</label>
+              <label class="form-label" for="docLanguage" data-i18n="language_label">Dil</label>
               <select id="docLanguage" class="form-select">
                 <option value="tr" selected>Türkçe</option>
                 <option value="en">İngilizce</option>
@@ -260,19 +265,19 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="docTone">Ton</label>
+              <label class="form-label" for="docTone" data-i18n="tone_label">Ton</label>
               <select id="docTone" class="form-select">
-                <option value="formal" selected>Resmi</option>
-                <option value="friendly">Samimi</option>
-                <option value="academic">Akademik</option>
-                <option value="simple">Basit</option>
+                <option value="formal" selected data-i18n="tone_formal">Resmi</option>
+                <option value="friendly" data-i18n="tone_friendly">Samimi</option>
+                <option value="academic" data-i18n="tone_academic">Akademik</option>
+                <option value="simple" data-i18n="tone_simple">Sade</option>
               </select>
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="pageCount">
-              Sayfa Sayısı: <span id="pageCountValue" style="color:var(--accent);">5</span>
+              <span data-i18n="page_count_label">Sayfa Sayısı</span>: <span id="pageCountValue" style="color:var(--accent);">5</span>
             </label>
             <div class="range-group">
               <span class="text-muted text-sm">1</span>
@@ -289,7 +294,8 @@
           <div class="form-group">
             <label class="form-label" for="docFolder">
               <i data-lucide="folder" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>
-              Klasöre Kaydet <span style="color:var(--text-3);font-weight:400;">(isteğe bağlı)</span>
+              <span data-i18n="folder_label">Klasöre Kaydet</span>
+              <span style="color:var(--text-3);font-weight:400;"> (<span data-i18n="extra_notes_optional">isteğe bağlı</span>)</span>
             </label>
             <select id="docFolder" class="form-select">
               <option value="">Klasör seçme</option>
@@ -301,7 +307,7 @@
         <div class="fade-up fade-up--4" style="margin-bottom:16px;">
           <button type="submit" id="generateBtn" class="btn btn--primary btn--lg btn--full">
             <i data-lucide="sparkles"></i>
-            Belge Oluştur
+            <span data-i18n="generate_btn">Belge Oluştur</span>
           </button>
           <p class="text-muted text-sm" style="text-align:center;margin-top:10px;">
             Oluşturma işlemi 10-30 saniye sürebilir.
@@ -314,7 +320,7 @@
       <div class="generation-panel fade-up" id="generationPanel">
         <div class="generation-panel__title">
           <span class="spinner"></span>
-          Belgeniz Oluşturuluyor
+          <span data-i18n="generating_title">Belgeniz Oluşturuluyor</span>
         </div>
 
         <div class="progress-bar-wrap">
@@ -348,21 +354,21 @@
         <div class="generation-result" id="generationResult">
           <div class="generation-result__title">
             <i data-lucide="check-circle"></i>
-            <span id="resultTitle">Belge hazır!</span>
+            <span id="resultTitle" data-i18n="doc_ready">Belge hazır!</span>
           </div>
           <div class="generation-result__meta" id="resultMeta"></div>
           <div class="generation-result__actions">
             <button class="btn btn--primary" data-action="download">
               <i data-lucide="download"></i>
-              İndir
+              <span data-i18n="download">İndir</span>
             </button>
             <button class="btn btn--ghost" data-action="download">
               <i data-lucide="eye"></i>
-              Önizle
+              <span data-i18n="preview">Önizle</span>
             </button>
-            <button class="btn btn--ghost" onclick="document.getElementById('createForm').reset(); document.getElementById('generationPanel').classList.remove('visible'); document.getElementById('generationResult').classList.remove('visible'); document.getElementById('progressFill').style.width='0%'; document.querySelectorAll('.generation-step').forEach(s=>s.classList.remove('active','done')); document.getElementById('generateBtn').disabled=false; document.getElementById('generateBtn').innerHTML='<i data-lucide=\'sparkles\'></i> Belge Oluştur'; lucide.createIcons();">
+            <button class="btn btn--ghost" onclick="document.getElementById('createForm').reset(); document.getElementById('generationPanel').classList.remove('visible'); document.getElementById('generationResult').classList.remove('visible'); document.getElementById('progressFill').style.width='0%'; document.querySelectorAll('.generation-step').forEach(s=>s.classList.remove('active','done')); document.getElementById('generateBtn').disabled=false; document.getElementById('generateBtn').querySelector('[data-i18n]').textContent = t('generate_btn'); lucide.createIcons();">
               <i data-lucide="refresh-cw"></i>
-              Yeni Oluştur
+              <span data-i18n="new_create">Yeni Oluştur</span>
             </button>
           </div>
         </div>
@@ -374,10 +380,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <!-- i18n MUST load before app.js -->
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
   <script>
-    // Character counter for topic
     document.addEventListener('DOMContentLoaded', () => {
+      // Init i18n
+      initI18n();
+
+      // Character counter for topic
       const topicInput = document.getElementById('topicInput');
       const charCount  = document.getElementById('topicCharCount');
       if (topicInput && charCount) {

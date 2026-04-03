@@ -8,6 +8,84 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles/app.css?v=3" />
+  <style>
+    /* ── Language Picker ── */
+    .lang-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-card);
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .18s, color .18s, background .18s;
+      font-family: inherit;
+    }
+    .lang-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .lang-btn.active {
+      border-color: var(--accent);
+      background: rgba(232,133,90,.12);
+      color: var(--accent);
+    }
+    .lang-btn .lang-flag {
+      font-size: 16px;
+      line-height: 1;
+    }
+    /* ── Theme Toggle ── */
+    .theme-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-card);
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .18s, color .18s, background .18s;
+      font-family: inherit;
+    }
+    .theme-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .theme-btn.active {
+      border-color: var(--accent);
+      background: rgba(232,133,90,.12);
+      color: var(--accent);
+    }
+    .settings-layout { display: flex; flex-direction: column; gap: 20px; max-width: 680px; }
+    .lang-saved-toast {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #4ade80;
+      margin-top: 10px;
+    }
+    .lang-saved-toast.visible { display: inline-flex; }
+  </style>
 </head>
 <body id="settingsPage">
 
@@ -26,26 +104,26 @@
       <span class="sidebar__logo-text">EgitimAI</span>
     </div>
     <nav class="sidebar__nav">
-      <div class="sidebar__section-label">Genel</div>
-      <a href="index.html" class="sidebar__link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
-      <a href="create.html" class="sidebar__link"><i data-lucide="plus-circle"></i><span>Yeni Oluştur</span></a>
-      <div class="sidebar__section-label">Kütüphane</div>
-      <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span>Geçmiş</span></a>
-      <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
-      <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
-      <div class="sidebar__section-label">Hesap</div>
-      <a href="pricing.html" class="sidebar__link"><i data-lucide="crown"></i><span>Planlar</span></a>
-      <a href="settings.html" class="sidebar__link sidebar__link--active"><i data-lucide="settings"></i><span>Ayarlar</span></a>
-      <a href="help.html" class="sidebar__link"><i data-lucide="help-circle"></i><span>Yardım</span></a>
+      <div class="sidebar__section-label" data-i18n="nav_section_general">Genel</div>
+      <a href="index.html" class="sidebar__link"><i data-lucide="layout-dashboard"></i><span data-i18n="nav_dashboard">Dashboard</span></a>
+      <a href="create.html" class="sidebar__link"><i data-lucide="plus-circle"></i><span data-i18n="nav_new_create">Yeni Oluştur</span></a>
+      <div class="sidebar__section-label" data-i18n="nav_section_library">Kütüphane</div>
+      <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span data-i18n="nav_history">Geçmiş</span></a>
+      <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span data-i18n="nav_templates">Şablonlar</span></a>
+      <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span data-i18n="nav_folders">Klasörlerim</span></a>
+      <div class="sidebar__section-label" data-i18n="nav_section_account">Hesap</div>
+      <a href="pricing.html" class="sidebar__link"><i data-lucide="crown"></i><span data-i18n="nav_pricing">Planlar</span></a>
+      <a href="settings.html" class="sidebar__link sidebar__link--active"><i data-lucide="settings"></i><span data-i18n="nav_settings">Ayarlar</span></a>
+      <a href="help.html" class="sidebar__link"><i data-lucide="help-circle"></i><span data-i18n="nav_help">Yardım</span></a>
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
         <div class="sidebar__avatar" data-user-avatar>?</div>
         <div class="sidebar__user-info">
-          <div class="sidebar__user-name" data-user-name>Yükleniyor...</div>
-          <div class="sidebar__user-plan" data-user-plan>Ücretsiz Plan</div>
+          <div class="sidebar__user-name" data-user-name data-i18n-dynamic="user-name">Yükleniyor...</div>
+          <div class="sidebar__user-plan" data-user-plan data-i18n="free_plan">Ücretsiz Plan</div>
         </div>
-        <button class="btn btn--icon" data-action="logout" title="Çıkış Yap"><i data-lucide="log-out"></i></button>
+        <button class="btn btn--icon" data-action="logout" data-i18n-title="nav_logout" title="Çıkış Yap"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </aside>
@@ -56,70 +134,123 @@
       <div class="topbar__breadcrumb">
         <span>EgitimAI</span>
         <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <span style="color:var(--text)">Ayarlar</span>
+        <span style="color:var(--text)" data-i18n="nav_settings">Ayarlar</span>
       </div>
+    </div>
+    <div class="topbar__right">
+      <button class="theme-toggle" id="themeToggle" title="Tema değiştir">
+        <i data-lucide="sun"></i>
+      </button>
     </div>
   </header>
 
   <main class="app-content">
     <div class="create-header fade-up">
-      <h1>Ayarlar</h1>
-      <p>Hesap bilgilerinizi yönetin ve planınızı görüntüleyin.</p>
+      <h1 data-i18n="settings_title">Ayarlar</h1>
+      <p data-i18n="settings_subtitle">Hesap bilgilerinizi ve arayüz tercihlerinizi yönetin.</p>
     </div>
 
     <div class="settings-layout">
 
       <!-- Profil -->
       <div class="form-card fade-up fade-up--1">
-        <div class="form-card__title"><i data-lucide="user"></i> Profil Bilgileri</div>
+        <div class="form-card__title"><i data-lucide="user"></i> <span data-i18n="profile_section">Profil Bilgileri</span></div>
         <form id="settingsForm" novalidate>
           <div class="form-group form-group--inline">
             <div>
-              <label class="form-label" for="settingsFirst">Ad</label>
-              <input type="text" id="settingsFirst" class="form-input" placeholder="Adınız" />
+              <label class="form-label" for="settingsFirst" data-i18n="first_name">Ad</label>
+              <input type="text" id="settingsFirst" class="form-input" data-i18n-placeholder="first_name" placeholder="Adınız" />
             </div>
             <div>
-              <label class="form-label" for="settingsLast">Soyad</label>
-              <input type="text" id="settingsLast" class="form-input" placeholder="Soyadınız" />
+              <label class="form-label" for="settingsLast" data-i18n="last_name">Soyad</label>
+              <input type="text" id="settingsLast" class="form-input" data-i18n-placeholder="last_name" placeholder="Soyadınız" />
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="settingsEmail">E-posta</label>
+            <label class="form-label" for="settingsEmail" data-i18n="email_label">E-posta</label>
             <input type="email" id="settingsEmail" class="form-input" disabled style="opacity:.6;cursor:not-allowed;" />
-            <p class="text-muted text-sm" style="margin-top:6px;">E-posta adresi değiştirilemez.</p>
+            <p class="text-muted text-sm" style="margin-top:6px;" data-i18n="email_no_change">E-posta adresi değiştirilemez.</p>
           </div>
           <button type="submit" class="btn btn--primary">
-            <i data-lucide="save"></i> Kaydet
+            <i data-lucide="save"></i> <span data-i18n="save">Kaydet</span>
           </button>
         </form>
       </div>
 
-      <!-- Plan -->
+      <!-- Arayüz Dili -->
       <div class="form-card fade-up fade-up--2">
-        <div class="form-card__title"><i data-lucide="crown"></i> Plan Kullanımı</div>
+        <div class="form-card__title"><i data-lucide="globe"></i> <span data-i18n="language_section">Arayüz Dili</span></div>
+        <p class="text-muted text-sm" style="margin-bottom:4px;">Seçtiğiniz dil tüm sayfalarda geçerli olacaktır.</p>
+        <div class="lang-grid" id="langGrid">
+          <button class="lang-btn" data-lang="tr">
+            <span class="lang-flag">🇹🇷</span> Türkçe
+          </button>
+          <button class="lang-btn" data-lang="en">
+            <span class="lang-flag">🇬🇧</span> English
+          </button>
+          <button class="lang-btn" data-lang="de">
+            <span class="lang-flag">🇩🇪</span> Deutsch
+          </button>
+          <button class="lang-btn" data-lang="fr">
+            <span class="lang-flag">🇫🇷</span> Français
+          </button>
+          <button class="lang-btn" data-lang="ar">
+            <span class="lang-flag">🇸🇦</span> العربية
+          </button>
+          <button class="lang-btn" data-lang="es">
+            <span class="lang-flag">🇪🇸</span> Español
+          </button>
+          <button class="lang-btn" data-lang="ru">
+            <span class="lang-flag">🇷🇺</span> Русский
+          </button>
+        </div>
+        <div class="lang-saved-toast" id="langSavedToast">
+          <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+          <span data-i18n="lang_saved">Dil kaydedildi</span>
+        </div>
+      </div>
+
+      <!-- Tema -->
+      <div class="form-card fade-up fade-up--3">
+        <div class="form-card__title"><i data-lucide="palette"></i> <span data-i18n="theme_section">Tema</span></div>
+        <div class="theme-row" id="themeRow">
+          <button class="theme-btn" id="themeDarkBtn">
+            <i data-lucide="moon" style="width:15px;height:15px;"></i>
+            <span data-i18n="theme_dark">Koyu</span>
+          </button>
+          <button class="theme-btn" id="themeLightBtn">
+            <i data-lucide="sun" style="width:15px;height:15px;"></i>
+            <span data-i18n="theme_light">Açık</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Plan -->
+      <div class="form-card fade-up fade-up--4">
+        <div class="form-card__title"><i data-lucide="crown"></i> <span data-i18n="plan_section">Plan Kullanımı</span></div>
         <div class="settings-plan">
-          <div class="settings-plan__badge">Ücretsiz Plan</div>
-          <p class="text-muted text-sm" style="margin:12px 0 8px;">Bu ayın belge kullanımı</p>
+          <div class="settings-plan__badge" data-i18n="free_plan">Ücretsiz Plan</div>
+          <p class="text-muted text-sm" style="margin:12px 0 8px;" data-i18n="this_month">Bu Ay</p>
           <div class="plan-usage-bar">
             <div class="plan-usage-bar__fill" id="planUsageBar"></div>
           </div>
-          <p class="text-muted text-sm" style="margin-top:6px;" id="planUsageText">— / 3 belge kullanıldı</p>
+          <p class="text-muted text-sm" style="margin-top:6px;" id="planUsageText">— / 10 belge kullanıldı</p>
           <a href="pricing.html" class="btn btn--primary btn--sm" style="margin-top:16px;display:inline-flex;">
-            <i data-lucide="arrow-up-right"></i> Pro Plana Geç
+            <i data-lucide="arrow-up-right"></i> <span data-i18n="upgrade_pro">Pro Plana Geç</span>
           </a>
         </div>
       </div>
 
       <!-- Tehlikeli alan -->
-      <div class="form-card fade-up fade-up--3" style="border-color:rgba(248,113,113,.2);">
-        <div class="form-card__title" style="color:var(--danger);"><i data-lucide="alert-triangle"></i> Hesap</div>
+      <div class="form-card fade-up fade-up--5" style="border-color:rgba(248,113,113,.2);">
+        <div class="form-card__title" style="color:var(--danger);"><i data-lucide="alert-triangle"></i> <span data-i18n="account_section">Hesap</span></div>
         <p class="text-muted text-sm" style="margin-bottom:16px;">Hesabınızdan çıkış yapın veya destek için iletişime geçin.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn btn--ghost" data-action="logout">
-            <i data-lucide="log-out"></i> Çıkış Yap
+            <i data-lucide="log-out"></i> <span data-i18n="nav_logout">Çıkış Yap</span>
           </button>
           <a href="help.html" class="btn btn--ghost">
-            <i data-lucide="help-circle"></i> Destek Al
+            <i data-lucide="help-circle"></i> <span data-i18n="get_support">Destek Al</span>
           </a>
         </div>
       </div>
@@ -129,6 +260,61 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- i18n MUST load before app.js -->
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Init translations
+      const currentLang = initI18n();
+
+      // Lucide icons
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Mark active language button
+      function updateLangButtons(lang) {
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+      }
+      updateLangButtons(currentLang);
+
+      // Language button click handlers
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lang = btn.dataset.lang;
+          setLanguage(lang);
+          updateLangButtons(lang);
+          // Re-init lucide after DOM text changes
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+          // Show toast
+          const toast = document.getElementById('langSavedToast');
+          toast.classList.add('visible');
+          setTimeout(() => toast.classList.remove('visible'), 2200);
+        });
+      });
+
+      // Theme buttons
+      const isDark = () => document.documentElement.classList.contains('dark') ||
+                           !document.documentElement.classList.contains('light');
+      function updateThemeButtons() {
+        const dark = document.documentElement.getAttribute('data-theme') !== 'light';
+        document.getElementById('themeDarkBtn').classList.toggle('active', dark);
+        document.getElementById('themeLightBtn').classList.toggle('active', !dark);
+      }
+      updateThemeButtons();
+
+      document.getElementById('themeDarkBtn').addEventListener('click', () => {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        updateThemeButtons();
+      });
+      document.getElementById('themeLightBtn').addEventListener('click', () => {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+        updateThemeButtons();
+      });
+    });
+  </script>
 </body>
 </html>
