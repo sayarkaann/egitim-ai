@@ -1061,7 +1061,7 @@ async function generatePDF(title, content, imageUrl) {
 <body>
 ${imgHtml}
 ${markdownToHtml(content)}
-<div class="footer">EgitimAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</div>
+<div class="footer">NotioAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</div>
 <script>setTimeout(() => { window.print(); }, 600);<\/script>
 </body>
 </html>`;
@@ -1094,7 +1094,7 @@ async function generateWord(title, content, imageUrl) {
 <body>
 ${imgHtml}
 ${markdownToHtml(content)}
-<p class="footer">EgitimAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</p>
+<p class="footer">NotioAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</p>
 </body>
 </html>`;
 
@@ -1141,7 +1141,7 @@ async function generatePPTX(title, content, pages, imageUrl) {
           fontSize: 16, color: 'ddcccc', align: 'center',
         });
       }
-      s.addText('EgitimAI', {
+      s.addText('NotioAI', {
         x: 0.5, y: 7.0, w: 12.3, h: 0.3,
         fontSize: 9, color: '556688', align: 'center',
       });

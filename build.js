@@ -1,5 +1,5 @@
 /**
- * EgitimAI Build Script
+ * NotioAI Build Script
  * Her Netlify deploy'unda CSS/JS linklerindeki ?v= değerini
  * otomatik olarak günceller. Tarayıcı cache sorunu olmaz.
  */
@@ -25,6 +25,6 @@ function processDir(dir) {
   }
 }
 
-console.log(`\nBuilding EgitimAI — CSS version: ${version}\n`);
+console.log(`\nBuilding NotioAI — CSS version: ${version}\n`);
 processDir('.');
 console.log('\nBuild complete.\n');

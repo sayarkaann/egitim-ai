@@ -1,5 +1,5 @@
 /* =========================================================
-   EgitimAI — i18n (Internationalization) System
+   NotioAI — i18n (Internationalization) System
    Supported: tr, en, de, fr, ar, es, ru
    ========================================================= */
 
