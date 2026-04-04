@@ -1515,12 +1515,14 @@ async function initFoldersPage() {
       const { error } = await sb.from('folders').insert({ user_id: session.user.id, name, color: selectedColor });
       if (error) {
         showToast('Klasör oluşturulamadı.', 'error');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-lucide="folder-plus"></i> Oluştur';
+        initIcons(saveBtn.parentElement);
       } else {
         showToast('Klasör oluşturuldu!', 'success');
         modal.remove();
         await loadFolders();
       }
-      saveBtn.disabled = false;
     });
 
     setTimeout(() => document.getElementById('folderNameInput')?.focus(), 100);
