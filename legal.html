@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EgitimAI — Yasal Belgeler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .legal-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 100px 24px 80px;
+    }
+    .legal-nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255,220,170,.08);
+    }
+    .legal-nav a {
+      font-size: .85rem;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,220,170,.1);
+      border-radius: 20px;
+      transition: all .2s;
+    }
+    .legal-nav a:hover { color: var(--accent); border-color: var(--accent); }
+    .legal-section {
+      margin-bottom: 72px;
+      scroll-margin-top: 100px;
+    }
+    .legal-section h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .legal-section .legal-date {
+      font-size: .82rem;
+      color: var(--text-3);
+      margin-bottom: 28px;
+    }
+    .legal-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 28px 0 10px;
+    }
+    .legal-section p, .legal-section li {
+      font-size: .9rem;
+      color: var(--text-2);
+      line-height: 1.75;
+    }
+    .legal-section ul, .legal-section ol {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    .legal-section li { margin-bottom: 6px; }
+    .legal-section a { color: var(--accent); }
+    .legal-divider {
+      border: none;
+      border-top: 1px solid rgba(255,220,170,.08);
+      margin: 72px 0;
+    }
+    .legal-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .85rem;
+      color: var(--text-3);
+      text-decoration: none;
+      margin-bottom: 32px;
+      transition: color .2s;
+    }
+    .legal-back:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="#e8855a"/>
+            <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+            <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="nav__logo-text">EgitimAI</span>
+      </a>
+      <div class="nav__actions">
+        <a href="app/auth.html" class="btn btn--ghost btn--sm">Giriş Yap</a>
+        <a href="app/create.html" class="btn btn--primary btn--sm">Ücretsiz Başla</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="legal-page">
+
+    <a href="index.html" class="legal-back">← Ana Sayfaya Dön</a>
+
+    <nav class="legal-nav">
+      <a href="#gizlilik">Gizlilik Politikası & KVKK</a>
+      <a href="#mesafeli-satis">Mesafeli Satış Sözleşmesi</a>
+      <a href="#iptal-iade">İptal ve İade Koşulları</a>
+    </nav>
+
+    <!-- ================================================
+         1. GİZLİLİK POLİTİKASI & KVKK
+    ================================================ -->
+    <section class="legal-section" id="gizlilik">
+      <h1>Gizlilik Politikası ve KVKK Aydınlatma Metni</h1>
+      <p class="legal-date">Son güncelleme: Nisan 2025</p>
+
+      <p>Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında EgitimAI hizmetini sunan veri sorumlusu tarafından hazırlanmıştır.</p>
+
+      <h2>1. Veri Sorumlusu</h2>
+      <p>EgitimAI platformunu işleten bireysel geliştirici veri sorumlusudur. İletişim için: <a href="mailto:destek@egitimai.com">destek@egitimai.com</a></p>
+
+      <h2>2. Toplanan Kişisel Veriler</h2>
+      <ul>
+        <li><strong>Kimlik ve iletişim bilgileri:</strong> Ad, soyad, e-posta adresi (kayıt sırasında)</li>
+        <li><strong>Kullanım verileri:</strong> Oluşturulan belge başlıkları, konu bilgileri, seçilen dil ve format tercihleri</li>
+        <li><strong>Teknik veriler:</strong> IP adresi, tarayıcı türü, oturum bilgileri</li>
+        <li><strong>Ödeme bilgileri:</strong> Ödeme işlemleri üçüncü taraf ödeme sağlayıcısı üzerinden gerçekleşir; kart bilgisi EgitimAI sistemlerinde saklanmaz</li>
+      </ul>
+
+      <h2>3. Verilerin İşlenme Amaçları</h2>
+      <ul>
+        <li>Hesap oluşturma ve kimlik doğrulama</li>
+        <li>Yapay zeka destekli belge üretim hizmetinin sunulması</li>
+        <li>Abonelik ve plan yönetimi</li>
+        <li>Teknik destek ve müşteri hizmetleri</li>
+        <li>Hizmet kalitesinin iyileştirilmesi</li>
+        <li>Yasal yükümlülüklerin yerine getirilmesi</li>
+      </ul>
+
+      <h2>4. Verilerin Aktarıldığı Taraflar</h2>
+      <ul>
+        <li><strong>Supabase Inc.:</strong> Kullanıcı kimlik doğrulama ve veritabanı hizmeti (ABD)</li>
+        <li><strong>Groq Inc.:</strong> Yapay zeka metin üretim hizmeti — belgeler oluşturulurken konu bilgisi işlenir (ABD)</li>
+        <li><strong>Vercel Inc. / Netlify Inc.:</strong> Uygulama barındırma altyapısı (ABD)</li>
+        <li><strong>Ödeme sağlayıcısı:</strong> Abonelik ve ödeme işlemleri</li>
+      </ul>
+      <p>Yurt dışı aktarımlar KVKK'nın 9. maddesi kapsamında gerçekleştirilmektedir.</p>
+
+      <h2>5. Verilerin Saklanma Süresi</h2>
+      <ul>
+        <li>Hesap verileri: Hesap silinene kadar</li>
+        <li>Oluşturulan belgeler: Hesap silinene kadar veya kullanıcı talep ettiğinde</li>
+        <li>Teknik log kayıtları: 90 gün</li>
+      </ul>
+
+      <h2>6. KVKK Kapsamındaki Haklarınız</h2>
+      <p>KVKK'nın 11. maddesi uyarınca aşağıdaki haklara sahipsiniz:</p>
+      <ul>
+        <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme</li>
+        <li>İşlenmişse buna ilişkin bilgi talep etme</li>
+        <li>İşlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+        <li>Yurt içinde veya yurt dışında kişisel verilerin aktarıldığı üçüncü kişileri bilme</li>
+        <li>Eksik veya yanlış işlenmiş verilerin düzeltilmesini isteme</li>
+        <li>Verilerin silinmesini veya yok edilmesini isteme</li>
+        <li>İşlenen verilerin aleyhte sonuç doğurmasına itiraz etme</li>
+        <li>Zararın giderilmesini talep etme</li>
+      </ul>
+      <p>Haklarınızı kullanmak için <a href="mailto:destek@egitimai.com">destek@egitimai.com</a> adresine e-posta gönderebilirsiniz. Talepler en geç 30 gün içinde yanıtlanır.</p>
+
+      <h2>7. Çerezler (Cookies)</h2>
+      <p>EgitimAI, oturum yönetimi için zorunlu çerezler kullanmaktadır. Üçüncü taraf izleme veya reklam çerezi kullanılmamaktadır.</p>
+
+      <h2>8. Güvenlik</h2>
+      <p>Tüm veriler SSL/TLS şifrelemesi ile iletilmektedir. Veritabanı erişimi, satır bazlı güvenlik politikaları (Row Level Security) ile korunmaktadır.</p>
+    </section>
+
+    <hr class="legal-divider" />
+
+    <!-- ================================================
+         2. MESAFELİ SATIŞ SÖZLEŞMESİ
+    ================================================ -->
+    <section class="legal-section" id="mesafeli-satis">
+      <h1>Mesafeli Satış Sözleşmesi</h1>
+      <p class="legal-date">Son güncelleme: Nisan 2025</p>
+
+      <p>Bu sözleşme, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği kapsamında düzenlenmiştir.</p>
+
+      <h2>1. Taraflar</h2>
+      <p><strong>Satıcı:</strong> EgitimAI platformunu işleten bireysel geliştirici<br>
+      <strong>E-posta:</strong> <a href="mailto:destek@egitimai.com">destek@egitimai.com</a><br>
+      <strong>Alıcı:</strong> EgitimAI platformuna kayıt olan kullanıcı</p>
+
+      <h2>2. Sözleşmenin Konusu</h2>
+      <p>Bu sözleşme, EgitimAI platformu üzerinden sunulan yapay zeka destekli eğitim belgesi oluşturma hizmetinin (PDF, Word, PPTX formatlarında belge üretimi) abonelik veya tek seferlik satın alım yoluyla edinilmesine ilişkin koşulları düzenlemektedir.</p>
+
+      <h2>3. Hizmet ve Ücretlendirme</h2>
+      <ul>
+        <li><strong>Ücretsiz Plan:</strong> 0₺/ay — 10 belge/ay, maks. 5 sayfa/belge</li>
+        <li><strong>Öğrenci Plan:</strong> 99₺/ay (veya 79₺/ay yıllık) — 30 belge/ay, maks. 20 sayfa</li>
+        <li><strong>Pro Plan:</strong> 169₺/ay (veya 135₺/ay yıllık) — 60 belge/ay, maks. 30 sayfa</li>
+        <li><strong>Kurumsal Plan:</strong> Görüşmeye göre fiyatlandırılır</li>
+      </ul>
+      <p>Ek belge paketleri (Başlangıç, Orta, Büyük, Mega) tek seferlik satın alım olarak sunulmaktadır. Tüm fiyatlara KDV dahildir.</p>
+
+      <h2>4. Ödeme Koşulları</h2>
+      <p>Abonelik ücretleri seçilen döneme göre (aylık veya yıllık) otomatik olarak tahsil edilir. Ödeme, platforma entegre üçüncü taraf ödeme sağlayıcısı aracılığıyla gerçekleştirilir. Kart bilgileri EgitimAI sistemlerinde saklanmaz.</p>
+
+      <h2>5. Hizmetin Başlaması</h2>
+      <p>Ödemenin onaylanmasının ardından hizmet derhal aktif edilir. Alıcı, dijital hizmetin başladığını ve cayma hakkının bu nedenle kullanılamayacağını kabul eder (TKHK m.15/ğ).</p>
+
+      <h2>6. Abonelik Yenileme ve İptali</h2>
+      <p>Aylık abonelikler her ay otomatik olarak yenilenir. Yıllık abonelikler yıl sonunda yenilenir. İptal işlemi bir sonraki dönem başlamadan gerçekleştirilmelidir. İptal için lütfen <a href="mailto:destek@egitimai.com">destek@egitimai.com</a> adresine başvurun veya hesap ayarlarınızı kullanın.</p>
+
+      <h2>7. Cayma Hakkı</h2>
+      <p>6502 sayılı Kanun'un 15. maddesinin (ğ) bendi uyarınca; alıcının talebi üzerine ifasına başlanan dijital içerik ve hizmetlerde, hizmet başladıktan sonra cayma hakkı kullanılamaz. Ödeme tamamlandıktan sonra hizmet aktif edildiğinden cayma hakkı bu aşamadan itibaren geçerliliğini yitirir.</p>
+
+      <h2>8. Sorumluluğun Sınırlandırılması</h2>
+      <p>EgitimAI, yapay zeka tarafından üretilen içeriklerin doğruluğunu, eksiksizliğini veya belirli bir amaca uygunluğunu garanti etmez. Üretilen belgeler kullanıcı tarafından kontrol edilmelidir. EgitimAI'nin sorumluluğu, ödenen abonelik bedeli ile sınırlıdır.</p>
+
+      <h2>9. Uyuşmazlık Çözümü</h2>
+      <p>Bu sözleşmeden doğan uyuşmazlıklarda Türkiye Cumhuriyeti mahkemeleri ve icra daireleri yetkilidir. Tüketici hakları kapsamındaki başvurular için ilgili Tüketici Hakem Heyetleri'ne başvurulabilir.</p>
+    </section>
+
+    <hr class="legal-divider" />
+
+    <!-- ================================================
+         3. İPTAL VE İADE KOŞULLARI
+    ================================================ -->
+    <section class="legal-section" id="iptal-iade">
+      <h1>İptal ve İade Koşulları</h1>
+      <p class="legal-date">Son güncelleme: Nisan 2025</p>
+
+      <h2>1. Abonelik İptali</h2>
+      <p>Aboneliğinizi istediğiniz zaman iptal edebilirsiniz. İptal işlemi mevcut dönem bitmeden yapılmalıdır. İptal sonrasında:</p>
+      <ul>
+        <li>Mevcut dönem sonuna kadar hizmetiniz aktif olmaya devam eder</li>
+        <li>Bir sonraki dönem için ücret tahsil edilmez</li>
+        <li>İptal edilen dönem için ücret iadesi yapılmaz</li>
+      </ul>
+
+      <h2>2. İade Koşulları</h2>
+      <p>Dijital hizmet niteliğindeki abonelik ürünlerinde, hizmetin kullanılmaya başlanmasıyla birlikte iade hakkı ortadan kalkar (TKHK m.15/ğ). Ancak aşağıdaki durumlarda iade değerlendirilebilir:</p>
+      <ul>
+        <li>Ödeme başarılı olmasına rağmen hizmet hiç aktif edilmemişse</li>
+        <li>Teknik arıza nedeniyle hizmet hiç kullanılamamışsa</li>
+        <li>Yanlışlıkla mükerrer ödeme yapılmışsa</li>
+      </ul>
+      <p>İade taleplerini <a href="mailto:destek@egitimai.com">destek@egitimai.com</a> adresine en geç 7 gün içinde iletmeniz gerekmektedir. Talepler 5 iş günü içinde değerlendirilir.</p>
+
+      <h2>3. Ek Belge Paketleri</h2>
+      <p>Tek seferlik satın alınan ek belge paketleri (Başlangıç, Orta, Büyük, Mega) iade edilemez. Paketler satın alım tarihinden itibaren 30 gün geçerlidir; bu süre uzatılamaz veya devredilemez.</p>
+
+      <h2>4. Yıllık Plan İptali</h2>
+      <p>Yıllık plan satın alındıktan sonra ilk 7 gün içinde hiç kullanılmamışsa tam iade talep edilebilir. 7 günden sonra veya herhangi bir kullanım gerçekleştikten sonra iade yapılmaz; ancak abonelik dönem sonunda iptal edilebilir.</p>
+
+      <h2>5. Hesap Silme</h2>
+      <p>Hesabınızı silmek için <a href="mailto:destek@egitimai.com">destek@egitimai.com</a> adresine başvurun. Hesap silme işlemi aktif aboneliği otomatik olarak iptal eder; kalan dönem için iade yapılmaz.</p>
+
+      <h2>6. İletişim</h2>
+      <p>İptal, iade veya diğer talepleriniz için:<br>
+      <strong>E-posta:</strong> <a href="mailto:destek@egitimai.com">destek@egitimai.com</a><br>
+      <strong>Yanıt süresi:</strong> En geç 2 iş günü</p>
+    </section>
+
+  </div>
+
+  <footer class="footer" style="margin-top:0;">
+    <div class="container">
+      <div class="footer__bottom">
+        <p>&copy; 2025 EgitimAI. Tüm hakları saklıdır.</p>
+        <div class="footer__legal">
+          <a href="legal.html#gizlilik">Gizlilik Politikası</a>
+          <a href="legal.html#mesafeli-satis">Kullanım Koşulları</a>
+          <a href="legal.html#iptal-iade">İptal & İade</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
