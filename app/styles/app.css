@@ -1306,6 +1306,39 @@ em { font-style: italic; }
   .docs-table__name { font-size: .82rem; }
 }
 
+/* =====================================================
+   ULTRA-KÜÇÜK EKRANLAR (360px ve altı — iPhone SE vb.)
+===================================================== */
+@media (max-width: 360px) {
+  /* Form kartları */
+  .form-card { padding: 14px 12px; }
+  .form-card__title { font-size: .88rem; }
+
+  /* Toggle butonları */
+  .toggle-btn { font-size: 11px; padding: 7px 8px; }
+
+  /* Options grid tek sütun */
+  .options-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .option-card { padding: 10px 8px; }
+  .option-card__label { font-size: .72rem; }
+
+  /* Başlık küçültme */
+  .create-header h1 { font-size: 1.3rem; }
+  .create-header p   { font-size: .82rem; }
+
+  /* Topbar */
+  .topbar__breadcrumb { font-size: .78rem; }
+
+  /* Butonlar */
+  .btn--lg { font-size: .85rem; padding: 11px 16px; }
+
+  /* Sidebar logo */
+  .sidebar__logo-text { font-size: .95rem; }
+
+  /* Stat kartları tek sütun */
+  .dashboard__stats { grid-template-columns: 1fr; }
+}
+
 /* Sidebar overlay mobilde tam ekran */
 @media (max-width: 768px) {
   .sidebar-overlay.active {
