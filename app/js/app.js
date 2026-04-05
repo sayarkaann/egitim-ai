@@ -86,7 +86,7 @@ function showUpgradeModal(reason = '') {
     <div class="modal-box">
       <div class="modal-icon"><i data-lucide="crown"></i></div>
       <h2 class="modal-title">Pro Plana Geç</h2>
-      <p class="modal-desc">${reason || 'Ücretsiz planın 3 belge limitine ulaştınız.'}</p>
+      <p class="modal-desc">${reason || 'Bu özellik ücretli planlara özeldir.'}</p>
       <div class="modal-features">
         <div class="modal-feature"><i data-lucide="check"></i> Sınırsız belge oluşturma</div>
         <div class="modal-feature"><i data-lucide="check"></i> 30 sayfaya kadar</div>
@@ -888,7 +888,9 @@ async function initCreatePage() {
   }
 
   const urlP = new URLSearchParams(window.location.search);
-  if (urlP.get('type') && (urlP.get('type') !== 'pptx' || isProUser)) selectedType = urlP.get('type');
+  const urlType = urlP.get('type');
+  if (urlType && (urlType !== 'pptx' || isProUser)) selectedType = urlType;
+  else if (urlType === 'pptx' && !isProUser) selectedType = 'pdf'; // ücretsiz kullanıcı PPTX'e yönlendirilemez
   if (urlP.get('audience')) selectedAudience = urlP.get('audience');
   if (urlP.get('topic')) {
     const ti = document.getElementById('topicInput');
@@ -972,26 +974,6 @@ async function initCreatePage() {
       const isPro = userPlan !== 'free' && !planExpired;
 
       if (!isPro) {
-        const now = new Date();
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-        const { count } = await sb
-          .from('documents')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', session.user.id)
-          .gte('created_at', monthStart);
-
-        const TRIAL_DAYS = 3;
-        const createdAt = new Date(session?.user?.created_at || Date.now());
-        const trialExpired = (Date.now() - createdAt.getTime()) > TRIAL_DAYS * 24 * 60 * 60 * 1000;
-
-        if (trialExpired) {
-          showUpgradeModal('3 günlük ücretsiz deneme süreniz doldu. Pro plana geçerek sınırsız belge oluşturun.');
-          return;
-        }
-        if ((count || 0) >= FREE_DOC_LIMIT) {
-          showUpgradeModal(`${FREE_DOC_LIMIT} belge hakkınızı kullandınız. Pro plana geçerek daha fazla belge oluşturun.`);
-          return;
-        }
         if (selectedType === 'pptx') {
           showUpgradeModal('PowerPoint (PPTX) oluşturma özelliği ücretli planlara özeldir. Pro plana geçerek kullanmaya başlayın.');
           return;
