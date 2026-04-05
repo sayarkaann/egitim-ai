@@ -165,16 +165,39 @@
 
       <div class="form-card fade-up fade-up--3" style="background:linear-gradient(135deg,rgba(232,133,90,.12),rgba(121,144,248,.08));">
         <div class="form-card__title"><i data-lucide="mail"></i> Destek</div>
-        <p class="text-muted" style="margin-bottom:16px;">Sorunuz cevaplanamadıysa veya bir hata ile karşılaştıysanız iletişime geçin.</p>
-        <a href="mailto:destek@notioai.net" class="btn btn--primary btn--sm">
-          <i data-lucide="send"></i> E-posta Gönder
-        </a>
-        <p style="font-size:12px;color:var(--text-3);margin-top:16px;">
+        <p class="text-muted" style="margin-bottom:20px;">Sorunuz cevaplanamadıysa veya bir hata ile karşılaştıysanız iletişime geçin.</p>
+
+        <form id="contactForm" novalidate>
+          <div class="form-group form-group--inline" style="margin-bottom:12px;">
+            <div>
+              <label class="form-label">Adınız</label>
+              <input type="text" id="contactName" class="form-input" placeholder="Ahmet Yılmaz" required />
+            </div>
+            <div>
+              <label class="form-label">E-posta</label>
+              <input type="email" id="contactEmail" class="form-input" placeholder="ornek@email.com" required />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Konu</label>
+            <input type="text" id="contactSubject" class="form-input" placeholder="ör. Belge oluşturulmuyor" />
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Mesajınız</label>
+            <textarea id="contactMessage" class="form-textarea" rows="4" placeholder="Sorununuzu veya geri bildiriminizi yazın..." required></textarea>
+          </div>
+          <p id="contactMsg" style="font-size:.85rem;margin-bottom:12px;display:none;"></p>
+          <button type="submit" id="contactSubmit" class="btn btn--primary btn--sm">
+            <i data-lucide="send"></i> Gönder
+          </button>
+        </form>
+
+        <p style="font-size:12px;color:var(--text-3);margin-top:20px;">
           <a href="../legal.html#gizlilik" style="color:var(--accent);margin-right:12px;">Gizlilik Politikası</a>
           <a href="../legal.html#mesafeli-satis" style="color:var(--accent);margin-right:12px;">Kullanım Koşulları</a>
           <a href="../legal.html#iptal-iade" style="color:var(--accent);">İptal & İade</a>
         </p>
-        <p style="font-size:12px;color:var(--text-3);margin-top:12px;">
+        <p style="font-size:12px;color:var(--text-3);margin-top:8px;">
           <i data-lucide="clock" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>
           Yanıt süresi: genellikle 24 saat içinde
         </p>
@@ -189,6 +212,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+
       document.querySelectorAll('.faq-question').forEach(btn => {
         btn.addEventListener('click', () => {
           const item = btn.closest('.faq-item');
@@ -196,6 +220,51 @@
           document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
           if (!isOpen) item.classList.add('open');
         });
+      });
+
+      // Contact form
+      document.getElementById('contactForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name    = document.getElementById('contactName').value.trim();
+        const email   = document.getElementById('contactEmail').value.trim();
+        const subject = document.getElementById('contactSubject').value.trim();
+        const message = document.getElementById('contactMessage').value.trim();
+        const msg     = document.getElementById('contactMsg');
+        const btn     = document.getElementById('contactSubmit');
+
+        if (!name || !email || !message) {
+          msg.style.cssText = 'display:block;color:var(--danger)';
+          msg.textContent = 'Ad, e-posta ve mesaj alanları zorunludur.';
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Gönderiliyor...';
+        msg.style.display = 'none';
+
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, subject, message }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            msg.style.cssText = 'display:block;color:var(--success)';
+            msg.textContent = 'Mesajınız iletildi! En geç 24 saat içinde yanıt vereceğiz.';
+            document.getElementById('contactForm').reset();
+          } else {
+            msg.style.cssText = 'display:block;color:var(--danger)';
+            msg.textContent = data.error || 'Gönderim başarısız, tekrar deneyin.';
+          }
+        } catch {
+          msg.style.cssText = 'display:block;color:var(--danger)';
+          msg.textContent = 'Bağlantı hatası, tekrar deneyin.';
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="send"></i> Gönder';
+          lucide.createIcons({ nodes: [btn] });
+        }
       });
     });
   </script>
