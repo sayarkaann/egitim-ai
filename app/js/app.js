@@ -802,8 +802,26 @@ async function initCreatePage() {
   })();
 
   // Pre-fill from URL params (from templates)
+  // Check user plan to restrict PPTX
+  const { data: profileData } = await getSB().from('profiles').select('plan, plan_expires_at').eq('id', session.user.id).single();
+  const _userPlan = profileData?.plan || 'free';
+  const _planExpired = profileData?.plan_expires_at ? new Date(profileData.plan_expires_at) < new Date() : false;
+  const isProUser = _userPlan !== 'free' && !_planExpired;
+
+  // Lock PPTX button for free users
+  const pptxBtn = document.querySelector('[data-doc-type="pptx"]');
+  if (pptxBtn && !isProUser) {
+    pptxBtn.setAttribute('title', 'PPTX ücretli plana özeldir');
+    pptxBtn.style.opacity = '0.45';
+    pptxBtn.style.cursor = 'not-allowed';
+    pptxBtn.addEventListener('click', (e) => {
+      e.stopImmediatePropagation();
+      showUpgradeModal('PowerPoint (PPTX) oluşturma özelliği ücretli planlara özeldir.');
+    }, true);
+  }
+
   const urlP = new URLSearchParams(window.location.search);
-  if (urlP.get('type'))     selectedType     = urlP.get('type');
+  if (urlP.get('type') && (urlP.get('type') !== 'pptx' || isProUser)) selectedType = urlP.get('type');
   if (urlP.get('audience')) selectedAudience = urlP.get('audience');
   if (urlP.get('topic')) {
     const ti = document.getElementById('topicInput');

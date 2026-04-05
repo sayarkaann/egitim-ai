@@ -204,7 +204,7 @@ function getCurriculumHint(subject, gradeLevel) {
 
 function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject) {
   const LANG_CONFIG = {
-    tr: { name: 'Türkçe',   enforce: 'Tüm çıktıyı doğal, akıcı Türkçe ile yaz. Klişe giriş cümleleri ("Bu belgede...") kullanma.' },
+    tr: { name: 'Türkçe',   enforce: 'KRİTİK: Tüm çıktı YALNIZCA Türkçe olmalıdır. Başlıklar, maddeler, açıklamalar dahil hiçbir yerde İngilizce veya başka yabancı dil kullanma. Klişe giriş cümleleri ("Bu belgede...", "In this document...") kullanma.' },
     en: { name: 'English',  enforce: 'CRITICAL: The entire output MUST be in English only — including all headings, bullets, and explanations. The topic may be in Turkish but your response must be 100% English. No Turkish words anywhere.' },
     de: { name: 'Deutsch',  enforce: 'WICHTIG: Die gesamte Ausgabe muss auf Deutsch sein. Das Thema kann auf Türkisch sein, aber deine Antwort muss vollständig auf Deutsch sein. Kein Türkisch.' },
     fr: { name: 'Français', enforce: 'IMPORTANT: Toute la sortie doit être en français. Le sujet peut être en turc, mais votre réponse doit être entièrement en français. Pas de turc.' },
