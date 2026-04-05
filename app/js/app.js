@@ -251,20 +251,17 @@ async function initAuthPage() {
   if (!document.getElementById('authPage')) return;
 
   const sb = getSB();
-  const urlParams = new URLSearchParams(window.location.search);
-  const isReset = urlParams.get('reset') === '1';
 
-  // PASSWORD_RECOVERY event'ini session kontrolünden önce dinle
-  if (isReset) {
-    sb.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        showResetPasswordModal();
-      }
-    });
-  } else {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) { window.location.href = 'index.html'; return; }
+  // Şifre sıfırlama linki — hash'te type=recovery varsa direkt modal göster
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  if (hashParams.get('type') === 'recovery') {
+    initIcons();
+    showResetPasswordModal();
+    return;
   }
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { window.location.href = 'index.html'; return; }
 
   initIcons();
 
