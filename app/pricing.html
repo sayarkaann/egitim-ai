@@ -147,9 +147,10 @@
       <div class="pricing-card">
         <div class="pricing-card__badge" style="background:rgba(196,181,253,.15);color:#c4b5fd;">Kurumsal</div>
         <div class="pricing-card__price">
-          <span class="pricing-card__amount" data-monthly="2.999" data-yearly="2.399">2.999</span>₺
+          <span class="pricing-card__amount" data-monthly="2999" data-yearly="2399">₺2.999</span>
           <span class="pricing-card__period">/ay</span>
         </div>
+        <p class="pricing-card__yearly-note" id="kurumsalYearlyNote" style="display:none;font-size:12px;color:var(--accent);margin-bottom:4px;">28.788₺/yıl faturalandırılır</p>
         <p class="pricing-card__desc">Tüm öğretmen kadrosu için okul lisansı.</p>
         <ul class="pricing-card__features">
           <li><i data-lucide="check"></i> Min. <strong>10 öğretmen</strong> hesabı</li>
@@ -306,10 +307,12 @@
         document.querySelectorAll('[data-monthly]').forEach(el => {
           el.textContent = yearly ? el.dataset.yearly : el.dataset.monthly;
         });
-        const studentNote = document.getElementById('studentYearlyNote');
-        const proNote     = document.getElementById('proYearlyNote');
-        if (studentNote) studentNote.style.display = yearly ? 'block' : 'none';
-        if (proNote)     proNote.style.display     = yearly ? 'block' : 'none';
+        const studentNote  = document.getElementById('studentYearlyNote');
+        const proNote      = document.getElementById('proYearlyNote');
+        const kurumsalNote = document.getElementById('kurumsalYearlyNote');
+        if (studentNote)  studentNote.style.display  = yearly ? 'block' : 'none';
+        if (proNote)      proNote.style.display      = yearly ? 'block' : 'none';
+        if (kurumsalNote) kurumsalNote.style.display = yearly ? 'block' : 'none';
       }
 
       monthlyBtn?.addEventListener('click', () => {

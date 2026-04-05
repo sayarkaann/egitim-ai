@@ -173,19 +173,21 @@ function initPricingToggle() {
     toggleBtn.classList.toggle('on', yearly);
     toggleBtn.setAttribute('aria-checked', yearly.toString());
 
-    const studentNote = document.getElementById('studentYearlyNote');
-    const proNote     = document.getElementById('proYearlyNote');
-    if (studentNote) studentNote.style.display = yearly ? 'block' : 'none';
-    if (proNote)     proNote.style.display     = yearly ? 'block' : 'none';
+    const studentNote   = document.getElementById('studentYearlyNote');
+    const proNote       = document.getElementById('proYearlyNote');
+    const kurumsalNote  = document.getElementById('kurumsalYearlyNote');
+    if (studentNote)  studentNote.style.display  = yearly ? 'block' : 'none';
+    if (proNote)      proNote.style.display      = yearly ? 'block' : 'none';
+    if (kurumsalNote) kurumsalNote.style.display = yearly ? 'block' : 'none';
 
     amounts.forEach(el => {
-      const monthly = parseInt(el.dataset.monthly, 10);
-      const yearlyV = parseInt(el.dataset.yearly, 10);
+      const parse = s => parseInt(String(s).replace(/\./g, '').replace('₺', ''), 10);
+      const monthly = parse(el.dataset.monthly);
+      const yearlyV = parse(el.dataset.yearly);
       if (isNaN(monthly) || isNaN(yearlyV)) return;
-      const value   = yearly ? yearlyV : monthly;
-      const formatted = value === 0 ? '₺0' : `₺${value}`;
+      const value = yearly ? yearlyV : monthly;
+      const formatted = value === 0 ? '₺0' : `₺${value.toLocaleString('tr-TR')}`;
 
-      // Animate number change
       el.style.opacity = '0';
       el.style.transform = 'translateY(-8px)';
       setTimeout(() => {
