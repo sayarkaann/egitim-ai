@@ -183,7 +183,8 @@ function initLogout() {
 ===================================================== */
 async function requireAuth() {
   const { data: { session } } = await getSB().auth.getSession();
-  return session; // no redirect — pages handle null session gracefully
+  if (!session) { window.location.href = 'auth.html'; return null; }
+  return session;
 }
 
 /* =====================================================
@@ -770,7 +771,7 @@ async function initCreatePage() {
   if (!document.getElementById('createPage')) return;
 
   const session = await requireAuth();
-  if (!session) { /* show guest UI */ }
+  if (!session) return;
 
   await populateUserInfo();
   initSidebar();
