@@ -1178,7 +1178,7 @@ em { font-style: italic; }
   display: none;
   background: transparent;
   border: none;
-  color: var(--text);
+  color: #ffffff;
   padding: 8px;
   cursor: pointer;
 }
