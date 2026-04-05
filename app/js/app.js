@@ -407,7 +407,13 @@ async function initAuthPage() {
   });
 
   document.querySelectorAll('[data-action="google-auth"]').forEach(btn => {
-    btn.style.display = 'none';
+    btn.style.display = '';
+    btn.addEventListener('click', async () => {
+      await getSB().auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/app/index.html' }
+      });
+    });
   });
 }
 
