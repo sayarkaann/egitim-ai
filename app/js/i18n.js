@@ -82,6 +82,9 @@ const TRANSLATIONS = {
     google_register:    'Google ile Kayıt Ol',
     first_name:         'Ad',
     last_name:          'Soyad',
+    reset_title:        'Şifre Sıfırla',
+    reset_desc:         'E-posta adresinizi girin, sıfırlama bağlantısı gönderelim.',
+    reset_btn:          'Bağlantı Gönder',
 
     // Settings
     settings_title:     'Ayarlar',
