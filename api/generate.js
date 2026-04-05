@@ -217,12 +217,21 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
   const notes   = extraNotes ? `\nAdditional instructions: ${extraNotes}` : '';
 
   const toneInstructions = {
-    formal:   'Writing style: FORMAL and institutional. Short, precise sentences. No personal expressions. Passive constructions where appropriate. Professional vocabulary.',
-    friendly: 'Writing style: FRIENDLY and warm. Active sentences, direct address. Encouraging, approachable language. Avoid overly technical terms.',
-    academic: 'Writing style: ACADEMIC. Use subject-specific terminology correctly. Objective, evidence-based writing. Structured sections with clear headings. No colloquial language. Cite facts, use logical argumentation.',
-    simple:   'Writing style: SIMPLE and clear. Short sentences, everyday language. If technical terms appear, explain them immediately in plain language.',
+    tr: {
+      formal:   'Yazım tonu: RESMİ ve kurumsal. Kısa, net cümleler. Kişisel ifade kullanma. Mesleki kelime dağarcığı.',
+      friendly: 'Yazım tonu: SAMIMI ve sıcak. Etkin cümleler, doğrudan hitap. Teşvik edici, yaklaşılabilir dil. Aşırı teknik terimlerden kaçın.',
+      academic: 'Yazım tonu: AKADEMİK. Konuya özgü terminolojiyi doğru kullan. Nesnel, kanıta dayalı yazım. Açık başlıklarla yapılandırılmış bölümler. Konuşma dili kullanma.',
+      simple:   'Yazım tonu: SADE ve anlaşılır. Kısa cümleler, günlük dil. Teknik terimler çıkarsa hemen sade dille açıkla.',
+    },
+    en: {
+      formal:   'Writing style: FORMAL and institutional. Short, precise sentences. Professional vocabulary.',
+      friendly: 'Writing style: FRIENDLY and warm. Encouraging, approachable language.',
+      academic: 'Writing style: ACADEMIC. Subject-specific terminology, objective writing, clear headings.',
+      simple:   'Writing style: SIMPLE and clear. Short sentences, everyday language.',
+    },
   };
-  const toneStr = toneInstructions[tone] || toneInstructions.formal;
+  const toneLang = toneInstructions[language] || toneInstructions.tr;
+  const toneStr = toneLang[tone] || toneLang.formal;
 
   // Grade level context
   const gradeLabels = {
@@ -237,8 +246,8 @@ function buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, langu
   const curriculumHint = getCurriculumHint(subject, gradeLevel);
 
   const contextBlock = [
-    gradeLabel  ? `Grade level: ${gradeLabel}` : '',
-    subject     ? `Subject: ${subject}` : '',
+    gradeLabel  ? `Sınıf seviyesi: ${gradeLabel}` : '',
+    subject     ? `Ders: ${subject}` : '',
     curriculumHint,
   ].filter(Boolean).join('\n');
 
@@ -271,30 +280,30 @@ ${audienceBlock}
 
 ${contextBlock}
 
-IMPORTANT: Content must be appropriate for ${gradeLabel || 'the selected'} level only.
+ÖNEMLİ: İçerik yalnızca ${gradeLabel || 'seçilen'} seviyesine uygun olmalıdır.
 
-Prepare a ${pages}-slide presentation on: "${topic}".${notes}
+"${topic}" konusunda ${pages} slaytlık sunum hazırla.${notes}
 
 ${pptxAudience}
 
-REQUIRED FORMAT:
-SLAYT 1: [Title]
-- [Subtitle]
+ZORUNLU FORMAT:
+SLAYT 1: [Başlık]
+- [Alt başlık]
 - [${gradeLabel}]
 
-SLAYT 2: [Section Title]
-- [Bullet]
-- [Bullet]
-- [Bullet]
+SLAYT 2: [Bölüm Başlığı]
+- [Madde]
+- [Madde]
+- [Madde]
 
-(continue up to ${pages} slides)
+(${pages} slayta kadar devam et)
 
-RULES:
-- Each slide focuses on one topic, 3-5 bullets
-- Bullets informative and complete (1-2 sentences each, 15-25 words)
-- EXACTLY ${pages} slides
-- ALL text in ${langCfg.name}
-- No special characters, arrows or markdown symbols`;
+KURALLAR:
+- Her slayt tek bir konuya odaklanır, 3-5 madde
+- Maddeler bilgilendirici ve tam (her biri 1-2 cümle, 15-25 kelime)
+- TAM OLARAK ${pages} slayt
+- TÜM metin ${langCfg.name} dilinde
+- Özel karakter, ok işareti veya markdown sembolü kullanma`;
   }
 
   /* ── PDF / WORD ── */
@@ -306,18 +315,18 @@ ${audienceBlock}
 
 ${contextBlock}
 
-IMPORTANT: Content must be appropriate for ${gradeLabel || 'the selected'} level only.
+ÖNEMLİ: İçerik yalnızca ${gradeLabel || 'seçilen'} seviyesine uygun olmalıdır.
 
-Write a document on: "${topic}". Length: approximately ${pages} pages.${notes}
+"${topic}" konusunda belge yaz. Uzunluk: yaklaşık ${pages} sayfa.${notes}
 
 FORMAT:
-# [Title]
-## [Section]
-[Content]
+# [Başlık]
+## [Bölüm]
+[İçerik]
 
-RULES:
-- If exam/test: number questions with explicit numbers like "Soru 1.", "Soru 2.", "Soru 3." — NEVER use markdown numbered lists (1. 1. 1.), always write the number explicitly
-- Write content only, no meta-commentary or pedagogical explanations
-- Fill approximately ${pages} pages
-- CRITICAL: ALL content must be written in ${langCfg.name} — no exceptions`;
+KURALLAR:
+- Sınav/test ise: soruları "Soru 1.", "Soru 2.", "Soru 3." şeklinde numaralandır — asla markdown numaralı liste (1. 1. 1.) kullanma, numarayı her zaman açıkça yaz
+- Sadece içerik yaz, meta-yorum veya pedagojik açıklama ekleme
+- Yaklaşık ${pages} sayfa doldur
+- KRİTİK: TÜM içerik ${langCfg.name} dilinde yazılmalıdır — istisna yok`;
 }
