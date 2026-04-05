@@ -287,6 +287,69 @@ async function initAuthPage() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('mode') === 'register') showRegister();
 
+  // PASSWORD RECOVERY — link tıklandıktan sonra yeni şifre formu
+  if (params.get('reset') === '1') {
+    // Supabase token'ı URL hash'ten alır otomatik
+    getSB().auth.onAuthStateChange(async (event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        showResetPasswordModal();
+      }
+    });
+  }
+
+  function showResetPasswordModal() {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+      <div style="background:var(--bg-card);border:1px solid var(--border-h);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:400px;margin:16px;">
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Yeni Şifre Belirle</h3>
+        <p style="color:var(--text-2);font-size:.9rem;margin-bottom:20px;">Hesabınız için yeni bir şifre girin.</p>
+        <div class="input-wrap" style="margin-bottom:12px;">
+          <span class="input-wrap__icon"><i data-lucide="lock"></i></span>
+          <input type="password" id="newPassword" class="form-input" placeholder="Yeni şifre (en az 6 karakter)" />
+        </div>
+        <div class="input-wrap" style="margin-bottom:20px;">
+          <span class="input-wrap__icon"><i data-lucide="lock"></i></span>
+          <input type="password" id="newPasswordConfirm" class="form-input" placeholder="Şifreyi tekrar girin" />
+        </div>
+        <p id="resetMsg" style="font-size:.85rem;margin-bottom:12px;display:none;"></p>
+        <button id="resetSave" class="btn btn--primary btn--full">Şifreyi Güncelle</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    initIcons();
+
+    document.getElementById('resetSave').addEventListener('click', async () => {
+      const pw  = document.getElementById('newPassword').value;
+      const pw2 = document.getElementById('newPasswordConfirm').value;
+      const msg = document.getElementById('resetMsg');
+      if (pw.length < 6) {
+        msg.style.cssText = 'display:block;color:var(--danger)';
+        msg.textContent = 'Şifre en az 6 karakter olmalı.';
+        return;
+      }
+      if (pw !== pw2) {
+        msg.style.cssText = 'display:block;color:var(--danger)';
+        msg.textContent = 'Şifreler eşleşmiyor.';
+        return;
+      }
+      const btn = document.getElementById('resetSave');
+      btn.disabled = true;
+      btn.textContent = 'Güncelleniyor...';
+      const { error } = await getSB().auth.updateUser({ password: pw });
+      if (error) {
+        msg.style.cssText = 'display:block;color:var(--danger)';
+        msg.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'Şifreyi Güncelle';
+      } else {
+        msg.style.cssText = 'display:block;color:var(--success)';
+        msg.textContent = 'Şifreniz güncellendi! Yönlendiriliyorsunuz...';
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      }
+    });
+  }
+
   // Password toggles
   document.querySelectorAll('[data-toggle-password]').forEach(btn => {
     btn.addEventListener('click', () => {
