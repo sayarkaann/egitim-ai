@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
 
   const emailBody = JSON.stringify({
     from: 'NotioAI Destek <onboarding@resend.dev>',
-    to: ['destek.notioai@gmail.com'],
+    to: ['sayar.kaann@gmail.com'],
     reply_to: email,
     subject: `[Destek] ${subject || 'Yeni mesaj'} — ${name}`,
     html: `
