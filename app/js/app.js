@@ -156,7 +156,11 @@ async function populateUserInfo() {
 
   document.querySelectorAll('[data-user-name]').forEach(el   => el.textContent = `${firstName} ${lastName}`.trim());
   document.querySelectorAll('[data-user-email]').forEach(el  => el.textContent = session.user.email);
-  document.querySelectorAll('[data-user-plan]').forEach(el   => el.textContent = 'Ücretsiz');
+  getSB().from('profiles').select('plan').eq('id', session.user.id).single().then(({ data }) => {
+    const planLabels = { free: 'Ücretsiz', ogrenci: 'Öğrenci', pro: 'Pro', kurumsal: 'Kurumsal' };
+    const label = planLabels[data?.plan || 'free'] || 'Ücretsiz';
+    document.querySelectorAll('[data-user-plan]').forEach(el => el.textContent = label);
+  });
   document.querySelectorAll('[data-user-avatar]').forEach(el => el.textContent = initials || '?');
   document.querySelectorAll('[data-user-first]').forEach(el  => el.textContent = firstName);
 }
@@ -867,42 +871,53 @@ async function initCreatePage() {
     const pages     = parseInt(pageRange?.value || '5', 10);
     const language  = document.getElementById('docLanguage')?.value || 'tr';
 
-    // FREE PLAN LIMIT CHECK (3-day trial)
+    // PLAN CHECK
     if (session) {
       const sb = getSB();
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const { count } = await sb
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.user.id)
-        .gte('created_at', monthStart);
 
-      // 3-day trial check
-      const TRIAL_DAYS = 3;
-      const createdAt = new Date(session?.user?.created_at || Date.now());
-      const trialExpired = (Date.now() - createdAt.getTime()) > TRIAL_DAYS * 24 * 60 * 60 * 1000;
+      // Fetch user plan from profiles
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('plan, plan_expires_at')
+        .eq('id', session.user.id)
+        .single();
 
-      if (trialExpired) {
-        showUpgradeModal('3 günlük ücretsiz deneme süreniz doldu. Pro plana geçerek sınırsız belge oluşturun.');
-        return;
+      const userPlan = profile?.plan || 'free';
+      const planExpired = profile?.plan_expires_at ? new Date(profile.plan_expires_at) < new Date() : false;
+      const isPro = userPlan !== 'free' && !planExpired;
+
+      if (!isPro) {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const { count } = await sb
+          .from('documents')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', session.user.id)
+          .gte('created_at', monthStart);
+
+        const TRIAL_DAYS = 3;
+        const createdAt = new Date(session?.user?.created_at || Date.now());
+        const trialExpired = (Date.now() - createdAt.getTime()) > TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
+        if (trialExpired) {
+          showUpgradeModal('3 günlük ücretsiz deneme süreniz doldu. Pro plana geçerek sınırsız belge oluşturun.');
+          return;
+        }
+        if ((count || 0) >= FREE_DOC_LIMIT) {
+          showUpgradeModal(`${FREE_DOC_LIMIT} belge hakkınızı kullandınız. Pro plana geçerek daha fazla belge oluşturun.`);
+          return;
+        }
+        if (selectedType === 'pptx') {
+          showUpgradeModal('PowerPoint (PPTX) oluşturma özelliği ücretli planlara özeldir. Pro plana geçerek kullanmaya başlayın.');
+          return;
+        }
+        if (pages > FREE_PAGE_LIMIT) {
+          showToast(`Ücretsiz planda en fazla ${FREE_PAGE_LIMIT} sayfa oluşturabilirsiniz.`, 'error', 4000);
+          if (pageRange) pageRange.value = FREE_PAGE_LIMIT;
+          if (pageValue) pageValue.textContent = FREE_PAGE_LIMIT;
+          return;
+        }
       }
-      if ((count || 0) >= FREE_DOC_LIMIT) {
-        showUpgradeModal(`${FREE_DOC_LIMIT} belge hakkınızı kullandınız. Pro plana geçerek daha fazla belge oluşturun.`);
-        return;
-      }
-    }
-
-    if (selectedType === 'pptx') {
-      showUpgradeModal('PowerPoint (PPTX) oluşturma özelliği ücretli planlara özeldir. Pro plana geçerek kullanmaya başlayın.');
-      return;
-    }
-
-    if (pages > FREE_PAGE_LIMIT) {
-      showToast(`Ücretsiz planda en fazla ${FREE_PAGE_LIMIT} sayfa oluşturabilirsiniz.`, 'error', 4000);
-      if (pageRange) pageRange.value = FREE_PAGE_LIMIT;
-      if (pageValue) pageValue.textContent = FREE_PAGE_LIMIT;
-      return;
     }
 
     const extraNotes = document.getElementById('extraNotes')?.value || '';
