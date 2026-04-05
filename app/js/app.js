@@ -7,7 +7,7 @@ const SUPABASE_URL      = 'https://bkeiwcxrdunicjvikfin.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWl3Y3hyZHVuaWNqdmlrZmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTI1MTQsImV4cCI6MjA5MDU2ODUxNH0.GX97jQJbnGynrC09uJUTTOse_J7ZlAmpEu0AZr6jBAU';
 
 /* Free plan limits */
-const FREE_DOC_LIMIT  = 10;  // trial: 3 days
+const FREE_DOC_LIMIT  = 10;
 const FREE_PAGE_LIMIT = 5;
 
 let _sb = null;
