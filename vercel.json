@@ -1,7 +1,17 @@
 {
   "outputDirectory": ".",
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/app/(.*)", "destination": "/app/$1" },
+    { "source": "/dashboard",  "destination": "/app/index.html" },
+    { "source": "/olustur",    "destination": "/app/create.html" },
+    { "source": "/gecmis",     "destination": "/app/history.html" },
+    { "source": "/sablonlar",  "destination": "/app/templates.html" },
+    { "source": "/planlar",    "destination": "/app/pricing.html" },
+    { "source": "/klasorler",  "destination": "/app/folders.html" },
+    { "source": "/ayarlar",    "destination": "/app/settings.html" },
+    { "source": "/yardim",     "destination": "/app/help.html" },
+    { "source": "/giris",      "destination": "/app/auth.html" },
+    { "source": "/app/(.*)",   "destination": "/app/$1" },
     { "source": "/((?!api/).*)", "destination": "/$1" }
   ]
 }
