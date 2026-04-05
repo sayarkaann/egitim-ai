@@ -416,7 +416,7 @@ async function initAuthPage() {
     btn.addEventListener('click', async () => {
       await getSB().auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/app/index.html' }
+        options: { redirectTo: 'https://notioai.net/app/index.html' }
       });
     });
   });
