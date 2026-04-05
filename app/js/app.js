@@ -407,7 +407,7 @@ async function initAuthPage() {
   });
 
   document.querySelectorAll('[data-action="google-auth"]').forEach(btn => {
-    btn.addEventListener('click', () => showToast('Google girişi yakında aktif olacak.', 'info'));
+    btn.style.display = 'none';
   });
 }
 
@@ -887,6 +887,11 @@ async function initCreatePage() {
       }
     }
 
+    if (selectedType === 'pptx') {
+      showUpgradeModal('PowerPoint (PPTX) oluşturma özelliği ücretli planlara özeldir. Pro plana geçerek kullanmaya başlayın.');
+      return;
+    }
+
     if (pages > FREE_PAGE_LIMIT) {
       showToast(`Ücretsiz planda en fazla ${FREE_PAGE_LIMIT} sayfa oluşturabilirsiniz.`, 'error', 4000);
       if (pageRange) pageRange.value = FREE_PAGE_LIMIT;
@@ -1268,8 +1273,8 @@ function markdownToHtml(text) {
       const num = parseInt(t.match(/^(\d+)\./)[1], 10);
       if (inUL) { html += '</ul>\n'; inUL = false; }
       if (!inOL) { html += `<ol start="${num}">\n`; inOL = true; olCount = num; }
-      else if (num !== olCount + 1) { html += `</ol>\n<ol start="${num}">\n`; olCount = num - 1; }
-      olCount++;
+      else if (num !== olCount + 1) { html += `</ol>\n<ol start="${num}">\n`; olCount = num; }
+      else { olCount++; }
       html += `<li>${inline(t.replace(/^\d+\. /, ''))}</li>\n`;
     } else {
       closeList();
