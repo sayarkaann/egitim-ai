@@ -390,7 +390,8 @@ async function initAuthPage() {
       showToast(msg, 'error');
     } else {
       showToast('Giriş başarılı!', 'success');
-      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      const nextPage = new URLSearchParams(window.location.search).get('next');
+      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html` : 'index.html'; }, 800);
     }
   });
 
@@ -432,7 +433,8 @@ async function initAuthPage() {
       showToast('E-postanıza bir onay linki gönderildi.', 'info', 7000);
     } else {
       showToast('Hesabınız oluşturuldu!', 'success');
-      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      const nextPage = new URLSearchParams(window.location.search).get('next');
+      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html` : 'index.html'; }, 800);
     }
   });
 
