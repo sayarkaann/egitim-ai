@@ -259,6 +259,10 @@ async function initAuthPage() {
     showResetPasswordModal();
     return;
   }
+  if (hashParams.get('error') === 'access_denied') {
+    initIcons();
+    showToast('Şifre sıfırlama linki geçersiz veya süresi dolmuş. Lütfen tekrar deneyin.', 'error', 6000);
+  }
 
   const { data: { session } } = await sb.auth.getSession();
   if (session) { window.location.href = 'index.html'; return; }
