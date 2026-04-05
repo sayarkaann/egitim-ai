@@ -1193,6 +1193,7 @@ em { font-style: italic; }
   }
   .sidebar.open {
     transform: translateX(0);
+    width: 240px;
   }
   .topbar {
     left: 0;
