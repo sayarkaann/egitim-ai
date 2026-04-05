@@ -251,8 +251,20 @@ async function initAuthPage() {
   if (!document.getElementById('authPage')) return;
 
   const sb = getSB();
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) { window.location.href = 'index.html'; return; }
+  const urlParams = new URLSearchParams(window.location.search);
+  const isReset = urlParams.get('reset') === '1';
+
+  // PASSWORD_RECOVERY event'ini session kontrolünden önce dinle
+  if (isReset) {
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        showResetPasswordModal();
+      }
+    });
+  } else {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { window.location.href = 'index.html'; return; }
+  }
 
   initIcons();
 
@@ -286,16 +298,6 @@ async function initAuthPage() {
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('mode') === 'register') showRegister();
-
-  // PASSWORD RECOVERY — link tıklandıktan sonra yeni şifre formu
-  if (params.get('reset') === '1') {
-    // Supabase token'ı URL hash'ten alır otomatik
-    getSB().auth.onAuthStateChange(async (event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        showResetPasswordModal();
-      }
-    });
-  }
 
   function showResetPasswordModal() {
     const modal = document.createElement('div');
