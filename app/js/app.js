@@ -1125,9 +1125,12 @@ async function generatePPTX(title, content, pages, imageUrl) {
     return;
   }
 
-  const slides = parseSlidecontent(content);
-  const pptx   = new PptxGenJS();
-  pptx.layout  = 'LAYOUT_WIDE';
+  const slides  = parseSlidecontent(content);
+  const pptx    = new PptxGenJS();
+  pptx.layout   = 'LAYOUT_WIDE';
+
+  // Convert image URL to base64 to avoid CORS issues
+  const imgData = imageUrl ? await imageUrlToBase64(imageUrl) : null;
 
   for (let i = 0; i < slides.length; i++) {
     const slide = slides[i];
@@ -1136,10 +1139,9 @@ async function generatePPTX(title, content, pages, imageUrl) {
     if (i === 0) {
       // Cover slide
       s.background = { color: '1a1a2e' };
-      // Add image to cover if available
-      if (imageUrl) {
+      if (imgData) {
         try {
-          s.addImage({ path: imageUrl, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 });
+          s.addImage({ data: imgData, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 });
         } catch (_) {}
       }
       s.addText(slide.title, {
@@ -1158,7 +1160,7 @@ async function generatePPTX(title, content, pages, imageUrl) {
       });
     } else {
       // Content slide — with optional image on right side
-      const hasImg = imageUrl && i === 1; // add image only to first content slide
+      const hasImg  = !!imgData && i === 1;
       const contentW = hasImg ? 7.5 : 12.3;
 
       s.background = { color: 'f8f9ff' };
@@ -1170,7 +1172,7 @@ async function generatePPTX(title, content, pages, imageUrl) {
 
       if (hasImg) {
         try {
-          s.addImage({ path: imageUrl, x: 8.1, y: 1.1, w: 4.8, h: 3.4, rounding: true });
+          s.addImage({ data: imgData, x: 8.1, y: 1.1, w: 4.8, h: 3.4, rounding: true });
         } catch (_) {}
       }
 

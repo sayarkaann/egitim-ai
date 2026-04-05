@@ -217,8 +217,8 @@ SLAYT 2: [Section Title]
 (continue up to ${pages} slides)
 
 RULES:
-- Each slide focuses on one topic, max 5 bullets
-- Bullets short and concise (max 10 words)
+- Each slide focuses on one topic, 3-5 bullets
+- Bullets informative and complete (1-2 sentences each, 15-25 words)
 - EXACTLY ${pages} slides
 - ALL text in ${langCfg.name}
 - No special characters, arrows or markdown symbols`;
