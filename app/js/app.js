@@ -1146,6 +1146,7 @@ async function generatePDF(title, content, imageUrl) {
   h2 { font-size: 14pt; color: #2d2d4e; margin: 24px 0 8px; }
   h3 { font-size: 12pt; color: #444; margin: 16px 0 6px; }
   p  { margin: 0 0 10px; }
+  p.soru { margin: 16px 0 6px; font-weight: 500; }
   ul, ol { margin: 0 0 10px 22px; }
   li { margin-bottom: 4px; }
   strong { color: #1a1a2e; }
@@ -1181,6 +1182,7 @@ async function generateWord(title, content, imageUrl) {
   h2     { font-size: 14pt; color: #2d2d4e; }
   h3     { font-size: 12pt; color: #444; }
   p      { margin-bottom: 8pt; }
+  p.soru { margin-top: 16pt; margin-bottom: 4pt; font-weight: bold; }
   ul, ol { margin-left: 18pt; }
   li     { margin-bottom: 3pt; }
   .footer{ color: #aaa; font-size: 9pt; margin-top: 36pt; border-top: 1px solid #eee; padding-top: 6pt; }
@@ -1370,7 +1372,8 @@ function markdownToHtml(text) {
       html += `<li>${inline(t.replace(/^\d+\. /, ''))}</li>\n`;
     } else {
       closeList();
-      html += `<p>${inline(t)}</p>\n`;
+      const cls = /^Soru\s*\d+\./.test(t) ? ' class="soru"' : '';
+      html += `<p${cls}>${inline(t)}</p>\n`;
     }
   }
   closeList();

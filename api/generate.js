@@ -326,6 +326,9 @@ FORMAT:
 
 KURALLAR:
 - Sınav/test ise: soruları "Soru 1.", "Soru 2.", "Soru 3." şeklinde numaralandır — asla markdown numaralı liste (1. 1. 1.) kullanma, numarayı her zaman açıkça yaz
+- Çoktan seçmeli sınav ise: HER soru için mutlaka A) B) C) D) şıkları olmalıdır, şıksız soru bırakma
+- Her sorudan sonra boş satır bırak, şıklar bittikten sonra da boş satır bırak
+- Kelimeleri asla birleştirme, her kelime arasında boşluk olsun (örn: "Bir Pizza" doğru, "BirPizza" yanlış)
 - Sadece içerik yaz, meta-yorum veya pedagojik açıklama ekleme
 - Yaklaşık ${pages} sayfa doldur
 - KRİTİK: TÜM içerik ${langCfg.name} dilinde yazılmalıdır — istisna yok`;
