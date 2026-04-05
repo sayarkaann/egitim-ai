@@ -1,7 +1,7 @@
 {
   "outputDirectory": ".",
-  "routes": [
-    { "src": "/app/(.*)", "dest": "/app/$1" },
-    { "src": "/(.*)", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/app/(.*)", "destination": "/app/$1" },
+    { "source": "/((?!api/).*)", "destination": "/$1" }
   ]
 }
