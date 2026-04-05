@@ -156,7 +156,7 @@ async function populateUserInfo() {
 
   document.querySelectorAll('[data-user-name]').forEach(el   => el.textContent = `${firstName} ${lastName}`.trim());
   document.querySelectorAll('[data-user-email]').forEach(el  => el.textContent = session.user.email);
-  getSB().from('profiles').select('plan').eq('id', session.user.id).single().then(({ data }) => {
+  getSB().from('profiles').select('plan').eq('id', session.user.id).maybeSingle().then(({ data }) => {
     const planLabels = { free: 'Ücretsiz', ogrenci: 'Öğrenci', pro: 'Pro', kurumsal: 'Kurumsal' };
     const label = planLabels[data?.plan || 'free'] || 'Ücretsiz';
     document.querySelectorAll('[data-user-plan]').forEach(el => el.textContent = label);
@@ -803,7 +803,7 @@ async function initCreatePage() {
 
   // Pre-fill from URL params (from templates)
   // Check user plan to restrict PPTX
-  const { data: profileData } = await getSB().from('profiles').select('plan, plan_expires_at').eq('id', session.user.id).single();
+  const { data: profileData } = await getSB().from('profiles').select('plan, plan_expires_at').eq('id', session.user.id).maybeSingle();
   const _userPlan = profileData?.plan || 'free';
   const _planExpired = profileData?.plan_expires_at ? new Date(profileData.plan_expires_at) < new Date() : false;
   const isProUser = _userPlan !== 'free' && !_planExpired;
@@ -898,7 +898,7 @@ async function initCreatePage() {
         .from('profiles')
         .select('plan, plan_expires_at')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
 
       const userPlan = profile?.plan || 'free';
       const planExpired = profile?.plan_expires_at ? new Date(profile.plan_expires_at) < new Date() : false;
