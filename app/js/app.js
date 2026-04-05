@@ -1046,7 +1046,7 @@ async function generatePDF(title, content, imageUrl) {
 <title>${escapeHtml(title)}</title>
 <style>
   * { box-sizing: border-box; }
-  body { font-family: Arial, Helvetica, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #222; font-size: 12pt; line-height: 1.7; }
+  body { font-family: Arial, Helvetica, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #222; font-size: 12pt; line-height: 1.7; hyphens: none; word-break: normal; }
   h1 { font-size: 20pt; color: #1a1a2e; border-bottom: 2px solid #e8855a; padding-bottom: 10px; margin: 0 0 24px; }
   h2 { font-size: 14pt; color: #2d2d4e; margin: 24px 0 8px; }
   h3 { font-size: 12pt; color: #444; margin: 16px 0 6px; }
@@ -1081,7 +1081,7 @@ async function generateWord(title, content, imageUrl) {
 <head>
 <meta charset="UTF-8">
 <style>
-  body   { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
+  body   { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.6; margin: 2cm; hyphens: none; word-break: normal; }
   h1     { font-size: 18pt; color: #1a1a2e; border-bottom: 1px solid #e8855a; padding-bottom: 6pt; }
   h2     { font-size: 14pt; color: #2d2d4e; }
   h3     { font-size: 12pt; color: #444; }
@@ -1238,12 +1238,11 @@ function parseSlidecontent(content) {
    MARKDOWN → HTML
 ===================================================== */
 function markdownToHtml(text) {
-  // Merge blank lines between consecutive numbered list items so numbering stays continuous
-  text = text.replace(/(\n\d+\.\s[^\n]+)\n\n+(\d+\.\s)/g, '$1\n$2');
   const lines = text.split('\n');
   let html    = '';
   let inUL    = false;
   let inOL    = false;
+  let olCount = 0;
 
   const closeList = () => {
     if (inUL) { html += '</ul>\n'; inUL = false; }
@@ -1258,16 +1257,19 @@ function markdownToHtml(text) {
   for (const line of lines) {
     const t = line.trim();
     if (!t) { closeList(); html += '\n'; continue; }
-    if (t.startsWith('# '))        { closeList(); html += `<h1>${inline(t.slice(2))}</h1>\n`; }
-    else if (t.startsWith('## '))  { closeList(); html += `<h2>${inline(t.slice(3))}</h2>\n`; }
-    else if (t.startsWith('### ')) { closeList(); html += `<h3>${inline(t.slice(4))}</h3>\n`; }
+    if (t.startsWith('# '))        { closeList(); olCount = 0; html += `<h1>${inline(t.slice(2))}</h1>\n`; }
+    else if (t.startsWith('## '))  { closeList(); olCount = 0; html += `<h2>${inline(t.slice(3))}</h2>\n`; }
+    else if (t.startsWith('### ')) { closeList(); olCount = 0; html += `<h3>${inline(t.slice(4))}</h3>\n`; }
     else if (/^[-*•] /.test(t)) {
       if (inOL) { html += '</ol>\n'; inOL = false; }
       if (!inUL){ html += '<ul>\n'; inUL = true; }
       html += `<li>${inline(t.replace(/^[-*•] /, ''))}</li>\n`;
     } else if (/^\d+\. /.test(t)) {
+      const num = parseInt(t.match(/^(\d+)\./)[1], 10);
       if (inUL) { html += '</ul>\n'; inUL = false; }
-      if (!inOL){ html += '<ol>\n'; inOL = true; }
+      if (!inOL) { html += `<ol start="${num}">\n`; inOL = true; olCount = num; }
+      else if (num !== olCount + 1) { html += `</ol>\n<ol start="${num}">\n`; olCount = num - 1; }
+      olCount++;
       html += `<li>${inline(t.replace(/^\d+\. /, ''))}</li>\n`;
     } else {
       closeList();

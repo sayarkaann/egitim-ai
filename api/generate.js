@@ -243,7 +243,7 @@ FORMAT:
 [Content]
 
 RULES:
-- If exam/test: number questions sequentially from 1, add answer key at the end
+- If exam/test: number questions with explicit numbers like "Soru 1.", "Soru 2.", "Soru 3." — NEVER use markdown numbered lists (1. 1. 1.), always write the number explicitly
 - Write content only, no meta-commentary or pedagogical explanations
 - Fill approximately ${pages} pages
 - CRITICAL: ALL content must be written in ${langCfg.name} — no exceptions`;
