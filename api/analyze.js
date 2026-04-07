@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     const prompt = buildSummaryPrompt(text, fileName, language);
 
     const requestBody = JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 4096,
       temperature: 0.5,
