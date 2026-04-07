@@ -10,11 +10,14 @@ module.exports = async (req, res) => {
 
   try {
     const body = req.body || {};
-    const { text, fileName, language } = body;
+    const { text: rawText, fileName, language } = body;
 
-    if (!text || !text.trim()) {
+    if (!rawText || !rawText.trim()) {
       return res.status(400).json({ error: 'Metin bulunamadı.' });
     }
+
+    // ~3000 token sınırı için metni kırp (1 token ≈ 4 karakter)
+    const text = rawText.slice(0, 12000);
 
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
