@@ -1138,6 +1138,7 @@ async function generatePDF(title, content, imageUrl) {
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>${escapeHtml(title)}</title>
 <style>
   * { box-sizing: border-box; }
@@ -1175,6 +1176,7 @@ async function generateWord(title, content, imageUrl) {
 
   const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta charset="UTF-8">
 <style>
   body   { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.6; margin: 2cm; hyphens: none; word-break: normal; }
@@ -1195,7 +1197,10 @@ ${markdownToHtml(content)}
 </body>
 </html>`;
 
-  const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+  const encoder = new TextEncoder();
+  const encoded = encoder.encode(html);
+  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const blob = new Blob([bom, encoded], { type: 'application/msword;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
