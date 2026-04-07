@@ -1701,4 +1701,149 @@ document.addEventListener('DOMContentLoaded', () => {
   initTemplatesPage();
   initSettingsPage();
   initFoldersPage();
+  initAnalyzePage();
 });
+
+/* =====================================================
+   ANALYZE PAGE
+===================================================== */
+async function initAnalyzePage() {
+  if (!document.getElementById('analyzePage')) return;
+
+  const session = await requireAuth();
+  if (!session) return;
+
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const resultPanel = document.getElementById('analyzeResult');
+  const summaryText = document.getElementById('summaryText');
+  const fileNameEl = document.getElementById('selectedFileName');
+
+  let extractedText = '';
+  let fileName = '';
+
+  // Drag & drop
+  dropZone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--accent)';
+  });
+  dropZone?.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = '';
+  });
+  dropZone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '';
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+  dropZone?.addEventListener('click', () => fileInput?.click());
+  fileInput?.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+
+  async function handleFile(file) {
+    // Max 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Dosya boyutu 10MB\'dan büyük olamaz.', 'error');
+      return;
+    }
+    fileName = file.name;
+    if (fileNameEl) fileNameEl.textContent = file.name;
+
+    // PDF veya DOCX metin çıkarma
+    if (file.name.endsWith('.pdf')) {
+      extractedText = await extractPdfText(file);
+    } else if (file.name.endsWith('.docx')) {
+      extractedText = await extractDocxText(file);
+    } else {
+      showToast('Sadece PDF ve DOCX dosyaları desteklenir.', 'error');
+      return;
+    }
+
+    if (!extractedText || extractedText.trim().length < 100) {
+      showToast('Dosyadan metin çıkarılamadı veya dosya çok kısa.', 'error');
+      return;
+    }
+
+    showToast(`"${file.name}" yüklendi. Özeti çıkarmak için butona tıklayın.`, 'success');
+    if (analyzeBtn) analyzeBtn.disabled = false;
+  }
+
+  async function extractPdfText(file) {
+    // PDF.js ile metin çıkar
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let text = '';
+      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(' ') + '\n';
+      }
+      return text;
+    } catch (e) {
+      showToast('PDF okunamadı: ' + e.message, 'error');
+      return '';
+    }
+  }
+
+  async function extractDocxText(file) {
+    // mammoth.js ile metin çıkar
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      return result.value;
+    } catch (e) {
+      showToast('DOCX okunamadı: ' + e.message, 'error');
+      return '';
+    }
+  }
+
+  analyzeBtn?.addEventListener('click', async () => {
+    if (!extractedText) return;
+
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = '<span class="spinner"></span> Özetleniyor...';
+    if (resultPanel) resultPanel.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: extractedText.slice(0, 12000), // token limiti için kırp
+          fileName,
+          language: 'tr',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      if (summaryText) summaryText.innerHTML = markdownToHtml(data.summary);
+      if (resultPanel) resultPanel.style.display = 'block';
+      showToast('Özet hazır!', 'success');
+
+      // Download buttons
+      document.getElementById('downloadSummaryPdf')?.addEventListener('click', () => {
+        generatePDF(fileName + ' — Özet', data.summary, null);
+      });
+      document.getElementById('downloadSummaryWord')?.addEventListener('click', () => {
+        generateWord(fileName + ' — Özet', data.summary, null);
+      });
+
+    } catch (err) {
+      showToast(err.message || 'Özet çıkarılamadı.', 'error');
+    } finally {
+      analyzeBtn.disabled = false;
+      analyzeBtn.innerHTML = '<i data-lucide="sparkles"></i> Özeti Çıkar';
+      initIcons(analyzeBtn);
+    }
+  });
+}

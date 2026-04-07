@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NotioAI — Makale Özetle</title>
+  <meta name="description" content="PDF veya Word dosyanızı yükleyin, yapay zeka sizin için özet çıkarsın." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/app.css?v=3" />
+</head>
+<body id="analyzePage">
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-icon">
+        <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.15"/>
+          <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+          <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="sidebar__logo-text">NotioAI</span>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__section-label" data-i18n="nav_section_general">Genel</div>
+      <a href="index.html" class="sidebar__link">
+        <i data-lucide="layout-dashboard"></i>
+        <span data-i18n="nav_dashboard">Dashboard</span>
+      </a>
+      <a href="create.html" class="sidebar__link">
+        <i data-lucide="plus-circle"></i>
+        <span data-i18n="nav_new_create">Yeni Oluştur</span>
+      </a>
+      <a href="analyze.html" class="sidebar__link sidebar__link--active">
+        <i data-lucide="file-search"></i>
+        <span>Makale Özetle</span>
+      </a>
+
+      <div class="sidebar__section-label" data-i18n="nav_section_library">Kütüphane</div>
+      <a href="history.html" class="sidebar__link">
+        <i data-lucide="clock"></i>
+        <span data-i18n="nav_history">Geçmiş</span>
+      </a>
+      <a href="templates.html" class="sidebar__link">
+        <i data-lucide="bookmark"></i>
+        <span data-i18n="nav_templates">Şablonlar</span>
+      </a>
+      <a href="folders.html" class="sidebar__link">
+        <i data-lucide="folder"></i>
+        <span data-i18n="nav_folders">Klasörlerim</span>
+      </a>
+
+      <div class="sidebar__section-label" data-i18n="nav_section_account">Hesap</div>
+      <a href="pricing.html" class="sidebar__link">
+        <i data-lucide="crown"></i>
+        <span data-i18n="nav_pricing">Planlar</span>
+      </a>
+      <a href="settings.html" class="sidebar__link">
+        <i data-lucide="settings"></i>
+        <span data-i18n="nav_settings">Ayarlar</span>
+      </a>
+      <a href="help.html" class="sidebar__link">
+        <i data-lucide="help-circle"></i>
+        <span data-i18n="nav_help">Yardım</span>
+      </a>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" data-user-avatar>?</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name" data-user-name>Yükleniyor...</div>
+          <div class="sidebar__user-plan" data-user-plan data-i18n="free_plan">Ücretsiz Plan</div>
+        </div>
+        <button class="btn btn--icon" data-action="logout" data-i18n-title="nav_logout" title="Çıkış Yap">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== TOPBAR ===== -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="mobile-topbar-toggle" id="sidebarToggle" aria-label="Menüyü Aç">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="topbar__breadcrumb">
+        <span>NotioAI</span>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+        <a href="index.html" style="color:var(--text-2)" data-i18n="nav_dashboard">Dashboard</a>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+        <span style="color:var(--text)">Makale Özetle</span>
+      </div>
+    </div>
+    <div class="topbar__right">
+      <button class="theme-toggle" id="themeToggle" title="Tema değiştir">
+        <i data-lucide="sun"></i>
+      </button>
+      <span class="plan-badge">
+        <i data-lucide="zap" style="width:11px;height:11px;"></i>
+        <span data-user-plan>Ücretsiz</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="app-content">
+    <div class="create-layout">
+
+      <div class="create-header fade-up">
+        <h1>Makale Özetle</h1>
+        <p>PDF veya Word dosyanızı yükleyin, yapay zeka sizin için özet çıkarsın.</p>
+      </div>
+
+      <!-- UPLOAD CARD -->
+      <div class="form-card fade-up fade-up--1">
+        <div class="form-card__title">
+          <i data-lucide="upload-cloud"></i>
+          <span>Dosya Yükle</span>
+        </div>
+
+        <div
+          id="dropZone"
+          style="
+            border: 2px dashed var(--border-h);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+          "
+        >
+          <div style="margin-bottom:12px;">
+            <i data-lucide="file-up" style="width:40px;height:40px;color:var(--text-3);"></i>
+          </div>
+          <p style="font-size:15px;font-weight:500;margin:0 0 6px;">Dosyayı buraya sürükleyin ya da tıklayın</p>
+          <p class="text-muted text-sm" style="margin:0 0 16px;">.pdf veya .docx — Maks. 10 MB</p>
+          <button type="button" id="browseBtn" class="btn btn--ghost" style="pointer-events:none;">
+            <i data-lucide="folder-open"></i>
+            <span>Dosya Seç</span>
+          </button>
+          <input
+            type="file"
+            id="fileInput"
+            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            style="display:none;"
+          />
+        </div>
+
+        <!-- Selected file info -->
+        <div id="fileInfo" style="display:none;margin-top:16px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);">
+            <i data-lucide="file-text" style="flex-shrink:0;color:var(--accent);"></i>
+            <div style="flex:1;min-width:0;">
+              <div id="fileName" style="font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+              <div id="fileSize" class="text-muted text-sm"></div>
+            </div>
+            <button type="button" id="removeFileBtn" class="btn btn--icon" title="Dosyayı kaldır">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error message -->
+        <div id="fileError" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;">
+          <p class="text-sm" style="color:#f87171;margin:0;">
+            <i data-lucide="alert-circle" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;"></i>
+            <span id="fileErrorMsg"></span>
+          </p>
+        </div>
+      </div>
+
+      <!-- OPTIONS CARD -->
+      <div class="form-card fade-up fade-up--2">
+        <div class="form-card__title">
+          <i data-lucide="sliders-horizontal"></i>
+          <span>Özet Seçenekleri</span>
+        </div>
+
+        <div class="options-grid">
+          <div class="form-group">
+            <label class="form-label" for="summaryLength">Özet Uzunluğu</label>
+            <select id="summaryLength" class="form-select">
+              <option value="short">Kısa (1–2 paragraf)</option>
+              <option value="medium" selected>Orta (3–5 paragraf)</option>
+              <option value="long">Uzun (detaylı)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="summaryStyle">Özet Tarzı</label>
+            <select id="summaryStyle" class="form-select">
+              <option value="academic">Akademik</option>
+              <option value="simple" selected>Sade ve Anlaşılır</option>
+              <option value="bullet">Madde Madde</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="fade-up fade-up--3" style="margin-bottom:16px;">
+        <button type="button" id="analyzeBtn" class="btn btn--primary btn--lg btn--full" disabled>
+          <i data-lucide="sparkles"></i>
+          <span>Özeti Çıkar</span>
+        </button>
+        <p class="text-muted text-sm" style="text-align:center;margin-top:10px;">
+          Analiz işlemi dosya boyutuna göre 10–30 saniye sürebilir.
+        </p>
+      </div>
+
+      <!-- PROGRESS PANEL -->
+      <div class="generation-panel fade-up" id="analyzePanel">
+        <div class="generation-panel__title">
+          <span class="spinner"></span>
+          <span>Makale Analiz Ediliyor</span>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="analyzeProgressFill"></div>
+        </div>
+
+        <div class="generation-steps">
+          <div class="generation-step" id="step-read">
+            <div class="generation-step__dot"></div>
+            <span>Dosya okunuyor...</span>
+          </div>
+          <div class="generation-step" id="step-extract">
+            <div class="generation-step__dot"></div>
+            <span>İçerik çıkarılıyor...</span>
+          </div>
+          <div class="generation-step" id="step-summarize">
+            <div class="generation-step__dot"></div>
+            <span>Yapay zeka özet yazıyor...</span>
+          </div>
+          <div class="generation-step" id="step-format-summary">
+            <div class="generation-step__dot"></div>
+            <span>Özet biçimlendiriliyor...</span>
+          </div>
+        </div>
+
+        <!-- RESULT -->
+        <div class="generation-result" id="analyzeResult">
+          <div class="generation-result__title">
+            <i data-lucide="check-circle"></i>
+            <span>Özet Hazır!</span>
+          </div>
+
+          <!-- Summary text -->
+          <div
+            id="summaryOutput"
+            style="
+              margin: 16px 0;
+              padding: 20px;
+              background: var(--bg-card);
+              border: 1px solid var(--border);
+              border-radius: var(--radius);
+              font-size: 14px;
+              line-height: 1.75;
+              color: var(--text-2);
+              white-space: pre-wrap;
+              text-align: left;
+              max-height: 400px;
+              overflow-y: auto;
+            "
+          ></div>
+
+          <div class="generation-result__actions">
+            <button class="btn btn--primary" id="downloadPdfBtn">
+              <i data-lucide="file-text"></i>
+              <span>PDF İndir</span>
+            </button>
+            <button class="btn btn--ghost" id="downloadWordBtn">
+              <i data-lucide="file-type"></i>
+              <span>Word İndir</span>
+            </button>
+            <button class="btn btn--ghost" id="newAnalyzeBtn">
+              <i data-lucide="refresh-cw"></i>
+              <span>Yeni Analiz</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';</script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <!-- i18n MUST load before app.js -->
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initI18n();
+
+      if (typeof initAnalyzePage === 'function') {
+        initAnalyzePage();
+      }
+
+      lucide.createIcons();
+
+      /* ---- Drag & Drop + File Selection ---- */
+      const dropZone     = document.getElementById('dropZone');
+      const fileInput    = document.getElementById('fileInput');
+      const browseBtn    = document.getElementById('browseBtn');
+      const fileInfo     = document.getElementById('fileInfo');
+      const fileName     = document.getElementById('fileName');
+      const fileSize     = document.getElementById('fileSize');
+      const removeBtn    = document.getElementById('removeFileBtn');
+      const fileError    = document.getElementById('fileError');
+      const fileErrorMsg = document.getElementById('fileErrorMsg');
+      const analyzeBtn   = document.getElementById('analyzeBtn');
+
+      const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+      const ALLOWED  = ['application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+      function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(1) + ' MB';
+      }
+
+      function showError(msg) {
+        fileErrorMsg.textContent = msg;
+        fileError.style.display  = 'block';
+        lucide.createIcons();
+      }
+
+      function clearError() {
+        fileError.style.display = 'none';
+      }
+
+      function setFile(file) {
+        clearError();
+
+        if (!ALLOWED.includes(file.type) && !file.name.match(/\.(pdf|docx)$/i)) {
+          showError('Yalnızca .pdf veya .docx dosyaları kabul edilir.');
+          return;
+        }
+
+        if (file.size > MAX_SIZE) {
+          showError('Dosya boyutu 10 MB sınırını aşıyor.');
+          return;
+        }
+
+        fileName.textContent     = file.name;
+        fileSize.textContent     = formatBytes(file.size);
+        fileInfo.style.display   = 'block';
+        analyzeBtn.disabled      = false;
+        fileInput._selectedFile  = file;
+        lucide.createIcons();
+      }
+
+      function clearFile() {
+        fileInput.value          = '';
+        fileInput._selectedFile  = null;
+        fileInfo.style.display   = 'none';
+        analyzeBtn.disabled      = true;
+        clearError();
+      }
+
+      /* Click on drop zone opens file picker */
+      dropZone.addEventListener('click', () => fileInput.click());
+      browseBtn.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) setFile(fileInput.files[0]);
+      });
+
+      removeBtn.addEventListener('click', e => { e.stopPropagation(); clearFile(); });
+
+      /* Drag events */
+      dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--accent)';
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = 'var(--border-h)';
+      });
+
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--border-h)';
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) setFile(file);
+      });
+
+      /* ---- Analyze button ---- */
+      const analyzePanel       = document.getElementById('analyzePanel');
+      const analyzeProgressFill = document.getElementById('analyzeProgressFill');
+      const analyzeResult      = document.getElementById('analyzeResult');
+      const summaryOutput      = document.getElementById('summaryOutput');
+      const steps              = ['step-read', 'step-extract', 'step-summarize', 'step-format-summary'];
+
+      function resetPanel() {
+        analyzePanel.classList.remove('visible');
+        analyzeResult.classList.remove('visible');
+        analyzeProgressFill.style.width = '0%';
+        steps.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove('active', 'done');
+        });
+      }
+
+      function activateStep(index) {
+        steps.forEach((id, i) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (i < index)       el.classList.add('done');
+          else if (i === index) el.classList.add('active');
+          else                 el.classList.remove('active', 'done');
+        });
+        analyzeProgressFill.style.width = ((index + 1) / steps.length * 100) + '%';
+      }
+
+      analyzeBtn.addEventListener('click', async () => {
+        /* If initAnalyzePage handles this, it will override — this is a fallback UI demo */
+        if (typeof initAnalyzePage === 'function') return;
+
+        analyzeBtn.disabled = true;
+        resetPanel();
+        analyzePanel.classList.add('visible');
+
+        for (let i = 0; i < steps.length; i++) {
+          activateStep(i);
+          await new Promise(r => setTimeout(r, 900));
+        }
+
+        analyzeProgressFill.style.width = '100%';
+        analyzeResult.classList.add('visible');
+        summaryOutput.textContent = 'Bu sayfa için özet çıkarma işlevi yakında eklenecek.';
+        analyzeBtn.disabled = false;
+        lucide.createIcons();
+      });
+
+      /* ---- Result action buttons ---- */
+      document.getElementById('newAnalyzeBtn').addEventListener('click', () => {
+        clearFile();
+        resetPanel();
+      });
+
+      document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+        /* app.js'deki initAnalyzePage tarafından yönetilecek */
+        alert('PDF indirme işlevi app.js üzerinden etkinleştirilecek.');
+      });
+
+      document.getElementById('downloadWordBtn').addEventListener('click', () => {
+        /* app.js'deki initAnalyzePage tarafından yönetilecek */
+        alert('Word indirme işlevi app.js üzerinden etkinleştirilecek.');
+      });
+    });
+  </script>
+</body>
+</html>
