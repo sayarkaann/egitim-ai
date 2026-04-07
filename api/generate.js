@@ -12,33 +12,22 @@ module.exports = async (req, res) => {
     const body = req.body || {};
     const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject } = body;
 
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    const GROQ_API_KEY   = process.env.GROQ_API_KEY;
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
-    if (!OPENAI_API_KEY && !GROQ_API_KEY) {
+    if (!GROQ_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
 
     const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject);
 
-    let content;
-    if (OPENAI_API_KEY) {
-      const requestBody = JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 8192,
-        temperature: 0.7,
-      });
-      content = await callOpenAI(OPENAI_API_KEY, requestBody);
-    } else {
-      const requestBody = JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 8192,
-        temperature: 0.7,
-      });
-      content = await callGroq(GROQ_API_KEY, requestBody);
-    }
+    const requestBody = JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 8192,
+      temperature: 0.7,
+    });
+
+    const content = await callGroq(GROQ_API_KEY, requestBody);
 
     if (!content) {
       return res.status(500).json({ error: 'İçerik üretilemedi, tekrar deneyin.' });
