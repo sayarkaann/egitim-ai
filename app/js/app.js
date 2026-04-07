@@ -1834,10 +1834,10 @@ async function initAnalyzePage() {
       showToast('Özet hazır!', 'success');
 
       // Download buttons
-      document.getElementById('downloadSummaryPdf')?.addEventListener('click', () => {
+      document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
         generatePDF(fileName + ' — Özet', data.summary, null);
       });
-      document.getElementById('downloadSummaryWord')?.addEventListener('click', () => {
+      document.getElementById('downloadWordBtn')?.addEventListener('click', () => {
         generateWord(fileName + ' — Özet', data.summary, null);
       });
 
