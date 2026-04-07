@@ -10,27 +10,27 @@ module.exports = async (req, res) => {
 
   try {
     const body = req.body || {};
-    const { text: rawText, fileName, language } = body;
+    const { text: rawText, fileName, language, summaryLength = 'medium', summaryStyle = 'simple' } = body;
 
     if (!rawText || !rawText.trim()) {
       return res.status(400).json({ error: 'Metin bulunamadı.' });
     }
 
-    // ~3000 token sınırı için metni kırp (1 token ≈ 4 karakter)
-    const text = rawText.slice(0, 6000);
+    // Uzun belgeler için akıllı örnekleme: başından + ortasından + sonundan al
+    const text = smartSample(rawText, 6000);
 
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
     if (!GROQ_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
 
-    const prompt = buildSummaryPrompt(text, fileName, language);
+    const maxTokens = summaryLength === 'short' ? 800 : summaryLength === 'long' ? 2500 : 1500;
+    const prompt = buildSummaryPrompt(text, fileName, language, summaryLength, summaryStyle);
 
     const requestBody = JSON.stringify({
       model: 'llama-3.1-8b-instant',
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 1024,
+      max_tokens: maxTokens,
       temperature: 0.5,
     });
 
@@ -46,6 +46,18 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: err.message || 'Bilinmeyen hata' });
   }
 };
+
+/* ── Akıllı Metin Örnekleme ── */
+function smartSample(text, maxChars) {
+  if (text.length <= maxChars) return text;
+
+  // Baştan 2500, ortadan 2000, sondan 1500 al
+  const start  = text.slice(0, 2500);
+  const mid    = text.slice(Math.floor(text.length / 2) - 1000, Math.floor(text.length / 2) + 1000);
+  const end    = text.slice(-1500);
+
+  return `${start}\n\n[...]\n\n${mid}\n\n[...]\n\n${end}`;
+}
 
 /* ── Groq API ── */
 function callGroq(apiKey, body) {
@@ -76,36 +88,38 @@ function callGroq(apiKey, body) {
     });
 
     req.on('error', (err) => reject(err));
-    req.setTimeout(9000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
+    req.setTimeout(25000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
     req.write(body);
     req.end();
   });
 }
 
 /* ── Özet Prompt ── */
-function buildSummaryPrompt(text, fileName, language) {
+function buildSummaryPrompt(text, fileName, language, summaryLength, summaryStyle) {
+  const isTr = language !== 'en';
   const fileLabel = fileName ? ` ("${fileName}")` : '';
-  const langNote = language === 'en'
-    ? 'Summarize the following academic paper or document in English.'
-    : 'Aşağıdaki akademik makale veya belgeyi Türkçe olarak özetle.';
 
-  const sections = language === 'en'
-    ? `The summary should include the following sections:
-- Main Topic: (1-2 sentences)
-- Key Findings: (bullet points, 5-8 items)
-- Methodology: (if present, 1-2 sentences)
-- Conclusion and Recommendations: (2-3 sentences)
-- Key Concepts: (comma-separated list)`
-    : `Özet şu bölümleri içersin:
-- Ana Konu: (1-2 cümle)
-- Temel Bulgular: (madde madde, 5-8 madde)
-- Yöntem: (varsa, 1-2 cümle)
-- Sonuç ve Öneriler: (2-3 cümle)
-- Anahtar Kavramlar: (virgülle ayrılmış liste)`;
+  const lengthInstr = isTr
+    ? ({ short: '1–2 paragraf kısa özet yaz.', medium: '3–5 paragraf orta uzunlukta kapsamlı özet yaz.', long: 'Tüm bölümleri detaylı şekilde ele alan uzun ve kapsamlı bir özet yaz (10–15 paragraf).' })[summaryLength] || ''
+    : ({ short: 'Write a brief 1–2 paragraph summary.', medium: 'Write a comprehensive 3–5 paragraph summary.', long: 'Write a detailed, long-form summary covering all sections (10–15 paragraphs).' })[summaryLength] || '';
 
-  const docLabel = language === 'en' ? 'Document text' : 'Belge metni';
+  const styleInstr = isTr
+    ? ({ academic: 'Akademik, bilimsel ve resmi bir dil kullan.', simple: 'Sade, anlaşılır ve akıcı bir dil kullan.', bullet: 'Madde madde liste formatında yaz, cümle kurmak yerine maddeler halinde özetle.' })[summaryStyle] || ''
+    : ({ academic: 'Use academic, formal, and scientific language.', simple: 'Use plain, clear, and accessible language.', bullet: 'Write in bullet-point format, summarizing as concise items rather than full sentences.' })[summaryStyle] || '';
 
-  return `${langNote}${fileLabel}
+  const sections = isTr
+    ? `Özet şu bölümleri içersin:\n- Ana Konu\n- Temel Bulgular\n- Yöntem (varsa)\n- Sonuç ve Öneriler\n- Anahtar Kavramlar`
+    : `The summary should include:\n- Main Topic\n- Key Findings\n- Methodology (if present)\n- Conclusion and Recommendations\n- Key Concepts`;
+
+  const intro = isTr
+    ? `Aşağıdaki akademik makale veya belgeyi${fileLabel} Türkçe olarak özetle.`
+    : `Summarize the following academic paper or document${fileLabel} in English.`;
+
+  const docLabel = isTr ? 'Belge metni' : 'Document text';
+
+  return `${intro}
+
+${lengthInstr} ${styleInstr}
 
 ${sections}
 

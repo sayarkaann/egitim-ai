@@ -454,6 +454,8 @@
       document.getElementById('newAnalyzeBtn').addEventListener('click', () => {
         clearFile();
         resetPanel();
+        document.getElementById('analyzePanel')?.classList.remove('visible');
+        document.getElementById('analyzeResult')?.classList.remove('visible');
       });
 
       /* downloadPdfBtn ve downloadWordBtn app.js'deki initAnalyzePage tarafından yönetilir */

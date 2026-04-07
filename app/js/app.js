@@ -1707,6 +1707,19 @@ document.addEventListener('DOMContentLoaded', () => {
 /* =====================================================
    ANALYZE PAGE
 ===================================================== */
+/* Özet plan limitleri */
+const SUMMARY_LIMITS = { free: 3, ogrenci: 10, pro: 30, kurumsal: 100 };
+
+function getSummaryUsage() {
+  const key = `summary_${new Date().toISOString().slice(0, 7)}`; // YYYY-MM
+  return parseInt(localStorage.getItem(key) || '0', 10);
+}
+
+function incrementSummaryUsage() {
+  const key = `summary_${new Date().toISOString().slice(0, 7)}`;
+  localStorage.setItem(key, String(getSummaryUsage() + 1));
+}
+
 async function initAnalyzePage() {
   if (!document.getElementById('analyzePage')) return;
 
@@ -1718,16 +1731,29 @@ async function initAnalyzePage() {
   initLogout();
   initIcons();
 
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  const analyzeBtn = document.getElementById('analyzeBtn');
+  const dropZone    = document.getElementById('dropZone');
+  const fileInput   = document.getElementById('fileInput');
+  const analyzeBtn  = document.getElementById('analyzeBtn');
   const analyzePanel = document.getElementById('analyzePanel');
   const resultPanel = document.getElementById('analyzeResult');
   const summaryText = document.getElementById('summaryOutput');
-  const fileNameEl = document.getElementById('selectedFileName');
+
+  // Özeti seçilemez yap
+  if (summaryText) {
+    summaryText.style.userSelect = 'none';
+    summaryText.style.webkitUserSelect = 'none';
+    summaryText.addEventListener('copy', e => e.preventDefault());
+    summaryText.addEventListener('contextmenu', e => e.preventDefault());
+  }
 
   let extractedText = '';
   let fileName = '';
+
+  // Kullanıcı planını al
+  let userPlan = 'free';
+  getSB().from('profiles').select('plan').eq('id', session.user.id).maybeSingle().then(({ data }) => {
+    userPlan = data?.plan || 'free';
+  });
 
   // Drag & drop
   dropZone?.addEventListener('dragover', (e) => {
@@ -1749,15 +1775,12 @@ async function initAnalyzePage() {
   });
 
   async function handleFile(file) {
-    // Max 10MB
     if (file.size > 10 * 1024 * 1024) {
       showToast('Dosya boyutu 10MB\'dan büyük olamaz.', 'error');
       return;
     }
     fileName = file.name;
-    if (fileNameEl) fileNameEl.textContent = file.name;
 
-    // PDF veya DOCX metin çıkarma
     if (file.name.endsWith('.pdf')) {
       extractedText = await extractPdfText(file);
     } else if (file.name.endsWith('.docx')) {
@@ -1777,12 +1800,11 @@ async function initAnalyzePage() {
   }
 
   async function extractPdfText(file) {
-    // PDF.js ile metin çıkar
     try {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let text = '';
-      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+      for (let i = 1; i <= Math.min(pdf.numPages, 100); i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
         text += content.items.map(item => item.str).join(' ') + '\n';
@@ -1795,7 +1817,6 @@ async function initAnalyzePage() {
   }
 
   async function extractDocxText(file) {
-    // mammoth.js ile metin çıkar
     try {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer });
@@ -1809,6 +1830,17 @@ async function initAnalyzePage() {
   analyzeBtn?.addEventListener('click', async () => {
     if (!extractedText) return;
 
+    // Plan limiti kontrolü
+    const limit = SUMMARY_LIMITS[userPlan] ?? SUMMARY_LIMITS.free;
+    const used  = getSummaryUsage();
+    if (used >= limit) {
+      showUpgradeModal(`Bu ay ${limit} makale özetleme hakkınızı kullandınız. Daha fazlası için planınızı yükseltin.`);
+      return;
+    }
+
+    const summaryLength = document.getElementById('summaryLength')?.value || 'medium';
+    const summaryStyle  = document.getElementById('summaryStyle')?.value  || 'simple';
+
     analyzeBtn.disabled = true;
     analyzeBtn.innerHTML = '<span class="spinner"></span> Özetleniyor...';
     if (resultPanel) resultPanel.classList.remove('visible');
@@ -1818,11 +1850,7 @@ async function initAnalyzePage() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: extractedText.slice(0, 12000), // token limiti için kırp
-          fileName,
-          language: 'tr',
-        }),
+        body: JSON.stringify({ text: extractedText, fileName, language: 'tr', summaryLength, summaryStyle }),
       });
 
       const data = await res.json();
@@ -1831,15 +1859,25 @@ async function initAnalyzePage() {
       if (summaryText) summaryText.innerHTML = markdownToHtml(data.summary);
       if (analyzePanel) analyzePanel.classList.add('visible');
       if (resultPanel) resultPanel.classList.add('visible');
-      showToast('Özet hazır!', 'success');
 
-      // Download buttons
-      document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
-        generatePDF(fileName + ' — Özet', data.summary, null);
-      });
-      document.getElementById('downloadWordBtn')?.addEventListener('click', () => {
-        generateWord(fileName + ' — Özet', data.summary, null);
-      });
+      incrementSummaryUsage();
+
+      const remaining = limit - getSummaryUsage();
+      showToast(`Özet hazır! Bu ay ${remaining} hakkınız kaldı.`, 'success');
+
+      // İndirme butonları (her tıklamada yeni listener eklememek için clone trick)
+      const pdfBtn  = document.getElementById('downloadPdfBtn');
+      const wordBtn = document.getElementById('downloadWordBtn');
+      if (pdfBtn) {
+        const fresh = pdfBtn.cloneNode(true);
+        pdfBtn.replaceWith(fresh);
+        fresh.addEventListener('click', () => generatePDF(fileName + ' — Özet', data.summary, null));
+      }
+      if (wordBtn) {
+        const fresh = wordBtn.cloneNode(true);
+        wordBtn.replaceWith(fresh);
+        fresh.addEventListener('click', () => generateWord(fileName + ' — Özet', data.summary, null));
+      }
 
     } catch (err) {
       showToast(err.message || 'Özet çıkarılamadı.', 'error');
