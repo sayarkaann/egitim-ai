@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
     }
 
     // ~3000 token sınırı için metni kırp (1 token ≈ 4 karakter)
-    const text = rawText.slice(0, 12000);
+    const text = rawText.slice(0, 6000);
 
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
     const requestBody = JSON.stringify({
       model: 'llama-3.1-8b-instant',
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 4096,
+      max_tokens: 1024,
       temperature: 0.5,
     });
 
