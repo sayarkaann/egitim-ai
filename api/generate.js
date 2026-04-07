@@ -12,22 +12,33 @@ module.exports = async (req, res) => {
     const body = req.body || {};
     const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject } = body;
 
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    const GROQ_API_KEY   = process.env.GROQ_API_KEY;
 
-    if (!GROQ_API_KEY) {
+    if (!OPENAI_API_KEY && !GROQ_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
 
     const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject);
 
-    const requestBody = JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 8192,
-      temperature: 0.7,
-    });
-
-    const content = await callGroq(GROQ_API_KEY, requestBody);
+    let content;
+    if (OPENAI_API_KEY) {
+      const requestBody = JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 8192,
+        temperature: 0.7,
+      });
+      content = await callOpenAI(OPENAI_API_KEY, requestBody);
+    } else {
+      const requestBody = JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 8192,
+        temperature: 0.7,
+      });
+      content = await callGroq(GROQ_API_KEY, requestBody);
+    }
 
     if (!content) {
       return res.status(500).json({ error: 'İçerik üretilemedi, tekrar deneyin.' });
@@ -39,6 +50,41 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: err.message || 'Bilinmeyen hata' });
   }
 };
+
+/* ── OpenAI API ── */
+function callOpenAI(apiKey, body) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.openai.com',
+      path: '/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.error) { reject(new Error(json.error.message || 'OpenAI API hatası')); return; }
+          resolve(json.choices?.[0]?.message?.content || '');
+        } catch (e) {
+          reject(new Error('Yanıt işlenemedi: ' + data.slice(0, 200)));
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.setTimeout(55000, () => { req.destroy(); reject(new Error('İstek zaman aşımına uğradı.')); });
+    req.write(body);
+    req.end();
+  });
+}
 
 /* ── Groq API ── */
 function callGroq(apiKey, body) {
