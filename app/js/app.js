@@ -1721,8 +1721,9 @@ async function initAnalyzePage() {
   const dropZone = document.getElementById('dropZone');
   const fileInput = document.getElementById('fileInput');
   const analyzeBtn = document.getElementById('analyzeBtn');
+  const analyzePanel = document.getElementById('analyzePanel');
   const resultPanel = document.getElementById('analyzeResult');
-  const summaryText = document.getElementById('summaryText');
+  const summaryText = document.getElementById('summaryOutput');
   const fileNameEl = document.getElementById('selectedFileName');
 
   let extractedText = '';
@@ -1810,7 +1811,8 @@ async function initAnalyzePage() {
 
     analyzeBtn.disabled = true;
     analyzeBtn.innerHTML = '<span class="spinner"></span> Özetleniyor...';
-    if (resultPanel) resultPanel.style.display = 'none';
+    if (resultPanel) resultPanel.classList.remove('visible');
+    if (analyzePanel) analyzePanel.classList.remove('visible');
 
     try {
       const res = await fetch('/api/analyze', {
@@ -1827,7 +1829,8 @@ async function initAnalyzePage() {
       if (data.error) throw new Error(data.error);
 
       if (summaryText) summaryText.innerHTML = markdownToHtml(data.summary);
-      if (resultPanel) resultPanel.style.display = 'block';
+      if (analyzePanel) analyzePanel.classList.add('visible');
+      if (resultPanel) resultPanel.classList.add('visible');
       showToast('Özet hazır!', 'success');
 
       // Download buttons
