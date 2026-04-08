@@ -1,19 +1,36 @@
 const https = require('https');
+const { getUser, getProfile, checkDocLimit, incrementDocs } = require('./_supabase');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
+    // ── Auth kontrolü ──
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    const user = await getUser(token);
+    if (!user) {
+      return res.status(401).json({ error: 'Oturum açmanız gerekiyor.' });
+    }
+
     const body = req.body || {};
-    const { topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject } = body;
+    const { topic, extraNotes, type, audience, pages: rawPages, gradeLevel, language, tone, subject } = body;
+    const pages = parseInt(rawPages, 10) || 5;
+
+    // ── Plan & limit kontrolü ──
+    const profile = await getProfile(user.id);
+    const limitCheck = checkDocLimit(profile, pages);
+    if (!limitCheck.allowed) {
+      return res.status(429).json({ error: limitCheck.message, code: limitCheck.code });
+    }
 
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
     if (!GROQ_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
@@ -32,6 +49,9 @@ module.exports = async (req, res) => {
     if (!content) {
       return res.status(500).json({ error: 'İçerik üretilemedi, tekrar deneyin.' });
     }
+
+    // ── Başarılı — sayacı artır ──
+    await incrementDocs(user.id, profile).catch(() => {}); // sayaç hatası ana akışı kesmez
 
     return res.status(200).json({ content });
 

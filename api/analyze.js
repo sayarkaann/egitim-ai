@@ -1,19 +1,36 @@
 const https = require('https');
+const { getUser, getProfile, checkAnalyzeLimit, incrementAnalyze } = require('./_supabase');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
+    // ── Auth kontrolü ──
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    const user = await getUser(token);
+    if (!user) {
+      return res.status(401).json({ error: 'Oturum açmanız gerekiyor.' });
+    }
+
     const body = req.body || {};
     const { text: rawText, fileName, language, summaryLength = 'medium', summaryStyle = 'simple' } = body;
 
     if (!rawText || !rawText.trim()) {
       return res.status(400).json({ error: 'Metin bulunamadı.' });
+    }
+
+    // ── Plan & limit kontrolü ──
+    const profile = await getProfile(user.id);
+    const limitCheck = checkAnalyzeLimit(profile);
+    if (!limitCheck.allowed) {
+      return res.status(429).json({ error: limitCheck.message, code: limitCheck.code });
     }
 
     // Uzun belgeler için akıllı örnekleme: başından + ortasından + sonundan al
@@ -39,6 +56,9 @@ module.exports = async (req, res) => {
     if (!summary) {
       return res.status(500).json({ error: 'Özet üretilemedi, tekrar deneyin.' });
     }
+
+    // ── Başarılı — sayacı artır ──
+    await incrementAnalyze(user.id, profile).catch(() => {}); // sayaç hatası ana akışı kesmez
 
     return res.status(200).json({ summary });
 

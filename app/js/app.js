@@ -1057,9 +1057,13 @@ async function initCreatePage() {
     }, 1600);
 
     try {
+      const { data: { session: currentSession } } = await getSB().auth.getSession();
       const response = await fetch('/api/generate', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${currentSession?.access_token || ''}`,
+        },
         body: JSON.stringify({
           topic:      params.topic,
           extraNotes: params.extraNotes,
@@ -1075,8 +1079,15 @@ async function initCreatePage() {
 
       clearInterval(stepTimer);
 
-      if (!response.ok) throw new Error('Sunucu hatası. Lütfen tekrar deneyin.');
-      const json = await response.json();
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 401) { window.location.href = 'auth.html'; return; }
+        if (response.status === 429 || json.code === 'DOC_LIMIT' || json.code === 'PAGE_LIMIT') {
+          showUpgradeModal(json.error || 'Belge limitinize ulaştınız.');
+          throw new Error(json.error || 'Limit aşıldı.');
+        }
+        throw new Error(json.error || 'Sunucu hatası. Lütfen tekrar deneyin.');
+      }
       if (json.error) throw new Error(json.error);
 
       generatedContent = json.content;
@@ -1847,13 +1858,25 @@ async function initAnalyzePage() {
     if (analyzePanel) analyzePanel.classList.remove('visible');
 
     try {
+      const { data: { session: analyzeSession } } = await getSB().auth.getSession();
       const res = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${analyzeSession?.access_token || ''}`,
+        },
         body: JSON.stringify({ text: extractedText, fileName, language: 'tr', summaryLength, summaryStyle }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) { window.location.href = 'auth.html'; return; }
+        if (res.status === 429 || data.code === 'ANALYZE_LIMIT') {
+          showUpgradeModal(data.error || 'Özet limitinize ulaştınız.');
+          throw new Error(data.error || 'Limit aşıldı.');
+        }
+        throw new Error(data.error || 'Sunucu hatası.');
+      }
       if (data.error) throw new Error(data.error);
 
       if (summaryText) summaryText.innerHTML = markdownToHtml(data.summary);
