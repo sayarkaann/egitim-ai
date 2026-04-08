@@ -1350,9 +1350,39 @@ function parseSlidecontent(content) {
 }
 
 /* =====================================================
+   UNICODE SANITIZE — PDF/Word için özel karakterleri ASCII'ye çevir
+===================================================== */
+function sanitizeForDocument(text) {
+  return text
+    .replace(/[→⇒⟹➜➡►▶➔]/g, '->')
+    .replace(/[←⟵⬅]/g, '<-')
+    .replace(/[↑↗]/g, '^')
+    .replace(/[↓↘]/g, 'v')
+    .replace(/[—–−]/g, '-')
+    .replace(/[""«»„]/g, '"')
+    .replace(/[''‚‹›]/g, "'")
+    .replace(/[•◦▸▹◆◇■□●○▪▫✦✧]/g, '-')
+    .replace(/[✓✔☑]/g, '(+)')
+    .replace(/[✗✘☒]/g, '(-)')
+    .replace(/[…]/g, '...')
+    .replace(/[×]/g, 'x')
+    .replace(/[÷]/g, '/')
+    .replace(/[±]/g, '+/-')
+    .replace(/[°]/g, ' derece')
+    .replace(/[²]/g, '^2')
+    .replace(/[³]/g, '^3')
+    .replace(/[½]/g, '1/2')
+    .replace(/[¼]/g, '1/4')
+    .replace(/[¾]/g, '3/4')
+    .replace(/[\u2000-\u200F\u2028-\u202F\u205F-\u206F]/g, ' ') // sıfır genişlikli boşluklar
+    .replace(/[\uFFFD\uFFFE\uFFFF]/g, '');                       // replacement chars
+}
+
+/* =====================================================
    MARKDOWN → HTML
 ===================================================== */
 function markdownToHtml(text) {
+  text = sanitizeForDocument(text);
   const lines = text.split('\n');
   let html    = '';
   let inUL    = false;
