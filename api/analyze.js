@@ -1,8 +1,9 @@
 const https = require('https');
 const { getUser, getProfile, checkAnalyzeLimit, incrementAnalyze } = require('./_supabase');
+const { rateLimit } = require('./_ratelimit');
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://notioai.net');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -17,6 +18,12 @@ module.exports = async (req, res) => {
     const user = await getUser(token);
     if (!user) {
       return res.status(401).json({ error: 'Oturum açmanız gerekiyor.' });
+    }
+
+    // ── Rate limit: dakikada max 5 istek / kullanıcı ──
+    const rl = rateLimit(`analyze:${user.id}`, 5, 60 * 1000);
+    if (!rl.allowed) {
+      return res.status(429).json({ error: 'Çok fazla istek gönderdiniz. Lütfen bir dakika bekleyin.' });
     }
 
     const body = req.body || {};

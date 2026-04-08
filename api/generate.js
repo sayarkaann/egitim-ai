@@ -1,8 +1,9 @@
 const https = require('https');
 const { getUser, getProfile, checkDocLimit, incrementDocs } = require('./_supabase');
+const { rateLimit } = require('./_ratelimit');
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://notioai.net');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -19,9 +20,43 @@ module.exports = async (req, res) => {
       return res.status(401).json({ error: 'Oturum açmanız gerekiyor.' });
     }
 
+    // ── Rate limit: dakikada max 10 istek / kullanıcı ──
+    const rl = rateLimit(`gen:${user.id}`, 10, 60 * 1000);
+    if (!rl.allowed) {
+      return res.status(429).json({ error: 'Çok fazla istek gönderdiniz. Lütfen bir dakika bekleyin.' });
+    }
+
     const body = req.body || {};
     const { topic, extraNotes, type, audience, pages: rawPages, gradeLevel, language, tone, subject } = body;
-    const pages = parseInt(rawPages, 10) || 5;
+
+    // ── Input validation ──
+    const VALID_TYPES     = ['pdf', 'word', 'pptx'];
+    const VALID_LANGUAGES = ['tr', 'en', 'de', 'fr', 'ar', 'es', 'ru'];
+    const VALID_TONES     = ['formal', 'friendly', 'academic', 'simple'];
+    const VALID_AUDIENCES = ['teacher', 'student'];
+
+    if (!topic || String(topic).trim().length < 3) {
+      return res.status(400).json({ error: 'Konu en az 3 karakter olmalıdır.' });
+    }
+    if (String(topic).length > 300) {
+      return res.status(400).json({ error: 'Konu çok uzun (max 300 karakter).' });
+    }
+    if (!VALID_TYPES.includes(type)) {
+      return res.status(400).json({ error: 'Geçersiz belge türü.' });
+    }
+    if (language && !VALID_LANGUAGES.includes(language)) {
+      return res.status(400).json({ error: 'Geçersiz dil.' });
+    }
+    if (tone && !VALID_TONES.includes(tone)) {
+      return res.status(400).json({ error: 'Geçersiz ton.' });
+    }
+    if (audience && !VALID_AUDIENCES.includes(audience)) {
+      return res.status(400).json({ error: 'Geçersiz hedef kitle.' });
+    }
+    if (extraNotes && String(extraNotes).length > 1000) {
+      return res.status(400).json({ error: 'Ek notlar çok uzun (max 1000 karakter).' });
+    }
+    const pages = Math.min(Math.max(parseInt(rawPages, 10) || 5, 1), 30);
 
     // ── Plan & limit kontrolü ──
     const profile = await getProfile(user.id);
