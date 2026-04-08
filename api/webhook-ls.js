@@ -1,5 +1,7 @@
 'use strict';
 const crypto = require('crypto');
+
+module.exports.config = { api: { bodyParser: false } };
 const { updateProfile, getProfile, sbRequest } = require('./_supabase');
 
 /* ── Variant ID → plan mapping ── */

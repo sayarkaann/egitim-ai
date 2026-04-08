@@ -3,10 +3,5 @@
   "rewrites": [
     { "source": "/app/(.*)", "destination": "/app/$1" },
     { "source": "/((?!api/).*)", "destination": "/$1" }
-  ],
-  "functions": {
-    "api/webhook-ls.js": {
-      "bodyParser": false
-    }
-  }
+  ]
 }
