@@ -115,7 +115,10 @@
           <li><i data-lucide="check"></i> Otomatik görsel ekleme</li>
           <li><i data-lucide="check"></i> Tüm şablonlar</li>
         </ul>
-        <button class="btn btn--ghost btn--full" onclick="showToast('Ödeme sistemi çok yakında aktif olacak!','info')">
+        <button class="btn btn--ghost btn--full js-checkout-btn"
+          data-plan="ogrenci"
+          data-monthly-variant="958562"
+          data-yearly-variant="1506010">
           <i data-lucide="graduation-cap"></i> Öğrenci Planı Al
         </button>
       </div>
@@ -139,7 +142,10 @@
           <li><i data-lucide="check"></i> Klasörler ve organizasyon</li>
           <li><i data-lucide="check"></i> E-posta desteği</li>
         </ul>
-        <button class="btn btn--primary btn--full" onclick="showToast('Ödeme sistemi çok yakında aktif olacak!','info')">
+        <button class="btn btn--primary btn--full js-checkout-btn"
+          data-plan="pro"
+          data-monthly-variant="958612"
+          data-yearly-variant="1506085">
           <i data-lucide="crown"></i> Pro'ya Geç
         </button>
       </div>
@@ -163,8 +169,8 @@
           <li><i data-lucide="check"></i> Öncelikli destek & kurulum yardımı</li>
           <li><i data-lucide="check"></i> 7/24 öncelikli destek</li>
         </ul>
-        <button class="btn btn--ghost btn--full" onclick="showToast('Ödeme sistemi çok yakında aktif olacak!','info')">
-          Kurumsal Plana Geç
+        <button class="btn btn--ghost btn--full" onclick="window.location.href='../index.html#contact'">
+          İletişime Geç
         </button>
       </div>
 
@@ -188,7 +194,7 @@
         <div class="pricing-card">
           <div class="pricing-card__badge" style="background:rgba(99,102,241,.15);color:#818cf8;">Başlangıç Paketi</div>
           <div class="pricing-card__price">
-            <span class="pricing-card__amount">₺19,99</span>
+            <span class="pricing-card__amount">₺24,99</span>
           </div>
           <p class="pricing-card__desc">Küçük eklemeler için hızlı çözüm.</p>
           <ul class="pricing-card__features">
@@ -197,7 +203,7 @@
             <li><i data-lucide="check"></i> 30 gün geçerli</li>
             <li><i data-lucide="check"></i> Tüm formatlar (PDF, Word, PPTX)</li>
           </ul>
-          <button class="btn btn--ghost btn--full" onclick="showToast('Ek paket satın alma çok yakında aktif olacak!','info')">
+          <button class="btn btn--ghost btn--full js-topup-btn" data-topup-variant="958629">
             <i data-lucide="package"></i> Satın Al
           </button>
         </div>
@@ -206,7 +212,7 @@
         <div class="pricing-card">
           <div class="pricing-card__badge" style="background:rgba(74,222,128,.15);color:#6ee7b7;">Orta Paket</div>
           <div class="pricing-card__price">
-            <span class="pricing-card__amount">₺34,99</span>
+            <span class="pricing-card__amount">₺39,99</span>
           </div>
           <p class="pricing-card__desc">Orta ölçekli ihtiyaçlar için ideal.</p>
           <ul class="pricing-card__features">
@@ -215,7 +221,7 @@
             <li><i data-lucide="check"></i> 30 gün geçerli</li>
             <li><i data-lucide="check"></i> Tüm formatlar (PDF, Word, PPTX)</li>
           </ul>
-          <button class="btn btn--ghost btn--full" onclick="showToast('Ek paket satın alma çok yakında aktif olacak!','info')">
+          <button class="btn btn--ghost btn--full js-topup-btn" data-topup-variant="958661">
             <i data-lucide="package"></i> Satın Al
           </button>
         </div>
@@ -225,7 +231,7 @@
           <div class="pricing-card__popular">En Popüler</div>
           <div class="pricing-card__badge" style="background:linear-gradient(135deg,#e8855a,#c96840);color:#fff;">Büyük Paket</div>
           <div class="pricing-card__price">
-            <span class="pricing-card__amount">₺59,99</span>
+            <span class="pricing-card__amount">₺69,99</span>
           </div>
           <p class="pricing-card__desc">En çok tercih edilen ek paket.</p>
           <ul class="pricing-card__features">
@@ -234,7 +240,7 @@
             <li><i data-lucide="check"></i> 30 gün geçerli</li>
             <li><i data-lucide="check"></i> Tüm formatlar (PDF, Word, PPTX)</li>
           </ul>
-          <button class="btn btn--primary btn--full" onclick="showToast('Ek paket satın alma çok yakında aktif olacak!','info')">
+          <button class="btn btn--primary btn--full js-topup-btn" data-topup-variant="958664">
             <i data-lucide="package"></i> Satın Al
           </button>
         </div>
@@ -253,7 +259,7 @@
             <li><i data-lucide="check"></i> Tüm formatlar (PDF, Word, PPTX)</li>
             <li><i data-lucide="check"></i> Öncelikli destek</li>
           </ul>
-          <button class="btn btn--ghost btn--full" onclick="showToast('Ek paket satın alma çok yakında aktif olacak!','info')">
+          <button class="btn btn--ghost btn--full js-topup-btn" data-topup-variant="958665">
             <i data-lucide="package"></i> Satın Al
           </button>
         </div>
@@ -294,42 +300,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
   <script src="js/app.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-
-      // Billing toggle
-      const monthlyBtn = document.getElementById('toggleMonthly');
-      const yearlyBtn  = document.getElementById('toggleYearly');
-      let isYearly = false;
-
-      function updatePrices(yearly) {
-        document.querySelectorAll('[data-monthly]').forEach(el => {
-          el.textContent = yearly ? el.dataset.yearly : el.dataset.monthly;
-        });
-        const studentNote  = document.getElementById('studentYearlyNote');
-        const proNote      = document.getElementById('proYearlyNote');
-        const kurumsalNote = document.getElementById('kurumsalYearlyNote');
-        if (studentNote)  studentNote.style.display  = yearly ? 'block' : 'none';
-        if (proNote)      proNote.style.display      = yearly ? 'block' : 'none';
-        if (kurumsalNote) kurumsalNote.style.display = yearly ? 'block' : 'none';
-      }
-
-      monthlyBtn?.addEventListener('click', () => {
-        isYearly = false;
-        monthlyBtn.classList.add('pricing-toggle__btn--active');
-        yearlyBtn.classList.remove('pricing-toggle__btn--active');
-        updatePrices(false);
-      });
-
-      yearlyBtn?.addEventListener('click', () => {
-        isYearly = true;
-        yearlyBtn.classList.add('pricing-toggle__btn--active');
-        monthlyBtn.classList.remove('pricing-toggle__btn--active');
-        updatePrices(true);
-      });
-    });
-  </script>
 </body>
 </html>

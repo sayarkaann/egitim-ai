@@ -87,13 +87,19 @@ function monthlyCount(profile, field, resetField) {
 
 /* ── Belge limiti kontrolü ── */
 function checkDocLimit(profile, pages) {
-  const plan     = activePlan(profile);
+  const plan      = activePlan(profile);
   const docLimit  = PLAN_DOC_LIMITS[plan]  || PLAN_DOC_LIMITS.free;
   const pageLimit = PLAN_PAGE_LIMITS[plan] || PLAN_PAGE_LIMITS.free;
   const used      = monthlyCount(profile, 'docs_used_month', 'docs_reset_at');
 
-  if (used >= docLimit) {
-    return { allowed: false, code: 'DOC_LIMIT', message: `Bu ay oluşturabileceğiniz ${docLimit} belge limitine ulaştınız. Planınızı yükseltin.` };
+  // Extra docs aktif mi?
+  const extraActive = (profile.extra_docs || 0) > 0 &&
+    profile.extra_docs_expires_at &&
+    new Date(profile.extra_docs_expires_at) > new Date();
+  const effectiveLimit = docLimit + (extraActive ? (profile.extra_docs || 0) : 0);
+
+  if (used >= effectiveLimit) {
+    return { allowed: false, code: 'DOC_LIMIT', message: `Bu ay oluşturabileceğiniz ${effectiveLimit} belge limitine ulaştınız. Planınızı yükseltin.` };
   }
   if (pages > pageLimit) {
     return { allowed: false, code: 'PAGE_LIMIT', message: `Planınızda en fazla ${pageLimit} sayfa oluşturabilirsiniz.` };
@@ -139,4 +145,9 @@ async function incrementAnalyze(userId, profile) {
   await sbRequest('PATCH', `/rest/v1/profiles?id=eq.${userId}`, updateBody, null, true);
 }
 
-module.exports = { getUser, getProfile, checkDocLimit, checkAnalyzeLimit, incrementDocs, incrementAnalyze };
+/* ── Profil güncelle (webhook için) ── */
+async function updateProfile(userId, fields) {
+  return sbRequest('PATCH', `/rest/v1/profiles?id=eq.${userId}`, fields, null, true);
+}
+
+module.exports = { sbRequest, getUser, getProfile, checkDocLimit, checkAnalyzeLimit, incrementDocs, incrementAnalyze, updateProfile };

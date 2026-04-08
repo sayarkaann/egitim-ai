@@ -1743,6 +1743,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSettingsPage();
   initFoldersPage();
   initAnalyzePage();
+  initPricingPage();
 });
 
 /* =====================================================
@@ -1938,6 +1939,134 @@ async function initAnalyzePage() {
       analyzeBtn.disabled = false;
       analyzeBtn.innerHTML = '<i data-lucide="sparkles"></i> Özeti Çıkar';
       initIcons(analyzeBtn);
+    }
+  });
+}
+
+/* =====================================================
+   PRICING PAGE
+===================================================== */
+async function initPricingPage() {
+  if (!document.getElementById('pricingPage')) return;
+
+  const session = await requireAuth();
+  if (!session) return;
+
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  // Başarılı ödeme dönüşü
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('success') === 'true') {
+    showToast('Ödemeniz alındı! Planınız birkaç saniye içinde aktif olacak.', 'success', 6000);
+    history.replaceState({}, '', window.location.pathname);
+  }
+
+  // Mevcut plan bilgisi
+  const { data: profile } = await getSB()
+    .from('profiles').select('plan').eq('id', session.user.id).maybeSingle();
+  const currentPlan = profile?.plan || 'free';
+  markCurrentPlan(currentPlan);
+
+  // Toggle state
+  let isYearly = false;
+
+  function updatePrices(yearly) {
+    document.querySelectorAll('[data-monthly]').forEach(el => {
+      el.textContent = yearly ? el.dataset.yearly : el.dataset.monthly;
+    });
+    ['studentYearlyNote', 'proYearlyNote', 'kurumsalYearlyNote'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = yearly ? 'block' : 'none';
+    });
+  }
+
+  const monthlyBtn = document.getElementById('toggleMonthly');
+  const yearlyBtn  = document.getElementById('toggleYearly');
+
+  monthlyBtn?.addEventListener('click', () => {
+    isYearly = false;
+    monthlyBtn.classList.add('pricing-toggle__btn--active');
+    yearlyBtn?.classList.remove('pricing-toggle__btn--active');
+    updatePrices(false);
+  });
+  yearlyBtn?.addEventListener('click', () => {
+    isYearly = true;
+    yearlyBtn.classList.add('pricing-toggle__btn--active');
+    monthlyBtn?.classList.remove('pricing-toggle__btn--active');
+    updatePrices(true);
+  });
+
+  // LemonSqueezy overlay setup
+  if (window.LemonSqueezy) {
+    window.LemonSqueezy.Setup({
+      eventHandler: (event) => {
+        if (event.event === 'checkout:complete') {
+          showToast('Ödemeniz alındı! Plan güncelleniyor...', 'success', 5000);
+          setTimeout(() => window.location.reload(), 2500);
+        }
+      }
+    });
+  }
+
+  // Plan butonları
+  document.querySelectorAll('.js-checkout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const variantId = isYearly ? btn.dataset.yearlyVariant : btn.dataset.monthlyVariant;
+      if (!variantId) return;
+      openLSCheckout(variantId, session.user.email, session.user.id);
+    });
+  });
+
+  // Top-up butonları
+  document.querySelectorAll('.js-topup-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const variantId = btn.dataset.topupVariant;
+      if (!variantId) return;
+      openLSCheckout(variantId, session.user.email, session.user.id);
+    });
+  });
+}
+
+function openLSCheckout(variantId, email, userId) {
+  const url = `https://store.lemonsqueezy.com/checkout/buy/${variantId}`
+    + `?checkout[email]=${encodeURIComponent(email)}`
+    + `&checkout[custom][user_id]=${encodeURIComponent(userId)}`
+    + `&embed=1`;
+
+  if (window.LemonSqueezy) {
+    window.LemonSqueezy.Url.Open(url);
+  } else {
+    window.location.href = url.replace('&embed=1', '');
+  }
+}
+
+function markCurrentPlan(currentPlan) {
+  // Ücretsiz kart
+  if (currentPlan === 'free') {
+    const freeBtn = document.querySelector('.pricing-card:first-child button');
+    if (freeBtn) { freeBtn.disabled = true; freeBtn.textContent = 'Mevcut Planınız'; }
+  }
+
+  document.querySelectorAll('.js-checkout-btn').forEach(btn => {
+    if (btn.dataset.plan === currentPlan) {
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="check"></i> Mevcut Planınız';
+      btn.classList.remove('btn--primary');
+      btn.classList.add('btn--ghost');
+      initIcons(btn);
+
+      const card = btn.closest('.pricing-card');
+      if (card && !card.querySelector('.pricing-card__current-badge')) {
+        const badge = document.createElement('div');
+        badge.className = 'pricing-card__current-badge';
+        badge.innerHTML = '<i data-lucide="check-circle"></i> Mevcut Plan';
+        card.style.position = 'relative';
+        card.prepend(badge);
+        initIcons(badge);
+      }
     }
   });
 }

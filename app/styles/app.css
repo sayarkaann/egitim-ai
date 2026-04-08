@@ -1608,6 +1608,14 @@ em { font-style: italic; }
   box-shadow: 0 0 40px rgba(232,133,90,.15);
   transform: scale(1.02);
 }
+.pricing-card__current-badge {
+  position: absolute;
+  top: -13px; left: 50%; transform: translateX(-50%);
+  background: #4ade80; color: #0c0a08;
+  font-size: .72rem; font-weight: 700;
+  padding: 3px 14px; border-radius: 20px; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
 .pricing-card__popular {
   position: absolute;
   top: -13px; left: 50%; transform: translateX(-50%);
