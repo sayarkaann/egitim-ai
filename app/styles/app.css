@@ -354,6 +354,21 @@ em { font-style: italic; }
 /* =====================================================
    DASHBOARD
 ===================================================== */
+.trial-banner {
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(232,133,90,.12), rgba(232,133,90,.06));
+  border: 1px solid rgba(232,133,90,.35);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+.trial-banner__inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.trial-banner__left {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--accent); font-size: .88rem; font-weight: 500;
+}
+.trial-banner__left i { width: 16px; height: 16px; }
 .dashboard__greeting {
   margin-bottom: 32px;
 }

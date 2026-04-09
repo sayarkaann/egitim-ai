@@ -504,6 +504,25 @@ async function initDashboard() {
   initLogout();
   initIcons();
 
+  // Trial banner
+  (async () => {
+    const { data: prof } = await getSB()
+      .from('profiles').select('plan, plan_expires_at, trial_used').eq('id', session.user.id).maybeSingle();
+    if (prof?.trial_used && prof?.plan === 'pro' && prof?.plan_expires_at) {
+      const expires = new Date(prof.plan_expires_at);
+      const daysLeft = Math.ceil((expires - Date.now()) / (1000 * 60 * 60 * 24));
+      if (daysLeft > 0) {
+        const banner = document.getElementById('trialBanner');
+        const text   = document.getElementById('trialBannerText');
+        if (banner && text) {
+          text.textContent = `Pro denemeniz bitiyor: ${daysLeft} gün kaldı.`;
+          banner.style.display = 'block';
+          initIcons(banner);
+        }
+      }
+    }
+  })();
+
   const sb = getSB();
   const { data: docs } = await sb
     .from('documents')
@@ -2032,9 +2051,37 @@ async function initPricingPage() {
 
   // Mevcut plan bilgisi
   const { data: profile } = await getSB()
-    .from('profiles').select('plan').eq('id', session.user.id).maybeSingle();
+    .from('profiles').select('plan, trial_used').eq('id', session.user.id).maybeSingle();
   const currentPlan = profile?.plan || 'free';
   markCurrentPlan(currentPlan);
+
+  // Trial butonu — sadece ücretsiz ve daha önce denememiş kullanıcılara göster
+  const trialBtn = document.getElementById('trialBtn');
+  if (trialBtn && currentPlan === 'free' && !profile?.trial_used) {
+    trialBtn.style.display = 'flex';
+    trialBtn.addEventListener('click', async () => {
+      trialBtn.disabled = true;
+      trialBtn.innerHTML = '<span class="spinner"></span> Aktifleştiriliyor...';
+      try {
+        const token = (await getSB().auth.getSession()).data.session?.access_token;
+        const res = await fetch('/api/trial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'Hata oluştu.', 'error'); return; }
+        showToast('Pro denemeniz başladı! 7 gün boyunca tüm Pro özelliklerine erişebilirsiniz.', 'success', 5000);
+        trialBtn.style.display = 'none';
+        markCurrentPlan('pro');
+        setTimeout(() => window.location.reload(), 2000);
+      } catch { showToast('Bağlantı hatası.', 'error'); }
+      finally {
+        trialBtn.disabled = false;
+        trialBtn.innerHTML = '<i data-lucide="gift"></i> 7 Gün Ücretsiz Dene';
+        initIcons(trialBtn);
+      }
+    });
+  }
 
   // Toggle state
   let isYearly = false;
