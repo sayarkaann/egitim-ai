@@ -9,9 +9,11 @@ const SUPABASE_ANON_KEY   = process.env.SUPABASE_ANON_KEY   || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 /* ── Plan limitleri ── */
-const PLAN_DOC_LIMITS     = { free: 10,  ogrenci: 60,  pro: 150, kurumsal: 200 };
-const PLAN_ANALYZE_LIMITS = { free: 3,   ogrenci: 10,  pro: 30,  kurumsal: 100 };
-const PLAN_PAGE_LIMITS    = { free: 5,   ogrenci: 20,  pro: 30,  kurumsal: 30  };
+const PLAN_DOC_LIMITS      = { free: 10, ogrenci: 60,  pro: 150, kurumsal: 200 };
+const PLAN_ANALYZE_LIMITS  = { free: 3,  ogrenci: 10,  pro: 30,  kurumsal: 100 };
+const PLAN_PAGE_LIMITS     = { free: 5,  ogrenci: 20,  pro: 30,  kurumsal: 30  };
+const PLAN_EXAM_LIMITS     = { free: 5,  ogrenci: 30,  pro: 100, kurumsal: 300 };
+const PLAN_QUESTION_LIMITS = { free: 10, ogrenci: 20,  pro: 40,  kurumsal: 40  };
 
 /* ── Düşük seviye HTTP yardımcısı ── */
 function sbRequest(method, path, body, authToken, useServiceKey = false) {
@@ -145,9 +147,38 @@ async function incrementAnalyze(userId, profile) {
   await sbRequest('PATCH', `/rest/v1/profiles?id=eq.${userId}`, updateBody, null, true);
 }
 
+/* ── Sınav limiti kontrolü ── */
+function checkExamLimit(profile, questionCount) {
+  const plan  = activePlan(profile);
+  const limit = PLAN_EXAM_LIMITS[plan] || PLAN_EXAM_LIMITS.free;
+  const qLimit = PLAN_QUESTION_LIMITS[plan] || PLAN_QUESTION_LIMITS.free;
+  const used  = monthlyCount(profile, 'exam_used_month', 'exam_reset_at');
+
+  if (used >= limit) {
+    return { allowed: false, code: 'EXAM_LIMIT', message: `Bu ay ${limit} sınav hakkınızı kullandınız. Planınızı yükseltin.` };
+  }
+  if (questionCount > qLimit) {
+    return { allowed: false, code: 'QUESTION_LIMIT', message: `Planınızda sınav başına en fazla ${qLimit} soru oluşturabilirsiniz.` };
+  }
+  return { allowed: true };
+}
+
+/* ── Sınav sayacını artır ── */
+async function incrementExam(userId, profile) {
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const resetAt    = profile.exam_reset_at ? new Date(profile.exam_reset_at) : new Date(0);
+  const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+  const newCount = (resetAt < currentMonthStart ? 0 : (profile.exam_used_month || 0)) + 1;
+  const updateBody = { exam_used_month: newCount };
+  if (resetAt < currentMonthStart) updateBody.exam_reset_at = monthStart;
+
+  await sbRequest('PATCH', `/rest/v1/profiles?id=eq.${userId}`, updateBody, null, true);
+}
+
 /* ── Profil güncelle (webhook için) ── */
 async function updateProfile(userId, fields) {
   return sbRequest('PATCH', `/rest/v1/profiles?id=eq.${userId}`, fields, null, true);
 }
 
-module.exports = { sbRequest, getUser, getProfile, checkDocLimit, checkAnalyzeLimit, incrementDocs, incrementAnalyze, updateProfile };
+module.exports = { sbRequest, getUser, getProfile, checkDocLimit, checkAnalyzeLimit, checkExamLimit, incrementDocs, incrementAnalyze, incrementExam, updateProfile, PLAN_EXAM_LIMITS, PLAN_QUESTION_LIMITS };

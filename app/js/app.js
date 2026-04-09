@@ -1744,6 +1744,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFoldersPage();
   initAnalyzePage();
   initPricingPage();
+  initExamPage();
 });
 
 /* =====================================================
@@ -2069,4 +2070,257 @@ function markCurrentPlan(currentPlan) {
       }
     }
   });
+}
+
+/* =====================================================
+   EXAM PAGE
+===================================================== */
+const EXAM_LIMITS   = { free: 5, ogrenci: 30, pro: 100, kurumsal: 300 };
+const EXAM_Q_LIMITS = { free: 10, ogrenci: 20, pro: 40,  kurumsal: 40  };
+
+function getExamUsage() {
+  const key = `exam_${new Date().toISOString().slice(0, 7)}`;
+  return parseInt(localStorage.getItem(key) || '0', 10);
+}
+function incrementExamUsage() {
+  const key = `exam_${new Date().toISOString().slice(0, 7)}`;
+  localStorage.setItem(key, String(getExamUsage() + 1));
+}
+
+async function initExamPage() {
+  if (!document.getElementById('examPage')) return;
+
+  const session = await requireAuth();
+  if (!session) return;
+
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  const { data: profile } = await getSB()
+    .from('profiles').select('plan').eq('id', session.user.id).maybeSingle();
+
+  const plan = profile?.plan || 'free';
+  const examLimit = EXAM_LIMITS[plan] || EXAM_LIMITS.free;
+  const qLimit    = EXAM_Q_LIMITS[plan] || EXAM_Q_LIMITS.free;
+
+  // Soru sayısı seçeneklerini plana göre kısıtla
+  const countSelect = document.getElementById('examCount');
+  if (countSelect) {
+    Array.from(countSelect.options).forEach(opt => {
+      if (parseInt(opt.value) > qLimit) opt.disabled = true;
+    });
+  }
+
+  // Kullanım bilgisi
+  const usageEl = document.getElementById('examUsageInfo');
+  let used = getExamUsage();
+  if (usageEl) usageEl.textContent = `Bu ay ${used} / ${examLimit} sınav hakkı kullandınız.`;
+
+  let questions = [];
+  let currentIdx = 0;
+  let answers = [];
+  let correctCount = 0;
+
+  // ── Soru Üret ──
+  document.getElementById('examStartBtn')?.addEventListener('click', async () => {
+    if (used >= examLimit) {
+      showToast(`Bu ay ${examLimit} sınav hakkınızı doldurdunuz. Plan yükseltin.`, 'error');
+      return;
+    }
+
+    const examType   = document.getElementById('examType').value;
+    const subject    = document.getElementById('examSubject').value;
+    const topic      = document.getElementById('examTopic')?.value.trim() || '';
+    const qCount     = parseInt(document.getElementById('examCount').value);
+    const difficulty = document.getElementById('examDifficulty').value;
+
+    const btn = document.getElementById('examStartBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Sorular üretiliyor...';
+
+    try {
+      const token = (await getSB().auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/exam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ examType, subject, topic, questionCount: qCount, difficulty }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.questions) {
+        showToast(data.error || 'Sorular üretilemedi, tekrar deneyin.', 'error');
+        return;
+      }
+
+      questions = data.questions;
+      answers = new Array(questions.length).fill(null);
+      correctCount = 0;
+      currentIdx = 0;
+
+      incrementExamUsage();
+      used++;
+      if (usageEl) usageEl.textContent = `Bu ay ${used} / ${examLimit} sınav hakkı kullandınız.`;
+
+      document.getElementById('examSetupCard').style.display = 'none';
+      document.getElementById('examResultsCard').classList.remove('active');
+      document.getElementById('examQuizCard').classList.add('active');
+      renderQuestion(0);
+
+    } catch {
+      showToast('Bağlantı hatası, tekrar deneyin.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="zap"></i> Soru Üret';
+      initIcons(btn);
+    }
+  });
+
+  // ── Cevabı Kontrol Et ──
+  document.getElementById('examCheckBtn')?.addEventListener('click', () => {
+    const selected = document.querySelector('.exam-option.selected');
+    if (!selected) { showToast('Bir şık seçin.', 'error'); return; }
+
+    const answer  = selected.dataset.letter;
+    const correct = questions[currentIdx].correct;
+    answers[currentIdx] = answer;
+    if (answer === correct) correctCount++;
+
+    document.querySelectorAll('.exam-option').forEach(opt => {
+      opt.disabled = true;
+      if (opt.dataset.letter === correct) opt.classList.add('correct');
+      else if (opt.dataset.letter === answer && answer !== correct) opt.classList.add('wrong');
+    });
+
+    document.getElementById('examExplanationText').textContent = questions[currentIdx].explanation;
+    document.getElementById('examExplanation').classList.add('visible');
+    document.getElementById('examCheckBtn').style.display = 'none';
+    document.getElementById('examScoreText').textContent = `${correctCount} doğru`;
+
+    if (currentIdx === questions.length - 1) {
+      document.getElementById('examFinishBtn').style.display = 'inline-flex';
+    } else {
+      document.getElementById('examNextBtn').style.display = 'inline-flex';
+    }
+  });
+
+  // ── Sonraki Soru ──
+  document.getElementById('examNextBtn')?.addEventListener('click', () => {
+    currentIdx++;
+    renderQuestion(currentIdx);
+  });
+
+  // ── Sonuçları Gör ──
+  document.getElementById('examFinishBtn')?.addEventListener('click', showResults);
+
+  // ── Tekrar Çöz ──
+  document.getElementById('examRetryBtn')?.addEventListener('click', () => {
+    answers = new Array(questions.length).fill(null);
+    correctCount = 0;
+    currentIdx = 0;
+    document.getElementById('examResultsCard').classList.remove('active');
+    document.getElementById('examQuizCard').classList.add('active');
+    renderQuestion(0);
+  });
+
+  // ── Yeni Sınav ──
+  document.getElementById('examNewBtn')?.addEventListener('click', () => {
+    document.getElementById('examResultsCard').classList.remove('active');
+    document.getElementById('examQuizCard').classList.remove('active');
+    document.getElementById('examSetupCard').style.display = '';
+    questions = []; answers = []; correctCount = 0; currentIdx = 0;
+  });
+
+  // ── PDF İndir ──
+  document.getElementById('examPdfBtn')?.addEventListener('click', () => {
+    exportExamPdf(questions, answers);
+  });
+
+  function renderQuestion(idx) {
+    const q     = questions[idx];
+    const total = questions.length;
+    const letters = ['A', 'B', 'C', 'D'];
+    const texts   = [q.a, q.b, q.c, q.d];
+
+    document.getElementById('examProgressText').textContent = `Soru ${idx + 1} / ${total}`;
+    document.getElementById('examProgressBar').style.width = `${(idx / total) * 100}%`;
+    document.getElementById('examQuestionText').textContent = `${idx + 1}. ${q.q}`;
+    document.getElementById('examExplanation').classList.remove('visible');
+    document.getElementById('examCheckBtn').style.display = 'inline-flex';
+    document.getElementById('examNextBtn').style.display = 'none';
+    document.getElementById('examFinishBtn').style.display = 'none';
+    document.getElementById('examScoreText').textContent = `${correctCount} doğru`;
+
+    document.getElementById('examOptions').innerHTML = letters.map((l, i) => `
+      <button class="exam-option" data-letter="${l}">
+        <span class="exam-option__letter">${l}</span>
+        <span>${texts[i]}</span>
+      </button>`).join('');
+
+    document.querySelectorAll('.exam-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.exam-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
+    initIcons(document.getElementById('examQuizCard'));
+  }
+
+  function showResults() {
+    document.getElementById('examQuizCard').classList.remove('active');
+    document.getElementById('examResultsCard').classList.add('active');
+
+    const total = questions.length;
+    const wrong = answers.filter((a, i) => a !== null && a !== questions[i].correct).length;
+    const empty = answers.filter(a => a === null).length;
+    const pct   = Math.round((correctCount / total) * 100);
+
+    document.getElementById('resultScore').textContent   = correctCount;
+    document.getElementById('resultTotal').textContent   = `/${total}`;
+    document.getElementById('resultCorrect').textContent = correctCount;
+    document.getElementById('resultWrong').textContent   = wrong;
+    document.getElementById('resultEmpty').textContent   = empty;
+
+    let label, sub;
+    if (pct >= 90)      { label = 'Mükemmel!';       sub = 'Harika bir performans!'; }
+    else if (pct >= 70) { label = 'Çok İyi!';         sub = 'Biraz daha pratikle mükemmel olacaksınız.'; }
+    else if (pct >= 50) { label = 'İyi Başlangıç';    sub = 'Eksik konuları tekrar edin.'; }
+    else                { label = 'Çalışmaya Devam';  sub = 'Bu konuyu daha fazla pekiştirmeniz gerekiyor.'; }
+
+    document.getElementById('resultLabel').textContent = label;
+    document.getElementById('resultSub').textContent   = `%${pct} başarı — ${sub}`;
+    document.getElementById('examProgressBar').style.width = '100%';
+    initIcons(document.getElementById('examResultsCard'));
+  }
+}
+
+function exportExamPdf(questions, answers) {
+  const win = window.open('', '_blank');
+  const letters = ['A', 'B', 'C', 'D'];
+  const rows = questions.map((q, i) => {
+    const texts    = [q.a, q.b, q.c, q.d];
+    const userAns  = answers[i];
+    const correct  = q.correct;
+    const isCorr   = userAns === correct;
+    const status   = userAns === null ? 'Boş' : (isCorr ? 'Doğru' : 'Yanlış');
+    const opts = letters.map((l, j) => {
+      const bold = l === correct ? '<strong>' : '';
+      const end  = l === correct ? '</strong>' : '';
+      return `<div style="margin:2px 0">${bold}${l}) ${texts[j]}${end}</div>`;
+    }).join('');
+    return `<div style="margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #eee">
+      <div style="font-weight:600;margin-bottom:8px">${i + 1}. ${q.q}</div>
+      <div style="margin-left:12px;margin-bottom:8px">${opts}</div>
+      <div style="font-size:13px;color:#555">Cevabınız: ${userAns || 'Boş'} | Doğru: ${correct} | ${status}</div>
+      <div style="font-size:13px;background:#f5f5f5;padding:8px;border-radius:4px;margin-top:6px"><strong>Açıklama:</strong> ${q.explanation}</div>
+    </div>`;
+  }).join('');
+
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Sınav Sonuçları</title>
+    <style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:32px;color:#111}</style>
+    </head><body><h2>NotioAI — Sınav Sonuçları</h2>${rows}
+    <script>window.onload=function(){window.print()}<\/script></body></html>`);
+  win.document.close();
 }

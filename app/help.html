@@ -33,6 +33,7 @@
       <div class="sidebar__section-label">Kütüphane</div>
       <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span>Geçmiş</span></a>
       <a href="analyze.html" class="sidebar__link"><i data-lucide="file-search"></i><span>Makale Özetle</span></a>
+      <a href="exam.html" class="sidebar__link"><i data-lucide="graduation-cap"></i><span>Sınav Hazırlık</span></a>
       <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
       <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
       <div class="sidebar__section-label">Hesap</div>
@@ -95,6 +96,11 @@
 
       <div class="form-card fade-up fade-up--2">
         <div class="form-card__title"><i data-lucide="message-circle"></i> Sık Sorulan Sorular</div>
+        <div class="faq-search">
+          <i data-lucide="search" class="faq-search__icon"></i>
+          <input type="text" id="faqSearch" placeholder="Soru ara..." autocomplete="off" />
+        </div>
+        <div class="faq-empty" id="faqEmpty">Aramanızla eşleşen soru bulunamadı.</div>
         <div class="faq-list" id="faqList">
 
           <div class="faq-item">
@@ -157,11 +163,83 @@
             <div class="faq-answer">Planlar sayfasındaki "Teklif Al" butonuna tıklayın veya aşağıdaki destek e-postasından bize ulaşın. Okulunuzun öğretmen sayısını ve ihtiyaçlarınızı belirtin, size özel fiyatlandırma sunalım.</div>
           </div>
 
+          <div class="faq-item">
+            <button class="faq-question">Makale Özetleme özelliği nasıl çalışır? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">"Makale Özetle" sayfasına gidin, özetlemek istediğiniz makale metnini yapıştırın. Yapay zeka metni analiz ederek ana fikir, önemli noktalar ve sonuç bölümleri içeren yapılandırılmış bir özet çıkarır. Ücretsiz planda ayda 3, Öğrenci planında 10, Pro planında 30 özet hakkınız vardır.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Klasörlerim ne işe yarar? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Oluşturduğunuz belgeleri klasörler halinde organize edebilirsiniz. Geçmiş sayfasından belgeleri klasöre taşıyabilir, Klasörlerim sayfasından yeni klasör oluşturabilir veya silebilirsiniz. Ders bazlı, dönem bazlı veya proje bazlı sınıflandırma yapabilirsiniz.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Şablonlar nasıl kullanılır? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Şablonlar sayfasında önceden hazırlanmış belge tipleri bulunur (çoktan seçmeli sınav, ders planı, sunum vb.). Bir şablona tıklayarak ilgili ayarlar otomatik doldurulmuş şekilde oluşturma sayfasına yönlendirilirsiniz — sadece konuyu girmeniz yeterlidir.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Belge geçmişim silinirse geri alabilir miyim? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Hayır, silinen belgeler kalıcı olarak kaldırılır ve geri alınamaz. Önemli belgelerinizi indirdikten sonra silmenizi öneririz. İndirdiğiniz PDF, Word veya PPTX dosyaları bilgisayarınızda saklanır.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">Aylık belge hakkım ne zaman yenilenir? <i data-lucide="chevron-down"></i></button>
+            <div class="faq-answer">Belge hakkınız her ayın 1'inde sıfırlanır. Kullanılmayan haklar bir sonraki aya devretmez. Ek belge paketi satın aldıysanız bu paket 90 gün geçerlidir ve aylık yenilemeden bağımsız çalışır.</div>
+          </div>
 
         </div>
       </div>
 
-      <div class="form-card fade-up fade-up--3" style="background:linear-gradient(135deg,rgba(232,133,90,.12),rgba(121,144,248,.08));">
+      <div class="form-card fade-up fade-up--3">
+        <div class="form-card__title"><i data-lucide="lightbulb"></i> Pro İpuçları</div>
+        <div class="help-tips">
+          <div class="help-tip">
+            <i data-lucide="pencil-line" class="help-tip__icon"></i>
+            <div>
+              <div class="help-tip__title">Konuyu detaylı yazın</div>
+              <div class="help-tip__desc">Kısa konu yerine "5. sınıf matematik, kesirler konusu, öğretmen için ders planı" gibi detaylı girin — çok daha iyi sonuç alırsınız.</div>
+            </div>
+          </div>
+          <div class="help-tip">
+            <i data-lucide="layers" class="help-tip__icon"></i>
+            <div>
+              <div class="help-tip__title">Sayfa sayısını optimize edin</div>
+              <div class="help-tip__desc">PPTX için 8–12 slayt, Word belgeler için 5–8 sayfa ideal sonuç verir. Çok fazla sayfa içerik kalitesini düşürebilir.</div>
+            </div>
+          </div>
+          <div class="help-tip">
+            <i data-lucide="globe" class="help-tip__icon"></i>
+            <div>
+              <div class="help-tip__title">Çoklu dil kullanımı</div>
+              <div class="help-tip__desc">Konuyu Türkçe yazıp çıktı dilini İngilizce seçebilirsiniz. Yapay zeka içeriği doğrudan seçilen dilde üretir — çeviri yapmaz.</div>
+            </div>
+          </div>
+          <div class="help-tip">
+            <i data-lucide="bookmark" class="help-tip__icon"></i>
+            <div>
+              <div class="help-tip__title">Şablonları kullanın</div>
+              <div class="help-tip__desc">Sık kullandığınız belge tiplerini Şablonlar sayfasından hızlıca açabilirsiniz — ayarlar otomatik doldurulur.</div>
+            </div>
+          </div>
+          <div class="help-tip">
+            <i data-lucide="folder-open" class="help-tip__icon"></i>
+            <div>
+              <div class="help-tip__title">Klasörlerle organize edin</div>
+              <div class="help-tip__desc">Ders veya dönem bazlı klasörler oluşturun. Geçmiş sayfasında belgeleri klasöre taşımak için satırdaki klasör ikonuna tıklayın.</div>
+            </div>
+          </div>
+          <div class="help-tip">
+            <i data-lucide="file-search" class="help-tip__icon"></i>
+            <div>
+              <div class="help-tip__title">Makale özetleme</div>
+              <div class="help-tip__desc">Uzun akademik metinleri ya da ders kitabı bölümlerini yapıştırın — yapay zeka ana fikir ve önemli noktaları çıkarır.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card fade-up fade-up--4" style="background:linear-gradient(135deg,rgba(232,133,90,.12),rgba(121,144,248,.08));">
         <div class="form-card__title"><i data-lucide="mail"></i> Destek</div>
         <p class="text-muted" style="margin-bottom:20px;">Sorunuz cevaplanamadıysa veya bir hata ile karşılaştıysanız iletişime geçin.</p>
 
@@ -218,6 +296,20 @@
           document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
           if (!isOpen) item.classList.add('open');
         });
+      });
+
+      // FAQ search
+      document.getElementById('faqSearch')?.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        const items = document.querySelectorAll('.faq-item');
+        let visible = 0;
+        items.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          const match = !q || text.includes(q);
+          item.classList.toggle('hidden', !match);
+          if (match) visible++;
+        });
+        document.getElementById('faqEmpty').style.display = (visible === 0) ? 'block' : 'none';
       });
 
       // Contact form
