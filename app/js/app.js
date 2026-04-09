@@ -2466,7 +2466,43 @@ async function initExamPage() {
     document.getElementById('resultLabel').textContent = label;
     document.getElementById('resultSub').textContent   = `%${pct} başarı — ${sub}`;
     document.getElementById('examProgressBar').style.width = '100%';
+    analyzeWrongTopics(questions, answers);
     initIcons(document.getElementById('examResultsCard'));
+  }
+
+  function analyzeWrongTopics(questions, answers) {
+    const el = document.getElementById('examTopicAnalysis');
+    const listEl = document.getElementById('examTopicsList');
+    if (!el || !listEl) return;
+
+    const wrongQs = questions.filter((q, i) => answers[i] !== null && answers[i] !== q.correct);
+    if (wrongQs.length === 0) { el.classList.remove('visible'); return; }
+
+    const combinedText = wrongQs.map(q => `${q.q} ${q.a} ${q.b} ${q.c} ${q.d}`).join(' ').toLowerCase();
+
+    const topicMap = {
+      'Matematik':    { 'Sayılar & Yüzdeler': ['yüzde','%','oran','orantı','rasyonel'], 'Denklemler': ['denklem','eşitlik','bilinmeyen'], 'Fonksiyonlar': ['fonksiyon','f(x)','tanım kümesi'], 'Geometri': ['açı','alan','çevre','üçgen','kare','daire','dörtgen'], 'Türev': ['türev','ekstremum','eğim'], 'İntegral': ['integral','antitürev'], 'Trigonometri': ['sin','cos','tan','trigonometri'], 'İstatistik': ['ortalama','medyan','mod','varyans','olasılık'] },
+      'Türkçe':       { 'Gramer': ['isim','fiil','sıfat','zarf','tamlama','ek','çekim'], 'Sözcük Bilgisi': ['eş anlamlı','zıt anlamlı','anlam'], 'Metin Analizi': ['tema','ana fikir','yardımcı fikir','amaç'], 'Edebiyat': ['şiir','roman','hikaye','tiyatro','yazar'], 'Söz Sanatları': ['benzetme','kişileştirme','abartma','tezat'] },
+      'Fizik':        { 'Kinematik': ['hız','ivme','mesafe','yer değiştirme'], 'Dinamik': ['kuvvet','newton','kütle'], 'Enerji': ['iş','enerji','kinetik','potansiyel'], 'Elektrik': ['akım','voltaj','direnç','ohm','elektrik'], 'Dalga': ['ses','ışık','frekans','dalga'] },
+      'Kimya':        { 'Atom & Periyodik': ['atom','elektron','proton','nötron','periyodik'], 'Kimyasal Bağlar': ['iyonik','kovalent','metalik'], 'Asit-Baz': ['asit','baz','ph','nötralizasyon'], 'Reaksiyonlar': ['reaksiyon','denge','hızı','kataliz'] },
+      'Biyoloji':     { 'Hücre': ['hücre','çekirdek','mitokondri','organit'], 'Genetik': ['gen','dna','rna','protein','ribosom'], 'Bölünme': ['mitoz','mayoz','bölünme','kromozom'], 'Fizyoloji': ['sindirim','kan','dolaşım','solunum'] },
+      'Tarih':        { 'Osmanlı': ['osmanlı','sultan','tanzimat','yeniçeri'], 'Cumhuriyet': ['cumhuriyet','atatürk','reform'], 'Dünya Tarihi': ['savaş','imparatorluk','devrim'] },
+      'Coğrafya':     { 'Fiziki Coğrafya': ['dağ','ova','iklim','toprak'], 'Siyasi Coğrafya': ['sınır','ülke','bölge','nüfus'], 'Harita': ['harita','ölçek','koordinat'] },
+      'Fen Bilimleri':{ 'Madde': ['madde','kütle','hacim','yoğunluk'], 'Kuvvet & Hareket': ['kuvvet','hareket','sürtünme','ağırlık'], 'Işık & Ses': ['ışık','ses','yansıma','kırılma'], 'Hücre & Canlı': ['hücre','canlı','bitki','hayvan'], 'Çevre': ['ekosistem','enerji zinciri','besin'] },
+    };
+
+    const subject = document.getElementById('examSubject')?.value || '';
+    const keywords = topicMap[subject] || {};
+    const found = new Set();
+
+    Object.entries(keywords).forEach(([topic, kws]) => {
+      if (kws.some(kw => combinedText.includes(kw))) found.add(topic);
+    });
+
+    if (found.size === 0) { el.classList.remove('visible'); return; }
+
+    listEl.innerHTML = [...found].slice(0, 6).map(t => `<span class="exam-topic-tag">${t}</span>`).join('');
+    el.classList.add('visible');
   }
 }
 

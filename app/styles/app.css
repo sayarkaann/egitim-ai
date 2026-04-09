@@ -1952,6 +1952,24 @@ em { font-style: italic; }
 .exam-stat--correct .exam-stat__val { color: var(--success); }
 .exam-stat--wrong .exam-stat__val   { color: var(--danger); }
 .exam-stat--empty .exam-stat__val   { color: var(--text-3); }
+.exam-topic-analysis {
+  display: none; margin: 16px 0;
+  background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.25);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.exam-topic-analysis.visible { display: block; }
+.exam-topic-analysis__header {
+  display: flex; align-items: center; gap: 8px;
+  color: #f59e0b; font-weight: 600; font-size: .9rem; margin-bottom: 10px;
+}
+.exam-topic-analysis__header i { width: 16px; height: 16px; }
+.exam-topic-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.exam-topic-tag {
+  background: rgba(251,191,36,.15); color: #f59e0b;
+  border: 1px solid rgba(251,191,36,.3);
+  padding: 4px 12px; border-radius: 20px; font-size: .82rem; font-weight: 500;
+}
+.exam-topic-analysis__tip { font-size: .78rem; color: var(--text-3); margin: 0; }
 
 /* ── Mobil Düzeltmeleri ── */
 @media (max-width: 640px) {
