@@ -259,8 +259,25 @@
         </div>
       </div>
 
+      <!-- Referral -->
+      <div class="form-card fade-up fade-up--5">
+        <div class="form-card__title"><i data-lucide="gift"></i> Arkadaşını Davet Et</div>
+        <p class="text-muted text-sm" style="margin-bottom:16px;">
+          Davet linkini arkadaşlarınla paylaş. Kayıt olan her kişi için ikiz de <strong style="color:var(--accent)">+5 belge hakkı</strong> kazanırsınız.
+        </p>
+        <div class="referral-link-row">
+          <input type="text" class="form-input" id="referralLink" readonly value="Yükleniyor..." style="font-size:.8rem;" />
+          <button class="btn btn--primary btn--sm" id="referralCopyBtn">
+            <i data-lucide="copy"></i> Kopyala
+          </button>
+        </div>
+        <p class="text-muted text-sm" style="margin-top:12px;">
+          Davet ettiğin kişi sayısı: <strong id="referralCount" style="color:var(--accent);">—</strong>
+        </p>
+      </div>
+
       <!-- Tehlikeli alan -->
-      <div class="form-card fade-up fade-up--5" style="border-color:rgba(248,113,113,.2);">
+      <div class="form-card fade-up fade-up--6" style="border-color:rgba(248,113,113,.2);">
         <div class="form-card__title" style="color:var(--danger);"><i data-lucide="alert-triangle"></i> <span data-i18n="account_section">Hesap</span></div>
         <p class="text-muted text-sm" style="margin-bottom:16px;">Hesabınızdan çıkış yapın veya destek için iletişime geçin.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">

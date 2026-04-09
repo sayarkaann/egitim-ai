@@ -252,6 +252,10 @@ async function initAuthPage() {
 
   const sb = getSB();
 
+  // Referral kodunu URL'den yakala, localStorage'a kaydet
+  const refCode = new URLSearchParams(window.location.search).get('ref');
+  if (refCode) localStorage.setItem('notioai_ref', refCode.toUpperCase());
+
   // Şifre sıfırlama linki — hash'te type=recovery varsa direkt modal göster
   const hashParams = new URLSearchParams(window.location.hash.substring(1));
   if (hashParams.get('type') === 'recovery') {
@@ -433,8 +437,24 @@ async function initAuthPage() {
       showToast('E-postanıza bir onay linki gönderildi.', 'info', 7000);
     } else {
       showToast('Hesabınız oluşturuldu!', 'success');
+      // Referral kodu varsa işle
+      const savedRef = localStorage.getItem('notioai_ref');
+      if (savedRef) {
+        try {
+          const token = data.session?.access_token;
+          const r = await fetch('/api/referral', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ code: savedRef }),
+          });
+          if (r.ok) {
+            showToast('Referral bonusu: +5 ekstra belge hakkı kazandınız! 🎉', 'success', 5000);
+          }
+        } catch { /* sessizce geç */ }
+        localStorage.removeItem('notioai_ref');
+      }
       const nextPage = new URLSearchParams(window.location.search).get('next');
-      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html` : 'index.html'; }, 800);
+      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html` : 'index.html'; }, 1200);
     }
   });
 
@@ -802,6 +822,32 @@ async function initSettingsPage() {
   initSidebar();
   initLogout();
   initIcons();
+
+  // Referral bölümü
+  (async () => {
+    try {
+      const token = (await getSB().auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/referral', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const { code, count } = await res.json();
+      const link = `https://notioai.net/app/auth.html?ref=${code}`;
+      const linkEl  = document.getElementById('referralLink');
+      const countEl = document.getElementById('referralCount');
+      const copyBtn = document.getElementById('referralCopyBtn');
+      if (linkEl)  linkEl.value = link;
+      if (countEl) countEl.textContent = count;
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(link).then(() => {
+            copyBtn.textContent = '✓ Kopyalandı!';
+            setTimeout(() => { copyBtn.innerHTML = '<i data-lucide="copy"></i> Kopyala'; initIcons(copyBtn); }, 2000);
+          });
+        });
+      }
+    } catch { /* referral yüklenemedi */ }
+  })();
 
   const meta      = session.user.user_metadata || {};
   const firstName = meta.first_name || meta.firstName || '';
