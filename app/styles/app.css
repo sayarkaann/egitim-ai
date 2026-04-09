@@ -1941,3 +1941,28 @@ em { font-style: italic; }
 .exam-stat--correct .exam-stat__val { color: var(--success); }
 .exam-stat--wrong .exam-stat__val   { color: var(--danger); }
 .exam-stat--empty .exam-stat__val   { color: var(--text-3); }
+
+/* ── Mobil Düzeltmeleri ── */
+@media (max-width: 640px) {
+  /* Sonuç istatistikleri 3 sütun → 1 sütun */
+  .exam-stats { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .exam-stat { padding: 10px 6px; }
+  .exam-stat__val { font-size: 1.2rem; }
+
+  /* Soru metni ve şıklar */
+  .exam-question__text { font-size: .95rem; margin-bottom: 16px; }
+  .exam-option { padding: 10px 12px; font-size: .88rem; }
+  .exam-option__letter { width: 24px; height: 24px; min-width: 24px; font-size: .75rem; }
+
+  /* Whiteboard canvas daha kısa */
+  .exam-wb-canvas { height: 200px; }
+
+  /* Whiteboard toolbar sıkıştır */
+  .exam-wb-toolbar { gap: 6px; padding: 6px 8px; }
+  .exam-wb-tool { width: 28px; height: 28px; }
+  .exam-wb-color { width: 18px; height: 18px; }
+  .exam-wb-bg { width: 18px; height: 18px; }
+  .exam-wb-size { padding: 3px 5px; font-size: .72rem; }
+
+  /* Setup grid zaten 540px'de tek sütun, ek fix yok */
+}
