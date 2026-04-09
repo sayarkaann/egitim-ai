@@ -915,12 +915,75 @@ async function initCreatePage() {
     btn.classList.toggle('active', btn.dataset.audience === selectedAudience);
   });
 
+  // ── Otomatik Kaydetme (Taslak) ──
+  const DRAFT_KEY = 'notioai_draft';
+  let draftTimer = null;
+
+  function saveDraft() {
+    const draft = {
+      topic:    document.getElementById('topicInput')?.value || '',
+      subject:  document.getElementById('docSubject')?.value || '',
+      language: document.getElementById('docLanguage')?.value || '',
+      tone:     document.getElementById('docTone')?.value || '',
+      pages:    document.getElementById('pageCount')?.value || '5',
+      type:     selectedType,
+      audience: selectedAudience,
+      savedAt:  Date.now(),
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    showDraftIndicator();
+  }
+
+  function showDraftIndicator() {
+    let el = document.getElementById('draftIndicator');
+    if (!el) return;
+    el.textContent = 'Taslak kaydedildi';
+    el.classList.add('visible');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => el.classList.remove('visible'), 2000);
+  }
+
+  function loadDraft() {
+    // URL param varsa draft'ı yükleme (template'den gelme durumu)
+    if (window.location.search) return;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      // 7 günden eski taslakları yoksay
+      if (Date.now() - d.savedAt > 7 * 24 * 60 * 60 * 1000) { localStorage.removeItem(DRAFT_KEY); return; }
+      if (d.topic)    { const el = document.getElementById('topicInput');   if (el) { el.value = d.topic; el.dispatchEvent(new Event('input')); } }
+      if (d.subject)  { const el = document.getElementById('docSubject');   if (el) el.value = d.subject; }
+      if (d.language) { const el = document.getElementById('docLanguage');  if (el) el.value = d.language; }
+      if (d.tone)     { const el = document.getElementById('docTone');      if (el) el.value = d.tone; }
+      if (d.pages)    { const el = document.getElementById('pageCount');    if (el) { el.value = d.pages; el.dispatchEvent(new Event('input')); } }
+      if (d.type)     { selectedType     = d.type;     document.querySelectorAll('[data-doc-type]').forEach(b => b.classList.toggle('active', b.dataset.docType === d.type)); }
+      if (d.audience) { selectedAudience = d.audience; document.querySelectorAll('[data-audience]').forEach(b => b.classList.toggle('active', b.dataset.audience === d.audience)); }
+      if (d.topic) showToast('Önceki taslak yüklendi.', 'info');
+    } catch { localStorage.removeItem(DRAFT_KEY); }
+  }
+
+  function scheduleSave() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveDraft, 800);
+  }
+
+  // Değişiklikleri izle
+  ['topicInput','docSubject','docLanguage','docTone','pageCount'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', scheduleSave);
+    document.getElementById(id)?.addEventListener('change', scheduleSave);
+  });
+
+  // Taslağı yükle
+  loadDraft();
+
   // Toggle interactions
   document.querySelectorAll('[data-doc-type]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-doc-type]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedType = btn.dataset.docType;
+      scheduleSave();
     });
   });
 
@@ -929,6 +992,7 @@ async function initCreatePage() {
       document.querySelectorAll('[data-audience]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedAudience = btn.dataset.audience;
+      scheduleSave();
     });
   });
 
@@ -1101,6 +1165,7 @@ async function initCreatePage() {
         if (resultMeta)  resultMeta.textContent  = `${typeLabels[params.type]} • ${params.pages} sayfa • ${params.audience === 'teacher' ? 'Öğretmen' : 'Öğrenci'} hedefli`;
         resultPanel?.classList.add('visible');
         showToast('Belgeniz başarıyla oluşturuldu!', 'success');
+        localStorage.removeItem(DRAFT_KEY);
 
         generateBtn.disabled = false;
         generateBtn.innerHTML = `<i data-lucide="sparkles"></i> Yeni Belge Oluştur`;
