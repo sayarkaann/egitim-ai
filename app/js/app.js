@@ -2097,6 +2097,7 @@ async function initExamPage() {
   initSidebar();
   initLogout();
   initIcons();
+  initWhiteboard();
 
   const { data: profile } = await getSB()
     .from('profiles').select('plan').eq('id', session.user.id).maybeSingle();
@@ -2243,6 +2244,7 @@ async function initExamPage() {
     const letters = ['A', 'B', 'C', 'D'];
     const texts   = [q.a, q.b, q.c, q.d];
 
+    clearWhiteboard();
     document.getElementById('examProgressText').textContent = `Soru ${idx + 1} / ${total}`;
     document.getElementById('examProgressBar').style.width = `${(idx / total) * 100}%`;
     document.getElementById('examQuestionText').textContent = `${idx + 1}. ${q.q}`;
@@ -2266,6 +2268,118 @@ async function initExamPage() {
     });
 
     initIcons(document.getElementById('examQuizCard'));
+  }
+
+  // ── Beyaz Tahta ──
+  let wbCtx = null;
+
+  function clearWhiteboard() {
+    if (wbCtx) wbCtx.clearRect(0, 0, wbCtx.canvas.width, wbCtx.canvas.height);
+  }
+
+  function initWhiteboard() {
+    const toggleBtn = document.getElementById('wbToggleBtn');
+    const wb        = document.getElementById('examWhiteboard');
+    const canvas    = document.getElementById('wbCanvas');
+    if (!toggleBtn || !wb || !canvas) return;
+
+    let drawing = false;
+    let tool    = 'pen';
+    let color   = '#ffffff';
+    let size    = 4;
+    let lastX   = 0, lastY = 0;
+
+    function ensureCanvas() {
+      if (canvas.width !== canvas.offsetWidth || canvas.height !== 280) {
+        canvas.width  = canvas.offsetWidth || 680;
+        canvas.height = 280;
+      }
+      wbCtx = canvas.getContext('2d');
+    }
+
+    function getPos(e) {
+      const rect  = canvas.getBoundingClientRect();
+      const scaleX = canvas.width  / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const src    = e.touches ? e.touches[0] : e;
+      return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+    }
+
+    function startDraw(e) {
+      drawing = true;
+      const { x, y } = getPos(e);
+      lastX = x; lastY = y;
+      wbCtx.beginPath();
+      wbCtx.arc(x, y, (tool === 'eraser' ? size * 3 : size) / 2, 0, Math.PI * 2);
+      wbCtx.fillStyle = tool === 'eraser' ? '#15120f' : color;
+      wbCtx.fill();
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const { x, y } = getPos(e);
+      wbCtx.beginPath();
+      wbCtx.moveTo(lastX, lastY);
+      wbCtx.lineTo(x, y);
+      wbCtx.strokeStyle = tool === 'eraser' ? '#15120f' : color;
+      wbCtx.lineWidth   = tool === 'eraser' ? size * 4 : size;
+      wbCtx.lineCap     = 'round';
+      wbCtx.lineJoin    = 'round';
+      wbCtx.stroke();
+      lastX = x; lastY = y;
+    }
+
+    function endDraw() { drawing = false; }
+
+    canvas.addEventListener('mousedown',  startDraw);
+    canvas.addEventListener('mousemove',  draw);
+    canvas.addEventListener('mouseup',    endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
+    canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e); },      { passive: false });
+    canvas.addEventListener('touchend',   endDraw);
+
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = wb.classList.toggle('open');
+      toggleBtn.innerHTML = isOpen
+        ? '<i data-lucide="x"></i> Tahtayı Kapat'
+        : '<i data-lucide="pencil-ruler"></i> Tahtada Çöz';
+      if (isOpen) setTimeout(ensureCanvas, 10);
+      initIcons(toggleBtn);
+    });
+
+    document.getElementById('wbPenBtn')?.addEventListener('click', () => {
+      tool = 'pen';
+      document.getElementById('wbPenBtn').classList.add('active');
+      document.getElementById('wbEraserBtn').classList.remove('active');
+      canvas.style.cursor = 'crosshair';
+    });
+
+    document.getElementById('wbEraserBtn')?.addEventListener('click', () => {
+      tool = 'eraser';
+      document.getElementById('wbEraserBtn').classList.add('active');
+      document.getElementById('wbPenBtn').classList.remove('active');
+      canvas.style.cursor = 'cell';
+    });
+
+    document.querySelectorAll('.exam-wb-color').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.exam-wb-color').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        color = btn.dataset.color;
+        tool  = 'pen';
+        document.getElementById('wbPenBtn').classList.add('active');
+        document.getElementById('wbEraserBtn').classList.remove('active');
+        canvas.style.cursor = 'crosshair';
+      });
+    });
+
+    document.getElementById('wbSize')?.addEventListener('change', e => {
+      size = parseInt(e.target.value);
+    });
+
+    document.getElementById('wbClearBtn')?.addEventListener('click', clearWhiteboard);
   }
 
   function showResults() {

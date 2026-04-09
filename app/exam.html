@@ -154,6 +154,35 @@
 
         <div class="exam-options" id="examOptions"></div>
 
+        <!-- BEYAZ TAHTA -->
+        <div class="exam-wb-row">
+          <button class="btn btn--ghost btn--sm exam-wb-toggle" id="wbToggleBtn">
+            <i data-lucide="pencil-ruler"></i> Tahtada Çöz
+          </button>
+        </div>
+        <div class="exam-whiteboard" id="examWhiteboard">
+          <div class="exam-wb-toolbar">
+            <button class="btn btn--icon exam-wb-tool active" id="wbPenBtn" title="Kalem"><i data-lucide="pen-line"></i></button>
+            <button class="btn btn--icon exam-wb-tool" id="wbEraserBtn" title="Silgi"><i data-lucide="eraser"></i></button>
+            <div class="exam-wb-colors">
+              <button class="exam-wb-color active" data-color="#ffffff" style="background:#ffffff" title="Beyaz"></button>
+              <button class="exam-wb-color" data-color="#fde047" style="background:#fde047" title="Sarı"></button>
+              <button class="exam-wb-color" data-color="#f87171" style="background:#f87171" title="Kırmızı"></button>
+              <button class="exam-wb-color" data-color="#60a5fa" style="background:#60a5fa" title="Mavi"></button>
+              <button class="exam-wb-color" data-color="#4ade80" style="background:#4ade80" title="Yeşil"></button>
+            </div>
+            <select class="exam-wb-size" id="wbSize">
+              <option value="2">İnce</option>
+              <option value="4" selected>Normal</option>
+              <option value="8">Kalın</option>
+            </select>
+            <button class="btn btn--ghost btn--sm" id="wbClearBtn" style="margin-left:auto;">
+              <i data-lucide="trash-2"></i> Temizle
+            </button>
+          </div>
+          <canvas class="exam-wb-canvas" id="wbCanvas"></canvas>
+        </div>
+
         <div class="exam-explanation" id="examExplanation">
           <strong style="color:var(--accent);">Açıklama:</strong> <span id="examExplanationText"></span>
         </div>
