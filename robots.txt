@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /app/pricing.html
+Allow: /app/auth.html
+Allow: /legal.html
+Disallow: /app/index.html
+Disallow: /app/create.html
+Disallow: /app/history.html
+Disallow: /app/folders.html
+Disallow: /app/settings.html
+Disallow: /app/analyze.html
+Disallow: /app/templates.html
+Disallow: /app/exam.html
+Disallow: /app/help.html
+Disallow: /api/
+
+Sitemap: https://notioai.net/sitemap.xml
