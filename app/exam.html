@@ -154,10 +154,29 @@
 
         <div class="exam-options" id="examOptions"></div>
 
-        <!-- BEYAZ TAHTA -->
-        <div class="exam-wb-row">
+        <div class="exam-explanation" id="examExplanation">
+          <strong style="color:var(--accent);">Açıklama:</strong> <span id="examExplanationText"></span>
+        </div>
+
+        <div class="exam-actions">
+          <button class="btn btn--primary btn--sm" id="examCheckBtn">
+            <i data-lucide="check"></i> Cevabı Kontrol Et
+          </button>
+          <button class="btn btn--ghost btn--sm" id="examNextBtn" style="display:none;">
+            Sonraki Soru <i data-lucide="arrow-right"></i>
+          </button>
+          <button class="btn btn--ghost btn--sm" id="examFinishBtn" style="display:none;">
+            Sonuçları Gör <i data-lucide="flag"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- BEYAZ TAHTA KARTI -->
+      <div class="form-card fade-up fade-up--3" id="examWbCard">
+        <div class="exam-wb-header">
+          <div class="form-card__title" style="margin-bottom:0;"><i data-lucide="pencil-ruler"></i> Beyaz Tahta</div>
           <button class="btn btn--ghost btn--sm exam-wb-toggle" id="wbToggleBtn">
-            <i data-lucide="pencil-ruler"></i> Tahtada Çöz
+            <i data-lucide="chevron-down"></i> Aç
           </button>
         </div>
         <div class="exam-whiteboard" id="examWhiteboard">
@@ -181,22 +200,6 @@
             </button>
           </div>
           <canvas class="exam-wb-canvas" id="wbCanvas"></canvas>
-        </div>
-
-        <div class="exam-explanation" id="examExplanation">
-          <strong style="color:var(--accent);">Açıklama:</strong> <span id="examExplanationText"></span>
-        </div>
-
-        <div class="exam-actions">
-          <button class="btn btn--primary btn--sm" id="examCheckBtn">
-            <i data-lucide="check"></i> Cevabı Kontrol Et
-          </button>
-          <button class="btn btn--ghost btn--sm" id="examNextBtn" style="display:none;">
-            Sonraki Soru <i data-lucide="arrow-right"></i>
-          </button>
-          <button class="btn btn--ghost btn--sm" id="examFinishBtn" style="display:none;">
-            Sonuçları Gör <i data-lucide="flag"></i>
-          </button>
         </div>
       </div>
 

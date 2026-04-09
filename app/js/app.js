@@ -2343,8 +2343,8 @@ async function initExamPage() {
     toggleBtn.addEventListener('click', () => {
       const isOpen = wb.classList.toggle('open');
       toggleBtn.innerHTML = isOpen
-        ? '<i data-lucide="x"></i> Tahtayı Kapat'
-        : '<i data-lucide="pencil-ruler"></i> Tahtada Çöz';
+        ? '<i data-lucide="chevron-up"></i> Kapat'
+        : '<i data-lucide="chevron-down"></i> Aç';
       if (isOpen) setTimeout(ensureCanvas, 10);
       initIcons(toggleBtn);
     });

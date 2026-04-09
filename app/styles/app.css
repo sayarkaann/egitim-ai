@@ -1882,7 +1882,8 @@ em { font-style: italic; }
 .exam-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 /* Whiteboard */
-.exam-wb-row { margin-bottom: 14px; }
+.exam-wb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+.exam-wb-header .form-card__title { display: flex; align-items: center; gap: 8px; }
 .exam-wb-toggle { font-size: .82rem; gap: 6px; }
 .exam-whiteboard { display: none; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
 .exam-whiteboard.open { display: block; }
