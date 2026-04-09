@@ -504,6 +504,11 @@ async function initDashboard() {
   initLogout();
   initIcons();
 
+  // Onboarding turu
+  if (!localStorage.getItem('notioai_tour_done')) {
+    setTimeout(() => startOnboardingTour(), 800);
+  }
+
   // Trial banner
   (async () => {
     const { data: prof } = await getSB()
@@ -2616,6 +2621,124 @@ async function initExamPage() {
     listEl.innerHTML = [...found].slice(0, 6).map(t => `<span class="exam-topic-tag">${t}</span>`).join('');
     el.classList.add('visible');
   }
+}
+
+// ── Onboarding Turu ──────────────────────────────────────────
+function startOnboardingTour() {
+  const overlay  = document.getElementById('onbOverlay');
+  const tooltip  = document.getElementById('onbTooltip');
+  const badge    = document.getElementById('onbBadge');
+  const icon     = document.getElementById('onbIcon');
+  const title    = document.getElementById('onbTitle');
+  const desc     = document.getElementById('onbDesc');
+  const nextBtn  = document.getElementById('onbNext');
+  const prevBtn  = document.getElementById('onbPrev');
+  const closeBtn = document.getElementById('onbClose');
+  if (!overlay || !tooltip) return;
+
+  const steps = [
+    {
+      emoji: '👋',
+      title: 'NotioAI\'ya Hoş Geldiniz!',
+      text: 'Yapay zeka ile saniyeler içinde PDF, Word ve PowerPoint belgeleri oluşturabilirsiniz. Kısa bir tur yapalım.',
+      target: null,
+    },
+    {
+      emoji: '📄',
+      title: 'Belge Oluştur',
+      text: 'Konu yazın, format seçin ve yapay zeka sizin için profesyonel bir belge oluştursun. PDF, Word veya PPTX.',
+      target: '.create-cards',
+    },
+    {
+      emoji: '🎓',
+      title: 'Sınav Hazırlık',
+      text: 'TYT, AYT, LGS veya genel sınav soruları üretin. Beyaz tahta ile soruları çözün, konu analizi yapın.',
+      target: 'a[href="exam.html"]',
+    },
+    {
+      emoji: '📋',
+      title: 'Belgelerim',
+      text: 'Oluşturduğunuz tüm belgeler Geçmiş\'te saklanır. İstediğiniz zaman tekrar indirebilirsiniz.',
+      target: 'a[href="history.html"]',
+    },
+    {
+      emoji: '🎁',
+      title: '7 Gün Ücretsiz Dene!',
+      text: 'Pro planı ücretsiz deneyin. 7 gün boyunca tüm özelliklere sınırsız erişin, kredi kartı gerekmez.',
+      target: 'a[href="pricing.html"]',
+    },
+  ];
+
+  let current = 0;
+  let spotlight = null;
+
+  function positionTooltip(targetEl) {
+    if (!targetEl) {
+      // Ortala
+      tooltip.style.top  = '50%';
+      tooltip.style.left = '50%';
+      tooltip.style.transform = 'translate(-50%, -50%)';
+      return;
+    }
+    tooltip.style.transform = '';
+    const rect = targetEl.getBoundingClientRect();
+    const tw = 300, th = 220;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let top = rect.bottom + 12;
+    let left = rect.left;
+    if (top + th > vh - 16) top = rect.top - th - 12;
+    if (left + tw > vw - 16) left = vw - tw - 16;
+    if (left < 16) left = 16;
+    tooltip.style.top  = top + 'px';
+    tooltip.style.left = left + 'px';
+  }
+
+  function showSpotlight(targetEl) {
+    if (spotlight) spotlight.remove();
+    if (!targetEl) return;
+    const rect = targetEl.getBoundingClientRect();
+    spotlight = document.createElement('div');
+    spotlight.className = 'onb-spotlight';
+    spotlight.style.cssText = `top:${rect.top - 6}px;left:${rect.left - 6}px;width:${rect.width + 12}px;height:${rect.height + 12}px`;
+    document.body.appendChild(spotlight);
+  }
+
+  function render(idx) {
+    const s = steps[idx];
+    badge.textContent = `${idx + 1} / ${steps.length}`;
+    icon.textContent  = s.emoji;
+    title.textContent = s.title;
+    desc.textContent  = s.text;
+    prevBtn.style.display = idx === 0 ? 'none' : 'inline-flex';
+    nextBtn.textContent   = idx === steps.length - 1 ? '✓ Başlayalım' : 'İleri →';
+
+    const targetEl = s.target ? document.querySelector(s.target) : null;
+    showSpotlight(targetEl);
+    positionTooltip(targetEl);
+    if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function close() {
+    overlay.classList.remove('active');
+    tooltip.classList.remove('active');
+    if (spotlight) { spotlight.remove(); spotlight = null; }
+    localStorage.setItem('notioai_tour_done', '1');
+  }
+
+  overlay.classList.add('active');
+  tooltip.classList.add('active');
+  render(0);
+
+  nextBtn.onclick = () => {
+    if (current === steps.length - 1) { close(); return; }
+    current++;
+    render(current);
+  };
+  prevBtn.onclick = () => {
+    if (current > 0) { current--; render(current); }
+  };
+  closeBtn.onclick = close;
+  overlay.onclick  = close;
 }
 
 function exportExamPdf(questions, answers) {
