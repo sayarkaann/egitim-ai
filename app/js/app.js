@@ -2274,7 +2274,10 @@ async function initExamPage() {
   let wbCtx = null;
 
   function clearWhiteboard() {
-    if (wbCtx) wbCtx.clearRect(0, 0, wbCtx.canvas.width, wbCtx.canvas.height);
+    if (wbCtx) {
+      wbCtx.fillStyle = wbCtx.canvas._bgColor || '#ffffff';
+      wbCtx.fillRect(0, 0, wbCtx.canvas.width, wbCtx.canvas.height);
+    }
   }
 
   function initWhiteboard() {
@@ -2285,9 +2288,16 @@ async function initExamPage() {
 
     let drawing = false;
     let tool    = 'pen';
-    let color   = '#ffffff';
+    let color   = '#374151';
+    let bgColor = '#ffffff';
     let size    = 4;
     let lastX   = 0, lastY = 0;
+
+    function fillBg() {
+      canvas._bgColor = bgColor;
+      wbCtx.fillStyle = bgColor;
+      wbCtx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     function ensureCanvas() {
       if (canvas.width !== canvas.offsetWidth || canvas.height !== 280) {
@@ -2295,6 +2305,7 @@ async function initExamPage() {
         canvas.height = 280;
       }
       wbCtx = canvas.getContext('2d');
+      fillBg();
     }
 
     function getPos(e) {
@@ -2311,7 +2322,7 @@ async function initExamPage() {
       lastX = x; lastY = y;
       wbCtx.beginPath();
       wbCtx.arc(x, y, (tool === 'eraser' ? size * 3 : size) / 2, 0, Math.PI * 2);
-      wbCtx.fillStyle = tool === 'eraser' ? '#15120f' : color;
+      wbCtx.fillStyle = tool === 'eraser' ? bgColor : color;
       wbCtx.fill();
     }
 
@@ -2322,7 +2333,7 @@ async function initExamPage() {
       wbCtx.beginPath();
       wbCtx.moveTo(lastX, lastY);
       wbCtx.lineTo(x, y);
-      wbCtx.strokeStyle = tool === 'eraser' ? '#15120f' : color;
+      wbCtx.strokeStyle = tool === 'eraser' ? bgColor : color;
       wbCtx.lineWidth   = tool === 'eraser' ? size * 4 : size;
       wbCtx.lineCap     = 'round';
       wbCtx.lineJoin    = 'round';
@@ -2380,6 +2391,15 @@ async function initExamPage() {
     });
 
     document.getElementById('wbClearBtn')?.addEventListener('click', clearWhiteboard);
+
+    document.querySelectorAll('.exam-wb-bg').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.exam-wb-bg').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        bgColor = btn.dataset.bg;
+        if (wbCtx) fillBg();
+      });
+    });
   }
 
   function showResults() {
