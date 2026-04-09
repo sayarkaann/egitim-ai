@@ -12,6 +12,13 @@
   </script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#e8855a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NotioAI" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   <title>NotioAI — Makale Özetle</title>
   <meta name="description" content="PDF veya Word dosyanızı yükleyin, yapay zeka sizin için özet çıkarsın." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -469,6 +476,13 @@
 
       /* downloadPdfBtn ve downloadWordBtn app.js'deki initAnalyzePage tarafından yönetilir */
     });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>

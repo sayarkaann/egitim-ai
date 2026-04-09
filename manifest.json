@@ -1,0 +1,50 @@
+{
+  "name": "NotioAI — Yapay Zeka ile Belge Üret",
+  "short_name": "NotioAI",
+  "description": "Öğretmenler ve öğrenciler için yapay zeka destekli PDF, Word ve PowerPoint belge üretici.",
+  "start_url": "/app/index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0c0a08",
+  "theme_color": "#e8855a",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Belge Oluştur",
+      "short_name": "Oluştur",
+      "description": "Yeni belge oluştur",
+      "url": "/app/create.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sınav Hazırlık",
+      "short_name": "Sınav",
+      "description": "Sınav soruları üret",
+      "url": "/app/exam.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

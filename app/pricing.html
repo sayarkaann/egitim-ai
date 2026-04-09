@@ -12,6 +12,13 @@
   </script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#e8855a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NotioAI" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   <title>NotioAI — Planlar ve Fiyatlar</title>
   <meta name="description" content="NotioAI ücretsiz, Öğrenci ve Pro planlarını karşılaştır. Aylık 99₺'den başlayan fiyatlarla sınırsız eğitim belgesi üret." />
   <link rel="canonical" href="https://notioai.net/app/pricing.html" />
@@ -319,5 +326,12 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
   <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
