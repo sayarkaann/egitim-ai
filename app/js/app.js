@@ -2196,13 +2196,50 @@ async function initExamPage() {
 
     document.getElementById('examExplanationText').textContent = questions[currentIdx].explanation;
     document.getElementById('examExplanation').classList.add('visible');
+    document.getElementById('examDetailedSolution').classList.remove('visible');
+    document.getElementById('examDetailedSolution').innerHTML = '';
     document.getElementById('examCheckBtn').style.display = 'none';
+    document.getElementById('examDetailedBtn').style.display = 'inline-flex';
     document.getElementById('examScoreText').textContent = `${correctCount} doğru`;
 
     if (currentIdx === questions.length - 1) {
       document.getElementById('examFinishBtn').style.display = 'inline-flex';
     } else {
       document.getElementById('examNextBtn').style.display = 'inline-flex';
+    }
+  });
+
+  // ── Detaylı Çöz ──
+  document.getElementById('examDetailedBtn')?.addEventListener('click', async () => {
+    const q   = questions[currentIdx];
+    const btn = document.getElementById('examDetailedBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Çözülüyor...';
+    try {
+      const token = (await getSB().auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/solve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          question: q.q,
+          options: { a: q.a, b: q.b, c: q.c, d: q.d },
+          correct: q.correct,
+          userAnswer: answers[currentIdx] || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.solution) { showToast(data.error || 'Çözüm alınamadı.', 'error'); return; }
+      const el = document.getElementById('examDetailedSolution');
+      el.innerHTML = data.solution
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+      el.classList.add('visible');
+      btn.style.display = 'none';
+    } catch { showToast('Bağlantı hatası.', 'error'); }
+    finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="sparkles"></i> Detaylı Çöz';
+      initIcons(btn);
     }
   });
 
@@ -2249,7 +2286,10 @@ async function initExamPage() {
     document.getElementById('examProgressBar').style.width = `${(idx / total) * 100}%`;
     document.getElementById('examQuestionText').textContent = `${idx + 1}. ${q.q}`;
     document.getElementById('examExplanation').classList.remove('visible');
+    document.getElementById('examDetailedSolution').classList.remove('visible');
+    document.getElementById('examDetailedSolution').innerHTML = '';
     document.getElementById('examCheckBtn').style.display = 'inline-flex';
+    document.getElementById('examDetailedBtn').style.display = 'none';
     document.getElementById('examNextBtn').style.display = 'none';
     document.getElementById('examFinishBtn').style.display = 'none';
     document.getElementById('examScoreText').textContent = `${correctCount} doğru`;

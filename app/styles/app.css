@@ -1879,6 +1879,17 @@ em { font-style: italic; }
   line-height: 1.6; margin-bottom: 16px; display: none;
 }
 .exam-explanation.visible { display: block; }
+.exam-detailed-solution {
+  display: none; background: var(--bg-3);
+  border-left: 3px solid var(--accent-2, #7c6af7);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 16px 20px; font-size: .88rem; color: var(--text-2);
+  line-height: 1.8; margin-bottom: 16px;
+}
+.exam-detailed-solution.visible { display: block; }
+.exam-detailed-solution strong { color: var(--text); }
+.exam-detailed-solution p { margin: 0 0 10px; }
+.exam-detailed-solution p:last-child { margin-bottom: 0; }
 .exam-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 /* Whiteboard */
