@@ -2195,7 +2195,7 @@ async function initPricingPage() {
 }
 
 function openLSCheckout(variantId, email, userId) {
-  const url = `https://store.lemonsqueezy.com/checkout/buy/${variantId}`
+  const url = `https://notioai.lemonsqueezy.com/checkout/buy/${variantId}`
     + `?checkout[email]=${encodeURIComponent(email)}`
     + `&checkout[custom][user_id]=${encodeURIComponent(userId)}`
     + `&embed=1`;
