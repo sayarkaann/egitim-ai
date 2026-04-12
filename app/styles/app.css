@@ -1347,12 +1347,13 @@ em { font-style: italic; }
   /* Giriş/kayıt sayfası — tam ekran form */
   .auth-form-panel { padding: 24px 20px; }
 
-  /* Oluştur sayfası butonları */
+  /* Oluştur sayfası butonları — 2x2 grid */
   .generation-result__actions {
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
-  .generation-result__actions .btn { width: 100%; justify-content: center; }
+  .generation-result__actions .btn { justify-content: center; }
 
   /* Dashboard greeting */
   .dashboard__greeting h1 { font-size: 1.3rem; }
@@ -2108,8 +2109,29 @@ em { font-style: italic; }
 @media (max-width: 540px) {
   #mebPickerBody { grid-template-columns: 1fr 1fr !important; }
   #aiChatPanel > div:first-of-type { flex-direction: column; }
-  #aiChatInput { min-width: 0 !important; }
+  #aiChatInput { min-width: 0 !important; width: 100% !important; }
+  #aiChatPanel > div:first-of-type .btn { width: 100%; justify-content: center; }
+}
+@media (max-width: 480px) {
+  /* 4 buton tek sütuna geç */
+  .generation-result__actions { grid-template-columns: 1fr; }
 }
 @media (max-width: 360px) {
   #mebPickerBody { grid-template-columns: 1fr !important; }
+}
+
+/* Batch log satır taşma koruması */
+#batchLog { word-break: break-word; overflow-x: hidden; }
+#batchLog .batch-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 8px; font-size: .85rem;
+}
+#batchLog .batch-item span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Share modal mobil */
+@media (max-width: 540px) {
+  .modal-box { margin: 16px; padding: 24px 18px; }
+  .modal-title { font-size: 1.1rem; }
 }

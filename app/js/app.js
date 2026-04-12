@@ -2293,7 +2293,7 @@ async function initBatchPage() {
     for (let i = 0; i < rawTopics.length; i++) {
       const topic = rawTopics[i];
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--bg-2);margin-bottom:8px;font-size:.85rem;';
+      row.className = 'batch-item';
       row.innerHTML = `<span class="spinner"></span><span>${escapeHtml(topic)}</span>`;
       logEl.appendChild(row);
 
