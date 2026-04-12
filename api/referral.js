@@ -1,11 +1,5 @@
-const { getUser } = require('./_supabase');
+const { getUser, sbRequest } = require('./_supabase');
 const { rateLimit } = require('./_ratelimit');
-const { createClient } = require('@supabase/supabase-js');
-
-const sb = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'https://notioai.net');
@@ -21,16 +15,22 @@ module.exports = async (req, res) => {
 
   // GET — kullanıcının referral bilgilerini döndür
   if (req.method === 'GET') {
-    const { data: profile } = await sb
-      .from('profiles')
-      .select('referral_code, referral_count')
-      .eq('id', user.id)
-      .single();
+    const { status, data } = await sbRequest(
+      'GET',
+      `/rest/v1/profiles?id=eq.${user.id}&select=referral_code,referral_count`,
+      null, null, true
+    );
+
+    if (status !== 200 || !Array.isArray(data) || data.length === 0) {
+      return res.status(500).json({ error: 'Profil alınamadı.' });
+    }
+
+    const profile = data[0];
 
     // Kod yoksa oluştur
-    if (!profile?.referral_code) {
+    if (!profile.referral_code) {
       const code = Math.random().toString(36).slice(2, 10).toUpperCase();
-      await sb.from('profiles').update({ referral_code: code }).eq('id', user.id);
+      await sbRequest('PATCH', `/rest/v1/profiles?id=eq.${user.id}`, { referral_code: code }, null, true);
       return res.status(200).json({ code, count: 0 });
     }
 
@@ -45,17 +45,21 @@ module.exports = async (req, res) => {
     const rl = rateLimit(`referral:${user.id}`, 3, 60 * 1000);
     if (!rl.allowed) return res.status(429).json({ error: 'Çok fazla istek.' });
 
-    const { code } = req.body || {};
+    let body = req.body || {};
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+    const { code } = body;
+
     if (!code || typeof code !== 'string') {
       return res.status(400).json({ error: 'Geçersiz referral kodu.' });
     }
 
-    // Kendi kodunu kullanamazsın
-    const { data: myProfile } = await sb
-      .from('profiles')
-      .select('referral_code, referred_by')
-      .eq('id', user.id)
-      .single();
+    // Kendi profilini al
+    const { data: myData } = await sbRequest(
+      'GET',
+      `/rest/v1/profiles?id=eq.${user.id}&select=referral_code,referred_by`,
+      null, null, true
+    );
+    const myProfile = Array.isArray(myData) ? myData[0] : null;
 
     if (myProfile?.referred_by) {
       return res.status(400).json({ error: 'Zaten bir referral kullandınız.' });
@@ -65,33 +69,33 @@ module.exports = async (req, res) => {
     }
 
     // Referral kodu sahibini bul
-    const { data: referrer } = await sb
-      .from('profiles')
-      .select('id, extra_docs, referral_count')
-      .eq('referral_code', code.toUpperCase())
-      .single();
+    const { data: refData } = await sbRequest(
+      'GET',
+      `/rest/v1/profiles?referral_code=eq.${code.toUpperCase()}&select=id,extra_docs,referral_count`,
+      null, null, true
+    );
+    const referrer = Array.isArray(refData) && refData.length > 0 ? refData[0] : null;
 
     if (!referrer) {
       return res.status(404).json({ error: 'Referral kodu bulunamadı.' });
     }
 
     const BONUS = 5;
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
 
     // Davet edeni ödüllendir
-    await sb.from('profiles').update({
+    await sbRequest('PATCH', `/rest/v1/profiles?id=eq.${referrer.id}`, {
       extra_docs: (referrer.extra_docs || 0) + BONUS,
       extra_docs_expires_at: expiresAt,
       referral_count: (referrer.referral_count || 0) + 1,
-    }).eq('id', referrer.id);
+    }, null, true);
 
     // Yeni kullanıcıyı ödüllendir + referred_by kaydet
-    await sb.from('profiles').update({
+    await sbRequest('PATCH', `/rest/v1/profiles?id=eq.${user.id}`, {
       extra_docs: BONUS,
       extra_docs_expires_at: expiresAt,
       referred_by: referrer.id,
-    }).eq('id', user.id);
+    }, null, true);
 
     return res.status(200).json({ success: true, bonus: BONUS });
   }
