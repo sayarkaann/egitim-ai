@@ -1474,7 +1474,7 @@ function parseSlidecontent(content) {
       current = { title: stripMarkdown(match[1].trim()), bullets: [], notes: [] };
     } else if (current) {
       // Öğretim notlarını slayttan filtrele, speaker note'a taşı
-      if (/\(öğretim notu[^)]*\)/i.test(trimmed) || /\(not[^)]*\)/i.test(trimmed)) {
+      if (/\((öğretim notu|öğrencilere|not:|ipucu:|dikkat:|öneri:|sınıfta|ders notu)[^)]*\)/i.test(trimmed)) {
         const note = trimmed.replace(/^[-•*]\s+/, '').trim();
         current.notes.push(stripMarkdown(note));
         continue;

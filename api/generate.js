@@ -389,6 +389,7 @@ SLAYT 2: [Bölüm Başlığı]
 (${pages} slayta kadar devam et)
 
 KURALLAR:
+- TÜM slaytlar YALNIZCA "${topic}" konusuyla ilgili olmalı — başka konu kesinlikle yasak
 - Her slayt tek bir konuya odaklanır, 3-5 madde
 - Maddeler bilgilendirici ve tam (her biri 1-2 cümle, 15-25 kelime)
 - TAM OLARAK ${pages} slayt
