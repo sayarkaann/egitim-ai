@@ -1,5 +1,5 @@
 const https = require('https');
-const { getUser, getProfile, checkDocLimit, incrementDocs } = require('./_supabase');
+const { getUser, getProfile, activePlan, checkDocLimit, incrementDocs } = require('./_supabase');
 const { rateLimit } = require('./_ratelimit');
 
 module.exports = async (req, res) => {
@@ -59,7 +59,14 @@ module.exports = async (req, res) => {
     const pages = Math.min(Math.max(parseInt(rawPages, 10) || 5, 1), 30);
 
     // ── Plan & limit kontrolü ──
-    const profile = await getProfile(user.id);
+    const profile    = await getProfile(user.id);
+    const currentPlan = activePlan(profile);
+
+    // PPTX sadece ücretli planlara açık
+    if (type === 'pptx' && currentPlan === 'free') {
+      return res.status(403).json({ error: 'PPTX formatı yalnızca ücretli planlarda kullanılabilir. Planınızı yükseltin.', code: 'PLAN_REQUIRED' });
+    }
+
     const limitCheck = checkDocLimit(profile, pages);
     if (!limitCheck.allowed) {
       return res.status(429).json({ error: limitCheck.message, code: limitCheck.code });

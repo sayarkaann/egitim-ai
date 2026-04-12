@@ -181,4 +181,4 @@ async function updateProfile(userId, fields) {
   return sbRequest('PATCH', `/rest/v1/profiles?id=eq.${userId}`, fields, null, true);
 }
 
-module.exports = { sbRequest, getUser, getProfile, checkDocLimit, checkAnalyzeLimit, checkExamLimit, incrementDocs, incrementAnalyze, incrementExam, updateProfile, PLAN_EXAM_LIMITS, PLAN_QUESTION_LIMITS };
+module.exports = { sbRequest, getUser, getProfile, activePlan, checkDocLimit, checkAnalyzeLimit, checkExamLimit, incrementDocs, incrementAnalyze, incrementExam, updateProfile, PLAN_EXAM_LIMITS, PLAN_QUESTION_LIMITS };
