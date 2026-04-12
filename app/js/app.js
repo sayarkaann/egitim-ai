@@ -244,8 +244,10 @@ async function initAuthPage() {
 
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
-    const nextPage = new URLSearchParams(window.location.search).get('next');
-    window.location.href = nextPage ? `${nextPage}.html` : 'index.html';
+    const sp = new URLSearchParams(window.location.search);
+    const nextPage = sp.get('next');
+    const plan = sp.get('plan');
+    window.location.href = nextPage ? `${nextPage}.html${plan ? '?plan=' + plan : ''}` : 'index.html';
     return;
   }
 
@@ -372,8 +374,10 @@ async function initAuthPage() {
       showToast(msg, 'error');
     } else {
       showToast('Giriş başarılı!', 'success');
-      const nextPage = new URLSearchParams(window.location.search).get('next');
-      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html` : 'index.html'; }, 800);
+      const sp = new URLSearchParams(window.location.search);
+      const nextPage = sp.get('next');
+      const plan = sp.get('plan');
+      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html${plan ? '?plan=' + plan : ''}` : 'index.html'; }, 800);
     }
   });
 
@@ -431,8 +435,10 @@ async function initAuthPage() {
         } catch { /* sessizce geç */ }
         localStorage.removeItem('notioai_ref');
       }
-      const nextPage = new URLSearchParams(window.location.search).get('next');
-      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html` : 'index.html'; }, 1200);
+      const sp = new URLSearchParams(window.location.search);
+      const nextPage = sp.get('next');
+      const plan = sp.get('plan');
+      setTimeout(() => { window.location.href = nextPage ? `${nextPage}.html${plan ? '?plan=' + plan : ''}` : 'index.html'; }, 1200);
     }
   });
 
@@ -2756,6 +2762,16 @@ async function initPricingPage() {
       openLSCheckout(variantId, session.user.email, session.user.id);
     });
   });
+
+  // Landing page'den gelen ?plan= parametresi varsa otomatik checkout aç
+  const autoPlan = params.get('plan');
+  if (autoPlan) {
+    history.replaceState({}, '', window.location.pathname);
+    const autoBtn = document.querySelector(`.js-checkout-btn[data-plan="${autoPlan}"]`);
+    if (autoBtn && !autoBtn.disabled) {
+      setTimeout(() => autoBtn.click(), 500);
+    }
+  }
 
   // Kurumsal iletişim butonu
   const kurumsalBtn = document.getElementById('kurumsalContactBtn');
