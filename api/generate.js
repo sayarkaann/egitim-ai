@@ -72,21 +72,21 @@ module.exports = async (req, res) => {
       return res.status(429).json({ error: limitCheck.message, code: limitCheck.code });
     }
 
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
-    if (!GROQ_API_KEY) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
 
     const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject);
 
     const requestBody = JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 8192,
       temperature: 0.7,
     });
 
-    const content = await callGroq(GROQ_API_KEY, requestBody);
+    const content = await callOpenAI(OPENAI_API_KEY, requestBody);
 
     if (!content) {
       return res.status(500).json({ error: 'İçerik üretilemedi, tekrar deneyin.' });
