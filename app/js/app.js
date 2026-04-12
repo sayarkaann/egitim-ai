@@ -908,6 +908,53 @@ async function initSettingsPage() {
       await populateUserInfo();
     }
   });
+
+  // Kurumsal logo bölümü
+  const { data: logoProfile } = await sb.from('profiles').select('plan, logo_url').eq('id', session.user.id).maybeSingle();
+  const logoSection = document.getElementById('logoSection');
+  if (logoProfile?.plan === 'kurumsal' && logoSection) {
+    logoSection.style.display = 'block';
+    initIcons(logoSection);
+
+    if (logoProfile.logo_url) {
+      document.getElementById('logoPreview').innerHTML =
+        `<img src="${logoProfile.logo_url}" style="max-height:80px;max-width:240px;object-fit:contain;border-radius:8px;border:1px solid var(--border);" alt="Mevcut logo" />`;
+    }
+
+    document.getElementById('logoInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Logo 2 MB\'dan küçük olmalı.', 'error');
+        return;
+      }
+
+      const statusEl = document.getElementById('logoUploadStatus');
+      statusEl.style.display = 'block';
+      statusEl.textContent = 'Yükleniyor...';
+
+      const ext  = file.name.split('.').pop().toLowerCase();
+      const path = `${session.user.id}/logo.${ext}`;
+
+      const { error: uploadErr } = await getSB().storage.from('logos').upload(path, file, { upsert: true });
+      if (uploadErr) {
+        statusEl.textContent = 'Yükleme başarısız: ' + uploadErr.message;
+        statusEl.style.color = 'var(--danger)';
+        return;
+      }
+
+      const { data: { publicUrl } } = getSB().storage.from('logos').getPublicUrl(path);
+
+      await getSB().from('profiles').update({ logo_url: publicUrl }).eq('id', session.user.id);
+      _logoUrlCache = publicUrl; // cache'i güncelle
+
+      document.getElementById('logoPreview').innerHTML =
+        `<img src="${publicUrl}" style="max-height:80px;max-width:240px;object-fit:contain;border-radius:8px;border:1px solid var(--border);" alt="Okul logosu" />`;
+      statusEl.textContent = '✓ Logo kaydedildi';
+      statusEl.style.color = 'var(--accent)';
+      showToast('Logo başarıyla yüklendi!', 'success');
+    });
+  }
 }
 
 /* =====================================================
@@ -1304,12 +1351,28 @@ async function initCreatePage() {
 }
 
 /* =====================================================
+   LOGO CACHE
+===================================================== */
+let _logoUrlCache = undefined;
+async function getUserLogoUrl() {
+  if (_logoUrlCache !== undefined) return _logoUrlCache;
+  try {
+    const { data: { session } } = await getSB().auth.getSession();
+    if (!session) { _logoUrlCache = null; return null; }
+    const { data: profile } = await getSB().from('profiles').select('plan, logo_url').eq('id', session.user.id).maybeSingle();
+    _logoUrlCache = (profile?.plan === 'kurumsal' && profile?.logo_url) ? profile.logo_url : null;
+  } catch { _logoUrlCache = null; }
+  return _logoUrlCache;
+}
+
+/* =====================================================
    DOCUMENT DOWNLOAD
 ===================================================== */
 async function downloadDocument(title, type, content, pages, imageUrl, lang) {
-  if (type === 'pdf')        await generatePDF(title, content, imageUrl);
-  else if (type === 'word')  await generateWord(title, content, imageUrl);
-  else if (type === 'pptx')  await generatePPTX(title, content, pages, lang || 'tr');
+  const logoUrl = await getUserLogoUrl();
+  if (type === 'pdf')        await generatePDF(title, content, imageUrl, logoUrl);
+  else if (type === 'word')  await generateWord(title, content, imageUrl, logoUrl);
+  else if (type === 'pptx')  await generatePPTX(title, content, pages, lang || 'tr', logoUrl);
 }
 
 function filterTeacherNotes(text) {
@@ -1346,10 +1409,13 @@ function cleanText(text) {
     .replace(/[^\S\n]{2,}/g, ' ');
 }
 
-async function generatePDF(title, content, imageUrl) {
+async function generatePDF(title, content, imageUrl, logoUrl) {
   content = cleanText(filterTeacherNotes(content));
   const imgHtml = imageUrl
     ? `<div style="text-align:center;margin:0 0 28px;"><img src="${imageUrl}" style="max-width:100%;max-height:260px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="İlgili görsel" /></div>`
+    : '';
+  const logoHtml = logoUrl
+    ? `<div style="text-align:right;margin-bottom:16px;"><img src="${logoUrl}" style="max-height:64px;max-width:200px;object-fit:contain;" alt="Okul logosu" /></div>`
     : '';
 
   const body = `<!DOCTYPE html>
@@ -1374,6 +1440,7 @@ async function generatePDF(title, content, imageUrl) {
 </style>
 </head>
 <body>
+${logoHtml}
 ${imgHtml}
 ${markdownToHtml(content)}
 <div class="footer">NotioAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</div>
@@ -1387,10 +1454,13 @@ ${markdownToHtml(content)}
   if (!win) showToast('Açılır pencere engellendi. Tarayıcı ayarlarından izin verin.', 'error');
 }
 
-async function generateWord(title, content, imageUrl) {
+async function generateWord(title, content, imageUrl, logoUrl) {
   content = cleanText(filterTeacherNotes(content));
   const imgHtml = imageUrl
     ? `<p style="text-align:center;"><img src="${imageUrl}" style="max-width:100%;max-height:240px;border-radius:8px;" /></p><br>`
+    : '';
+  const logoHtml = logoUrl
+    ? `<p style="text-align:right;margin-bottom:10pt;"><img src="${logoUrl}" style="max-height:60px;max-width:180px;object-fit:contain;" /></p>`
     : '';
 
   const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -1410,6 +1480,7 @@ async function generateWord(title, content, imageUrl) {
 </style>
 </head>
 <body>
+${logoHtml}
 ${imgHtml}
 ${markdownToHtml(content)}
 <p class="footer">NotioAI tarafından oluşturuldu &mdash; ${new Date().toLocaleDateString('tr-TR')}</p>
@@ -1429,7 +1500,7 @@ ${markdownToHtml(content)}
   showToast('Word belgesi indiriliyor...', 'success');
 }
 
-async function generatePPTX(title, content, pages, language) {
+async function generatePPTX(title, content, pages, language, logoUrl) {
   if (!window.PptxGenJS) {
     showToast('PowerPoint kütüphanesi henüz yüklenmedi. Lütfen bekleyin ve tekrar deneyin.', 'error');
     return;
@@ -1463,6 +1534,9 @@ async function generatePPTX(title, content, pages, language) {
       if (imgData) {
         try { s.addImage({ data: imgData, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 }); } catch (_) {}
       }
+      if (logoUrl) {
+        try { s.addImage({ path: logoUrl, x: 0.4, y: 0.3, w: 1.6, h: 0.7, sizing: { type: 'contain', w: 1.6, h: 0.7 } }); } catch (_) {}
+      }
       s.addText(slide.title, {
         x: 0.5, y: 2.0, w: 12.3, h: 1.6,
         fontSize: 32, bold: true, color: 'FFFFFF', align: 'center',
@@ -1491,6 +1565,9 @@ async function generatePPTX(title, content, pages, language) {
 
       if (hasImg) {
         try { s.addImage({ data: imgData, x: 8.5, y: 1.1, w: 4.5, h: 3.6, rounding: true }); } catch (_) {}
+      }
+      if (logoUrl) {
+        try { s.addImage({ path: logoUrl, x: 11.9, y: 6.9, w: 1.2, h: 0.5, sizing: { type: 'contain', w: 1.2, h: 0.5 } }); } catch (_) {}
       }
 
       if (slide.bullets.length > 0) {

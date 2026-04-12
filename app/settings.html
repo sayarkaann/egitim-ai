@@ -265,6 +265,21 @@
         </div>
       </div>
 
+      <!-- Okul Logosu (yalnızca Kurumsal) -->
+      <div class="form-card fade-up fade-up--5" id="logoSection" style="display:none;">
+        <div class="form-card__title"><i data-lucide="building-2"></i> Okul Logosu</div>
+        <p class="text-muted text-sm" style="margin-bottom:16px;">Yüklediğiniz logo PDF, Word ve PowerPoint belgelerinizde görünecektir.</p>
+        <div id="logoPreview" style="margin-bottom:16px;min-height:24px;"></div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <label class="btn btn--ghost" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+            <i data-lucide="upload"></i> Logo Yükle
+            <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+          </label>
+          <span class="text-muted text-sm">PNG, JPG, WebP — maks. 2 MB</span>
+        </div>
+        <p id="logoUploadStatus" style="margin-top:10px;font-size:13px;display:none;color:var(--accent);"></p>
+      </div>
+
       <!-- Referral -->
       <div class="form-card fade-up fade-up--5">
         <div class="form-card__title"><i data-lucide="gift"></i> Arkadaşını Davet Et</div>
