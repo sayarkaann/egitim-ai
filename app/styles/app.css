@@ -2070,3 +2070,46 @@ em { font-style: italic; }
 
   /* Setup grid zaten 540px'de tek sütun, ek fix yok */
 }
+
+/* =====================================================
+   MEB PICKER + YENİ ÖZELLİKLER
+===================================================== */
+/* Küçük select (MEB picker) */
+.form-select--sm {
+  padding: 7px 10px;
+  font-size: .82rem;
+  height: auto;
+}
+
+/* MEB picker details */
+#mebPickerCard { cursor: default; }
+#mebPickerCard summary::-webkit-details-marker { display: none; }
+#mebPickerCard[open] #mebChevron { transform: rotate(180deg); }
+#mebPickerCard summary { border-radius: var(--radius); }
+#mebPickerCard[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+
+/* AI Chat panel */
+#aiChatPanel { border-radius: 0 0 var(--radius) var(--radius); }
+#aiChatHistory { max-height: 200px; overflow-y: auto; }
+
+/* Batch log */
+#batchLog .btn--icon { flex-shrink: 0; }
+
+/* Önizleme modal içerik */
+#previewContent h1 { color: var(--text); font-size: 1.15rem; margin: 16px 0 8px; }
+#previewContent h2 { color: var(--text); font-size: 1rem; margin: 14px 0 6px; }
+#previewContent h3 { color: var(--text); font-size: .9rem; margin: 12px 0 5px; }
+#previewContent ul { padding-left: 18px; margin: 6px 0; }
+#previewContent li { margin-bottom: 3px; }
+#previewContent p  { margin-bottom: 8px; }
+#previewContent strong { color: var(--text); }
+
+/* Mobil: MEB picker responsive */
+@media (max-width: 540px) {
+  #mebPickerBody { grid-template-columns: 1fr 1fr !important; }
+  #aiChatPanel > div:first-of-type { flex-direction: column; }
+  #aiChatInput { min-width: 0 !important; }
+}
+@media (max-width: 360px) {
+  #mebPickerBody { grid-template-columns: 1fr !important; }
+}
