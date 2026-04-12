@@ -547,6 +547,8 @@ async function initDashboard() {
   const remaining = document.getElementById('statRemaining');
   if (remaining) remaining.textContent = Math.max(0, FREE_DOC_LIMIT - total);
 
+  const skeleton = document.getElementById('docsLoadingSkeleton');
+  if (skeleton) skeleton.remove();
   renderDocsTable(docs || []);
 }
 
@@ -2437,6 +2439,31 @@ initTheme();
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'dark');
+
+  // Cookie consent
+  if (!localStorage.getItem('cookie_consent')) {
+    const banner = document.createElement('div');
+    banner.className = 'cookie-banner';
+    banner.id = 'cookieBanner';
+    banner.innerHTML = `
+      <div class="cookie-banner__text">
+        🍪 Bu site deneyiminizi iyileştirmek için çerez kullanır. Devam ederek <a href="/legal.html" target="_blank">Gizlilik Politikası</a>'nı kabul etmiş olursunuz.
+      </div>
+      <div class="cookie-banner__actions">
+        <button class="btn btn--ghost btn--sm" id="cookieDecline">Reddet</button>
+        <button class="btn btn--primary btn--sm" id="cookieAccept">Kabul Et</button>
+      </div>`;
+    document.body.appendChild(banner);
+    document.getElementById('cookieAccept').addEventListener('click', () => {
+      localStorage.setItem('cookie_consent', 'accepted');
+      banner.remove();
+    });
+    document.getElementById('cookieDecline').addEventListener('click', () => {
+      localStorage.setItem('cookie_consent', 'declined');
+      banner.remove();
+    });
+  }
+
   initAuthPage();
   initDashboard();
   initCreatePage();
