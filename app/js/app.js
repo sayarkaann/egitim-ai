@@ -1350,13 +1350,20 @@ async function generatePPTX(title, content, pages, language) {
 
   showToast('Görseller yükleniyor...', 'info', 3000);
 
-  // Her slayt için paralel görsel çek — slayt başlığı + ana konu birleştirilerek aranır
-  const imageData = await Promise.all(
-    slides.map((s, i) => {
-      const query = i === 0 ? title : `${s.title} ${title}`;
-      return fetchEducationalImage(query, language).catch(() => null);
-    })
-  );
+  // Görselleri 5'er 5'er çek (Vercel timeout önlemek için)
+  const imageData = [];
+  const BATCH = 5;
+  for (let b = 0; b < slides.length; b += BATCH) {
+    const batch = slides.slice(b, b + BATCH);
+    const results = await Promise.all(
+      batch.map((s, j) => {
+        const i = b + j;
+        const query = i === 0 ? title : `${s.title} ${title}`;
+        return fetchEducationalImage(query, language).catch(() => null);
+      })
+    );
+    imageData.push(...results);
+  }
 
   for (let i = 0; i < slides.length; i++) {
     const slide  = slides[i];

@@ -369,45 +369,34 @@ Dil: Anlaşılır, motive edici, öğrenci dostu`;
     const pptxAudience = isTeacher
       ? `- Slaytlar öğretmen sunumu için: her slaytta öğretim notu/ipucu ekle parantez içinde\n- Son slayt: Değerlendirme soruları veya tartışma noktaları`
       : `- Slaytlar öğrenci sunumu için: sade, görsel, akılda kalıcı\n- Son slayt: Temel kavramlar özeti veya hatırlatıcı sorular`;
-    return `${langCfg.enforce}
+    return `Sen bir sunum hazırlama asistanısın. SADECE verilen konuyla ilgili slayt üretirsin. Konu dışına ASLA çıkamazsın.
 
-${toneStr}
-
-${audienceBlock}
-
-${contextBlock}
-
-ÖNEMLİ: İçerik yalnızca ${gradeLabel || 'seçilen'} seviyesine uygun olmalıdır.
-
-"${topic}" konusunda ${pages} slaytlık sunum hazırla.${notes}
+KONU: "${topic}"
+DİL: ${langCfg.name}
+SLAYT SAYISI: TAM OLARAK ${pages} slayt
 
 ${pptxAudience}
 
-ZORUNLU FORMAT (kesinlikle bu formatta yaz, başka format kabul edilmez):
-SLAYT 1: Başlık Buraya
-- Madde buraya
-- Madde buraya
+ÇIKTI FORMATI (başka hiçbir şey yazma, sadece bu format):
+SLAYT 1: [Başlık]
+- [Madde]
+- [Madde]
+- [Madde]
 
-SLAYT 2: Başlık Buraya
-- Madde buraya
-- Madde buraya
-- Madde buraya
+SLAYT 2: [Başlık]
+- [Madde]
+- [Madde]
+- [Madde]
 
-SLAYT 3: Başlık Buraya
-- Madde buraya
-- Madde buraya
+... SLAYT ${pages}'e kadar devam et.
 
-(TAM OLARAK ${pages} slayt olacak, SLAYT 1'den SLAYT ${pages}'e kadar)
-
-KURALLAR:
-- Her satır ya "SLAYT N: Başlık" ya da "- madde" formatında olmalı, başka hiçbir şey yazma
-- TÜM slaytlar YALNIZCA "${topic}" konusuyla ilgili olmalı
-- Her slayt 3-5 madde içermeli
-- Maddeler açıklayıcı ve bilgi dolu olmalı (kuru tanım değil, detaylı tam cümleler)
-- Tarihi/bilimsel konularda: tarihler, sayılar, önemli olaylar belirt
-- TAM OLARAK ${pages} slayt — ne eksik ne fazla
-- TÜM metin ${langCfg.name} dilinde
-- Markdown, ok işareti veya özel sembol kullanma`;
+ZORUNLU KURALLAR:
+1. YALNIZCA "${topic}" konusunu işle — başka konu yasak
+2. Her slayt sadece "SLAYT N: başlık" ve "- madde" satırlarından oluşur
+3. Her slayta 3-5 madde yaz
+4. Maddeler bilgi dolu ve açıklayıcı olmalı (tarih, sayı, önemli detay içermeli)
+5. TAM OLARAK ${pages} slayt — eksik veya fazla yapma
+6. Markdown, sembol veya ek açıklama yazma`;
   }
 
   /* ── PDF / WORD ── */
