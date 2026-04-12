@@ -2767,7 +2767,7 @@ function openLSCheckout(variantId, email, userId) {
   const url = `https://notioai.lemonsqueezy.com/checkout/buy/${variantId}`
     + `?checkout[email]=${encodeURIComponent(email)}`
     + `&checkout[custom][user_id]=${encodeURIComponent(userId)}`
-    + `&embed=1`;
+    + `&embed=1&test=1`;
 
   if (window.LemonSqueezy) {
     window.LemonSqueezy.Url.Open(url);
