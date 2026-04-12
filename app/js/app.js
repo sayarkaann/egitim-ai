@@ -544,8 +544,17 @@ async function initDashboard() {
   animateCounter(document.getElementById('statDocs'),      total);
   animateCounter(document.getElementById('statDownloads'), total);
   animateCounter(document.getElementById('statHours'),     Math.ceil(total * 0.5));
-  const remaining = document.getElementById('statRemaining');
-  if (remaining) remaining.textContent = Math.max(0, FREE_DOC_LIMIT - total);
+
+  // Kalan belge hakkı — plana göre hesapla
+  const { data: profUsage } = await sb.from('profiles').select('plan, docs_used_month, docs_reset_at').eq('id', session.user.id).maybeSingle();
+  const planLimits = { free: 10, ogrenci: 30, pro: 60, kurumsal: 200 };
+  const userPlan   = profUsage?.plan || 'free';
+  const planLimit  = planLimits[userPlan] || 10;
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const resetAt    = profUsage?.docs_reset_at ? new Date(profUsage.docs_reset_at) : new Date(0);
+  const usedMonth  = resetAt < monthStart ? 0 : (profUsage?.docs_used_month || 0);
+  const remaining  = document.getElementById('statRemaining');
+  if (remaining) remaining.textContent = Math.max(0, planLimit - usedMonth);
 
   const skeleton = document.getElementById('docsLoadingSkeleton');
   if (skeleton) skeleton.remove();
