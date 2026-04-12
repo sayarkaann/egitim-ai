@@ -78,20 +78,39 @@ module.exports = async (req, res) => {
     }
 
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    if (!OPENAI_API_KEY) {
+    const GROQ_API_KEY   = process.env.GROQ_API_KEY;
+    if (!OPENAI_API_KEY && !GROQ_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
 
     const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject);
 
-    const requestBody = JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 8192,
-      temperature: 0.7,
-    });
+    let content = null;
 
-    const content = await callOpenAI(OPENAI_API_KEY, requestBody);
+    // Önce OpenAI dene, başarısız olursa Groq'a düş
+    if (OPENAI_API_KEY) {
+      try {
+        const openaiBody = JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 8192,
+          temperature: 0.7,
+        });
+        content = await callOpenAI(OPENAI_API_KEY, openaiBody);
+      } catch (e) {
+        console.error('OpenAI hatası, Groq\'a geçiliyor:', e.message);
+      }
+    }
+
+    if (!content && GROQ_API_KEY) {
+      const groqBody = JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 8192,
+        temperature: 0.7,
+      });
+      content = await callGroq(GROQ_API_KEY, groqBody);
+    }
 
     if (!content) {
       return res.status(500).json({ error: 'İçerik üretilemedi, tekrar deneyin.' });
