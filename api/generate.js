@@ -72,6 +72,11 @@ module.exports = async (req, res) => {
       return res.status(429).json({ error: limitCheck.message, code: limitCheck.code });
     }
 
+    // Öğrenci planı sadece TR & EN
+    if (currentPlan === 'ogrenci' && language && !['tr', 'en'].includes(language)) {
+      return res.status(403).json({ error: 'Öğrenci planında yalnızca Türkçe ve İngilizce desteklenir. Diğer diller için Pro plana geçin.', code: 'PLAN_REQUIRED' });
+    }
+
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
     if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'API anahtarı eksik.' });

@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY   = process.env.SUPABASE_ANON_KEY   || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 /* ── Plan limitleri ── */
-const PLAN_DOC_LIMITS      = { free: 10, ogrenci: 60,  pro: 60,  kurumsal: 200 };
+const PLAN_DOC_LIMITS      = { free: 10, ogrenci: 30,  pro: 60,  kurumsal: 200 };
 const PLAN_ANALYZE_LIMITS  = { free: 3,  ogrenci: 10,  pro: 30,  kurumsal: 100 };
 const PLAN_PAGE_LIMITS     = { free: 5,  ogrenci: 20,  pro: 30,  kurumsal: 50  };
 const PLAN_EXAM_LIMITS     = { free: 5,  ogrenci: 30,  pro: 100, kurumsal: 300 };

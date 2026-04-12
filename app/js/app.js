@@ -923,6 +923,20 @@ async function initCreatePage() {
   initSidebar();
   initLogout();
 
+  // Öğrenci planı için dil kısıtı — sadece TR & EN
+  const { data: _profileLang } = await getSB().from('profiles').select('plan').eq('id', session.user.id).maybeSingle();
+  if (_profileLang?.plan === 'ogrenci') {
+    const langSelect = document.getElementById('docLanguage');
+    if (langSelect) {
+      langSelect.querySelectorAll('option').forEach(opt => {
+        if (!['tr', 'en'].includes(opt.value)) {
+          opt.disabled = true;
+          opt.textContent += ' (Pro)';
+        }
+      });
+    }
+  }
+
   let selectedType     = 'pdf';
   let selectedAudience = 'teacher';
   let generatedContent  = '';
