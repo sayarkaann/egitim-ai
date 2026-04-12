@@ -1,11 +1,5 @@
-const { getUser, getProfile } = require('./_supabase');
+const { getUser, getProfile, updateProfile } = require('./_supabase');
 const { rateLimit } = require('./_ratelimit');
-const { createClient } = require('@supabase/supabase-js');
-
-const sb = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'https://notioai.net');
@@ -40,16 +34,13 @@ module.exports = async (req, res) => {
     // 7 günlük Pro aktifleştir
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const { error } = await sb
-      .from('profiles')
-      .update({
-        plan: 'pro',
-        plan_expires_at: expiresAt,
-        trial_used: true,
-      })
-      .eq('id', user.id);
+    const { status } = await updateProfile(user.id, {
+      plan: 'pro',
+      plan_expires_at: expiresAt,
+      trial_used: true,
+    });
 
-    if (error) throw error;
+    if (status !== 200 && status !== 204) throw new Error('Profil güncellenemedi.');
 
     return res.status(200).json({ success: true, expiresAt });
 
