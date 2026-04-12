@@ -1350,9 +1350,12 @@ async function generatePPTX(title, content, pages, language) {
 
   showToast('Görseller yükleniyor...', 'info', 3000);
 
-  // Her slayt için paralel görsel çek (API direkt base64 döndürüyor)
+  // Her slayt için paralel görsel çek — slayt başlığı + ana konu birleştirilerek aranır
   const imageData = await Promise.all(
-    slides.map(s => fetchEducationalImage(s.title, language).catch(() => null))
+    slides.map((s, i) => {
+      const query = i === 0 ? title : `${s.title} ${title}`;
+      return fetchEducationalImage(query, language).catch(() => null);
+    })
   );
 
   for (let i = 0; i < slides.length; i++) {
