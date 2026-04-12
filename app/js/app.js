@@ -919,7 +919,8 @@ async function initCreatePage() {
   let selectedAudience = 'teacher';
   let generatedContent  = '';
   let generatedTitle    = '';
-  let generatedImageUrl = null;  // reserved for future use
+  let generatedImageUrl = null;
+  let generatedLanguage = 'tr';
 
   // Load user folders into dropdown
   (async () => {
@@ -1131,10 +1132,7 @@ async function initCreatePage() {
 
     generatedTitle    = topic.slice(0, 60);
     generatedImageUrl = null;
-
-    if (selectedType === 'pptx') {
-      generatedImageUrl = await fetchEducationalImage(topic, language);
-    }
+    generatedLanguage = language;
 
     await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, session, folderId });
   });
@@ -1148,7 +1146,7 @@ async function initCreatePage() {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
       try {
-        await downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5', generatedImageUrl);
+        await downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5', generatedImageUrl, generatedLanguage);
       } finally {
         btn.disabled = false;
         btn.innerHTML = origHtml;
@@ -1269,10 +1267,10 @@ async function initCreatePage() {
 /* =====================================================
    DOCUMENT DOWNLOAD
 ===================================================== */
-async function downloadDocument(title, type, content, pages, imageUrl) {
+async function downloadDocument(title, type, content, pages, imageUrl, lang) {
   if (type === 'pdf')        await generatePDF(title, content, imageUrl);
   else if (type === 'word')  await generateWord(title, content, imageUrl);
-  else if (type === 'pptx')  await generatePPTX(title, content, pages, imageUrl);
+  else if (type === 'pptx')  await generatePPTX(title, content, pages, lang || 'tr');
 }
 
 async function generatePDF(title, content, imageUrl) {
@@ -1356,30 +1354,36 @@ ${markdownToHtml(content)}
   showToast('Word belgesi indiriliyor...', 'success');
 }
 
-async function generatePPTX(title, content, pages, imageUrl) {
+async function generatePPTX(title, content, pages, language) {
   if (!window.PptxGenJS) {
     showToast('PowerPoint kütüphanesi henüz yüklenmedi. Lütfen bekleyin ve tekrar deneyin.', 'error');
     return;
   }
 
-  const slides  = parseSlidecontent(content);
-  const pptx    = new PptxGenJS();
-  pptx.layout   = 'LAYOUT_WIDE';
+  const slides = parseSlidecontent(content);
+  const pptx   = new PptxGenJS();
+  pptx.layout  = 'LAYOUT_WIDE';
 
-  // Convert image URL to base64 to avoid CORS issues
-  const imgData = imageUrl ? await imageUrlToBase64(imageUrl) : null;
+  showToast('Görseller yükleniyor...', 'info', 3000);
+
+  // Her slayt için paralel görsel çek
+  const imageUrls = await Promise.all(
+    slides.map(s => fetchEducationalImage(s.title, language).catch(() => null))
+  );
+  const imageData = await Promise.all(
+    imageUrls.map(u => (u ? imageUrlToBase64(u).catch(() => null) : Promise.resolve(null)))
+  );
 
   for (let i = 0; i < slides.length; i++) {
-    const slide = slides[i];
-    const s     = pptx.addSlide();
+    const slide  = slides[i];
+    const s      = pptx.addSlide();
+    const imgData = imageData[i];
 
     if (i === 0) {
-      // Cover slide
+      // Kapak slaytı
       s.background = { color: '1a1a2e' };
       if (imgData) {
-        try {
-          s.addImage({ data: imgData, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 });
-        } catch (_) {}
+        try { s.addImage({ data: imgData, x: 0, y: 0, w: 13.33, h: 7.5, transparency: 65 }); } catch (_) {}
       }
       s.addText(slide.title, {
         x: 0.5, y: 2.0, w: 12.3, h: 1.6,
@@ -1396,9 +1400,9 @@ async function generatePPTX(title, content, pages, imageUrl) {
         fontSize: 9, color: '556688', align: 'center',
       });
     } else {
-      // Content slide — with optional image on right side
-      const hasImg  = !!imgData && i === 1;
-      const contentW = hasImg ? 7.5 : 12.3;
+      // İçerik slaytı
+      const hasImg   = !!imgData;
+      const contentW = hasImg ? 7.8 : 12.3;
 
       s.background = { color: 'f8f9ff' };
       s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.33, h: 0.08, fill: { color: 'e8855a' } });
@@ -1408,9 +1412,7 @@ async function generatePPTX(title, content, pages, imageUrl) {
       });
 
       if (hasImg) {
-        try {
-          s.addImage({ data: imgData, x: 8.1, y: 1.1, w: 4.8, h: 3.4, rounding: true });
-        } catch (_) {}
+        try { s.addImage({ data: imgData, x: 8.5, y: 1.1, w: 4.5, h: 3.6, rounding: true }); } catch (_) {}
       }
 
       if (slide.bullets.length > 0) {
