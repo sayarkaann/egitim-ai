@@ -2,37 +2,29 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H7PF01MD2N"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-H7PF01MD2N');
-  </script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-H7PF01MD2N');</script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#e8855a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="NotioAI" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-  <title>NotioAI — Geçmiş</title>
+  <title>NotioAI — Toplu Belge Üret</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles/app.css?v=3" />
 </head>
-<body id="historyPage">
+<body id="batchPage">
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__logo">
       <div class="sidebar__logo-icon">
-        <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
           <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.15"/>
           <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
           <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
@@ -46,11 +38,11 @@
       <a href="index.html" class="sidebar__link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
       <a href="create.html" class="sidebar__link"><i data-lucide="plus-circle"></i><span>Yeni Oluştur</span></a>
       <div class="sidebar__section-label">Kütüphane</div>
-      <a href="history.html" class="sidebar__link sidebar__link--active"><i data-lucide="clock"></i><span>Geçmiş</span></a>
+      <a href="history.html" class="sidebar__link"><i data-lucide="clock"></i><span>Geçmiş</span></a>
       <a href="analyze.html" class="sidebar__link"><i data-lucide="file-search"></i><span>Makale Özetle</span></a>
       <a href="exam.html" class="sidebar__link"><i data-lucide="graduation-cap"></i><span>Sınav Hazırlık</span></a>
       <a href="templates.html" class="sidebar__link"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
-      <a href="batch.html" class="sidebar__link"><i data-lucide="layers"></i><span>Toplu Oluştur</span></a>
+      <a href="batch.html" class="sidebar__link sidebar__link--active"><i data-lucide="layers"></i><span>Toplu Oluştur</span></a>
       <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
       <div class="sidebar__section-label">Hesap</div>
       <a href="pricing.html" class="sidebar__link"><i data-lucide="crown"></i><span>Planlar</span></a>
@@ -75,49 +67,92 @@
       <div class="topbar__breadcrumb">
         <span>NotioAI</span>
         <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <a href="index.html" style="color:var(--text-2)">Dashboard</a>
-        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
-        <span style="color:var(--text)">Geçmiş</span>
+        <span style="color:var(--text)">Toplu Oluştur</span>
       </div>
     </div>
     <div class="topbar__right">
-      <a href="create.html" class="btn btn--primary btn--sm"><i data-lucide="plus"></i> Yeni Belge</a>
+      <button class="theme-toggle" id="themeToggle" title="Tema değiştir"><i data-lucide="sun"></i></button>
+      <a href="create.html" class="btn btn--primary btn--sm"><i data-lucide="plus"></i> Tek Belge</a>
     </div>
   </header>
 
   <main class="app-content">
+
     <div class="create-header fade-up">
-      <h1>Belge Geçmişi</h1>
-      <p>Oluşturduğunuz tüm belgeleri görüntüleyin, indirin veya silin.</p>
+      <h1>Toplu Belge Üretimi</h1>
+      <p>Her satıra bir konu yazın — yapay zeka hepsini sırayla oluşturur ve geçmişinize kaydeder.</p>
     </div>
 
-    <div class="fade-up fade-up--1" style="margin-bottom:16px;">
-      <div class="input-wrap" style="max-width:360px;">
-        <span class="input-wrap__icon"><i data-lucide="search"></i></span>
-        <input type="text" id="historySearch" class="form-input" placeholder="Belge ara..." />
+    <div class="form-card fade-up fade-up--1" style="margin-bottom:0;">
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;background:rgba(251,191,36,.1);color:#fbbf24;font-size:.78rem;font-weight:600;margin-bottom:16px;">
+        <i data-lucide="crown" style="width:12px;height:12px;"></i> Pro / Kurumsal özelliği
       </div>
+      <p style="color:var(--text-2);font-size:.85rem;margin-bottom:20px;">Ücretsiz planda da çalışır, ancak aylık belge limitinizden düşülür.</p>
+
+      <form id="batchForm">
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="list" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>
+            Konular <span style="color:var(--text-3);font-weight:400;">(her satıra bir konu, max 20)</span>
+          </label>
+          <textarea id="batchTopics" class="form-textarea" rows="8"
+            placeholder="8. Sınıf Matematik - Kesirler
+9. Sınıf Fizik - Kuvvet ve Hareket
+Osmanlı Devletinin Kuruluşu
+Fotosentez ve Hücresel Solunum
+..."></textarea>
+        </div>
+
+        <div class="options-grid" style="margin:16px 0;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Belge Türü</label>
+            <select id="batchType" class="form-select">
+              <option value="pdf">PDF</option>
+              <option value="word">Word (DOCX)</option>
+              <option value="pptx">PowerPoint</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Hedef Kitle</label>
+            <select id="batchAudience" class="form-select">
+              <option value="teacher">Öğretmen</option>
+              <option value="student">Öğrenci</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Sayfa Sayısı</label>
+            <select id="batchPages" class="form-select">
+              <option value="3">3 sayfa</option>
+              <option value="5" selected>5 sayfa</option>
+              <option value="8">8 sayfa</option>
+              <option value="10">10 sayfa</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" id="batchStartBtn" class="btn btn--primary btn--lg btn--full">
+          <i data-lucide="zap"></i> Toplu Oluştur
+        </button>
+      </form>
     </div>
 
-    <div class="docs-table fade-up fade-up--2">
-      <div class="docs-table__header">
-        <div>Belge Adı</div>
-        <div>Tür</div>
-        <div>Boyut</div>
-        <div>Tarih</div>
-        <div></div>
-      </div>
+    <!-- İlerleme logu -->
+    <div id="batchLog" style="margin-top:20px;"></div>
+
+    <div style="margin-top:16px;">
+      <a href="history.html" class="btn btn--ghost btn--sm">
+        <i data-lucide="clock"></i> Oluşturulan belgeleri görüntüle
+      </a>
     </div>
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
   <script src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
     }
   </script>
 </body>

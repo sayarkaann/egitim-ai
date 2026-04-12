@@ -781,6 +781,30 @@ function initTemplatesPage() {
       window.location.href = `create.html?${params.toString()}`;
     });
   });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      applyTemplateFilter();
+    });
+  });
+
+  // Arama
+  const searchInput = document.getElementById('templateSearch');
+  searchInput?.addEventListener('input', applyTemplateFilter);
+
+  function applyTemplateFilter() {
+    const active  = document.querySelector('.filter-chip.active')?.dataset.tf || 'all';
+    const query   = (document.getElementById('templateSearch')?.value || '').toLowerCase();
+    grid.querySelectorAll('.template-card').forEach(card => {
+      const t = JSON.parse(card.dataset.template);
+      const matchFilter = active === 'all' || t.audience === active || t.type === active;
+      const matchSearch = !query || t.title.toLowerCase().includes(query) || t.desc.toLowerCase().includes(query) || t.subject.toLowerCase().includes(query);
+      card.style.display = matchFilter && matchSearch ? '' : 'none';
+    });
+  }
 }
 
 /* =====================================================
@@ -1111,25 +1135,38 @@ async function initCreatePage() {
     await runGeneration({ topic, extraNotes, type: selectedType, audience: selectedAudience, pages, gradeLevel, language, tone, subject, session, folderId });
   });
 
-  // Download buttons
+  // Download / Preview / Share buttons
   document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-action="download"]');
-    if (btn && generatedContent) {
-      const icon = btn.querySelector('i[data-lucide]');
-      const origHtml = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>';
+    // İndir
+    const dlBtn = e.target.closest('[data-action="download"]');
+    if (dlBtn && generatedContent) {
+      const origHtml = dlBtn.innerHTML;
+      dlBtn.disabled = true;
+      dlBtn.innerHTML = '<span class="spinner"></span>';
       try {
         await downloadDocument(generatedTitle, selectedType, generatedContent, pageRange?.value || '5', generatedImageUrl, generatedLanguage);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = origHtml;
-        initIcons(btn);
+        dlBtn.disabled = false;
+        dlBtn.innerHTML = origHtml;
+        initIcons(dlBtn);
       }
+    }
+    // Önizle
+    if (e.target.closest('[data-action="preview"]') && generatedContent) {
+      showPreviewModal(generatedTitle, selectedType, generatedContent);
+    }
+    // Paylaş
+    if (e.target.closest('[data-action="share-doc"]') && generatedContent) {
+      await shareDocument(generatedTitle, selectedType, generatedContent);
     }
   });
 
   initIcons();
+  initMEBPicker();
+  initAIChat(
+    () => ({ topic: generatedTitle, type: selectedType, pages: parseInt(pageRange?.value || '5', 10), audience: selectedAudience, language: generatedLanguage }),
+    (newContent) => { generatedContent = newContent; }
+  );
 
   async function runGeneration(params) {
     const panel        = document.getElementById('generationPanel');
@@ -1208,6 +1245,10 @@ async function initCreatePage() {
         resultPanel?.classList.add('visible');
         showToast('Belgeniz başarıyla oluşturuldu!', 'success');
         localStorage.removeItem(DRAFT_KEY);
+
+        // AI chat panelini göster
+        const chatPanel = document.getElementById('aiChatPanel');
+        if (chatPanel) chatPanel.style.display = 'block';
 
         generateBtn.disabled = false;
         generateBtn.innerHTML = `<i data-lucide="sparkles"></i> Yeni Belge Oluştur`;
@@ -1886,6 +1927,407 @@ async function initFoldersPage() {
 }
 
 /* =====================================================
+   BELGE ÖNİZLEME MODAL
+===================================================== */
+function showPreviewModal(title, type, content) {
+  const existing = document.getElementById('previewModal');
+  if (existing) existing.remove();
+
+  // İçeriği basit HTML'e dönüştür
+  function toHtml(text) {
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/^#{3}\s+(.+)$/gm, '<h3>$1</h3>')
+      .replace(/^#{2}\s+(.+)$/gm, '<h2>$1</h2>')
+      .replace(/^#{1}\s+(.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+      .replace(/<\/ul>\s*<ul>/g, '')
+      .replace(/\n{2,}/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // PPTX için slayt kartları
+  function pptxHtml(text) {
+    const slides = [];
+    let current = null;
+    text.split('\n').forEach(line => {
+      const m = line.match(/^SLAYT\s*\d+\s*[:：]\s*(.+)/i);
+      if (m) { if (current) slides.push(current); current = { title: m[1].trim(), bullets: [] }; }
+      else if (current && /^[-•]\s+/.test(line)) current.bullets.push(line.replace(/^[-•]\s+/, ''));
+    });
+    if (current) slides.push(current);
+    return slides.map((s, i) => `
+      <div style="background:var(--bg-2);border-radius:10px;padding:18px 20px;margin-bottom:12px;border:1px solid var(--border);">
+        <div style="font-size:.72rem;color:var(--text-3);margin-bottom:6px;">SLAYT ${i + 1}</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:10px;">${escapeHtml(s.title)}</div>
+        ${s.bullets.length ? '<ul style="margin:0;padding-left:16px;">' + s.bullets.map(b => `<li style="font-size:.88rem;color:var(--text-2);margin-bottom:4px;">${escapeHtml(b)}</li>`).join('') + '</ul>' : ''}
+      </div>`).join('');
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'previewModal';
+  modal.className = 'modal-overlay';
+  modal.style.cssText = 'align-items:flex-start;padding:24px 16px;overflow-y:auto;';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:720px;width:100%;max-height:none;text-align:left;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h3 style="margin:0;font-size:1.05rem;">${escapeHtml(title)}</h3>
+          <span style="font-size:.78rem;color:var(--text-3);">${type.toUpperCase()} önizlemesi</span>
+        </div>
+        <button class="btn btn--icon btn--ghost" id="previewClose"><i data-lucide="x"></i></button>
+      </div>
+      <div id="previewContent" style="font-size:.88rem;line-height:1.75;color:var(--text-2);">
+        ${type === 'pptx' ? pptxHtml(content) : '<p>' + toHtml(content) + '</p>'}
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  initIcons(modal);
+  document.getElementById('previewClose').onclick = () => modal.remove();
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+/* =====================================================
+   BELGE PAYLAŞMA
+===================================================== */
+async function shareDocument(title, type, content) {
+  const { data: { session } } = await getSB().auth.getSession();
+  if (!session) return showToast('Paylaşmak için giriş yapmanız gerekiyor.', 'error');
+
+  const shareBtn = document.querySelector('[data-action="share-doc"]');
+  if (shareBtn) { shareBtn.disabled = true; shareBtn.innerHTML = '<span class="spinner"></span>'; }
+
+  try {
+    const res = await fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ title, type, content }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Paylaşım oluşturulamadı.');
+
+    const shareUrl = `${location.origin}/share.html?id=${data.id}`;
+    // Kopyala
+    try { await navigator.clipboard.writeText(shareUrl); } catch (_) {}
+
+    // Modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-box" style="max-width:420px;">
+        <div class="modal-icon"><i data-lucide="share-2"></i></div>
+        <h3 style="margin:0 0 8px;">Paylaşım Linki Hazır</h3>
+        <p style="color:var(--text-2);font-size:.85rem;margin-bottom:16px;">Link panoya kopyalandı. 7 gün geçerlidir.</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input type="text" class="form-input" value="${shareUrl}" readonly style="font-size:.78rem;" id="shareLinkInput" />
+          <button class="btn btn--primary btn--sm" id="shareCopyBtn"><i data-lucide="copy"></i></button>
+        </div>
+        <button class="btn btn--ghost" style="width:100%;" id="shareModalClose">Kapat</button>
+      </div>`;
+    document.body.appendChild(modal);
+    initIcons(modal);
+    document.getElementById('shareModalClose').onclick = () => modal.remove();
+    document.getElementById('shareCopyBtn').onclick = () => {
+      navigator.clipboard.writeText(shareUrl).catch(() => {});
+      showToast('Link kopyalandı!', 'success', 2000);
+    };
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    if (shareBtn) { shareBtn.disabled = false; shareBtn.innerHTML = '<i data-lucide="share-2"></i> <span>Paylaş</span>'; initIcons(shareBtn); }
+  }
+}
+
+/* =====================================================
+   MEB MÜFREDATı VERİSİ
+===================================================== */
+const MEB_CURRICULUM = {
+  '1-4': {
+    'Matematik':      ['Doğal Sayılar', 'Toplama İşlemi', 'Çıkarma İşlemi', 'Çarpma İşlemi', 'Bölme İşlemi', 'Kesirler', 'Geometri', 'Ölçme'],
+    'Türkçe':         ['Okuma Yazma', 'Dinleme', 'Konuşma', 'Yazma', 'Sözcük Hazinesi'],
+    'Hayat Bilgisi':  ['Okul Heyecanım', 'Benim Eşsiz Yuvam', 'Dün Bugün Yarın'],
+    'İngilizce':      ['Greetings', 'Colors and Numbers', 'Animals', 'Family', 'School'],
+  },
+  '5': {
+    'Matematik':      ['Doğal Sayılar', 'Kesirler', 'Ondalık Gösterim', 'Yüzdeler', 'Oran ve Orantı', 'Cebire Giriş', 'Geometri', 'Veri Analizi'],
+    'Türkçe':         ['Dinleme/İzleme', 'Konuşma', 'Okuma', 'Yazma', 'Dil Bilgisi'],
+    'Fen Bilimleri':  ['Hücre', 'Vücudumuzdaki Sistemler', 'Kuvvet ve Hareket', 'Madde ve Değişim', 'Işık ve Ses', 'Yaşamımızdaki Elektrik'],
+    'Sosyal Bilgiler':['Birey ve Toplum', 'Kültür ve Miras', 'İnsanlar Yerler Çevreler', 'Bilim Teknoloji Toplum', 'Üretim Dağıtım Tüketim', 'Etkin Vatandaşlık'],
+    'İngilizce':      ['My Friends', 'Yummy Breakfast', 'My Town', 'Games and Hobbies', 'My School', 'Movies and Television'],
+  },
+  '6': {
+    'Matematik':      ['Çarpanlar ve Katlar', 'Kesirlerle İşlemler', 'Oran Orantı', 'Yüzde', 'Alan Ölçme', 'Veri ve İstatistik', 'Olasılık'],
+    'Türkçe':         ['İletişim ve Dil', 'Değerlerimiz', 'Sevgi', 'Liderlik', 'Tükenmez Kalemler'],
+    'Fen Bilimleri':  ['Vücudumuzdaki Sistemler', 'Madde ve Isı', 'Elektrikle Çalışan Araçlar', 'Ses ve Işık', 'Kuvvet ve Hareket', 'Bitkilerde Üreme'],
+    'Sosyal Bilgiler':['Bireysel Gelişim', 'Yönetim Biçimleri', 'Nüfus ve Yerleşme', 'Ülkemizin Kaynakları', 'Sonuçlarıyla Kurtuluş Savaşı'],
+    'İngilizce':      ['Life', 'Yummy Breakfast', 'Sports', 'My Town', 'On the Phone'],
+  },
+  '7': {
+    'Matematik':      ['Tam Sayılar', 'Rasyonel Sayılar', 'Oran ve Orantı', 'Yüzdeler', 'Cebir', 'Geometri', 'Veri Analizi', 'Olasılık'],
+    'Türkçe':         ['İletişim', 'Erdemler', 'Hayâl Gücü', 'Zaman ve Mekân', 'Milli Kültür'],
+    'Fen Bilimleri':  ['Hücre ve Bölünmeler', 'Kuvvet ve Enerji', 'Saf Madde ve Karışımlar', 'Işığın Madde ile Etkileşimi', 'Elektrik Devresi', 'Güneş Sistemi'],
+    'Sosyal Bilgiler':['İletişim ve İnsan İlişkileri', 'Ülkemizde Nüfus', 'Türk Tarihinde Yolculuk', 'Ekonomi ve Sosyal Hayat', 'Çevre ve Toplum'],
+    'İngilizce':      ['Appearance and Personality', 'Sports', 'Biographies', 'Wild Animals', 'Getting Around', 'Festivals and Celebrations'],
+  },
+  '8': {
+    'Matematik':      ['Çarpanlara Ayırma', 'Üslü İfadeler', 'Kareköklü İfadeler', 'Doğrusal Denklemler', 'Eşitsizlikler', 'Üçgenler', 'Dönüşüm Geometrisi', 'Veri Analizi'],
+    'Türkçe':         ['Gerçeklik ve Hayal', 'Değerlerimiz', 'Bilim ve Teknoloji', 'Sağlık ve Spor', 'Milli Mücadele ve Atatürk'],
+    'Fen Bilimleri':  ['Mevsimler ve İklim', 'DNA ve Genetik Kod', 'Basınç', 'Madde ve Endüstri', 'Asitler ve Bazlar', 'Canlılar ve Enerji'],
+    'İngilizce':      ['Friendship', 'Teen Life', 'Cooking', 'Communication', 'The Environment', 'Occupations'],
+    'T.C. İnkılap Tarihi': ['Osmanlı Devletinin Çöküşü', 'Milli Uyanış', 'Kurtuluş Savaşına Hazırlık', 'Kurtuluş Savaşı', 'Atatürk İlkeleri', 'Türkiye Cumhuriyeti'],
+  },
+  '9': {
+    'Matematik':      ['Kümeler', 'Denklemler', 'Üçgenler', 'Geometri Dönüşümleri', 'Veri Analizi', 'Olasılık'],
+    'Türkçe Dili':    ['Türk Dilinin Tarihi', 'Ses Bilgisi', 'Yapı Bilgisi', 'Söz Dizimi', 'Anlam Bilgisi', 'Anlatım Biçimleri'],
+    'Fizik':          ['Fizik Bilimine Giriş', 'Madde ve Özellikleri', 'Hareket', 'Kuvvet', 'Enerji'],
+    'Kimya':          ['Kimyanın Temel Kavramları', 'Atom ve Periyodik Sistem', 'Kimyasal Türler Arası Etkileşimler', 'Maddenin Halleri', 'Doğa ve Kimya'],
+    'Biyoloji':       ['Yaşam Bilimi Biyoloji', 'Hücre', 'Canlıların Ortak Özellikleri', 'Canlı Âlemleri'],
+    'Tarih':          ['Tarih ve Tarih Yazıcılığı', 'Başlangıçtan Günümüze İnsanlık Tarihi', 'İslam Medeniyetinin Doğuşu', 'Türk İslam Devletleri', 'Türkiye Tarihi'],
+    'Coğrafya':       ['Coğrafyanın Doğası', 'Doğal Sistemler', 'Beşeri Sistemler', 'Mekânsal Bir Sentez: Türkiye'],
+    'İngilizce':      ['Studying Abroad', 'Hobbies and Skills', 'Technology', 'Travel', 'Health', 'Movies'],
+  },
+  '10': {
+    'Matematik':      ['Logaritma', 'Polinomlar', 'İkinci Dereceden Denklemler', 'Trigonometri', 'Analitik Geometri', 'Olasılık ve İstatistik'],
+    'Türkçe Dili':    ['Metinlere Yaklaşım', 'Roman', 'Hikâye', 'Şiir', 'Tiyatro', 'Deneme'],
+    'Fizik':          ['Elektrik ve Manyetizma', 'Dalgalar', 'Optik', 'Modern Fizik'],
+    'Kimya':          ['Karışımlar', 'Asitler Bazlar ve Tuzlar', 'Kimyasal Hesaplamalar', 'Kimya Her Yerde'],
+    'Biyoloji':       ['Hücre Bölünmesi', 'Kalıtım', 'Ekosistem Ekolojisi ve Güncel Çevre Sorunları'],
+    'Tarih':          ['Değişen Dünya Dengeleri', 'Osmanlı Devletinin Yükselme Dönemi', 'Coğrafi Keşifler', 'Reform'],
+    'Coğrafya':       ['Iklim ve Doğal Afetler', 'Türkiyede Nüfus', 'Ekonomi', 'Küresel Ortam'],
+    'İngilizce':      ['School Life', 'Plans', 'Legendary Figures', 'Inspirational People', 'Sci-fi'],
+  },
+  '11': {
+    'Matematik':      ['Fonksiyonlar', 'Türev', 'İntegral', 'Diziler', 'Limit', 'Analitik Geometri'],
+    'Fizik':          ['Basit Harmonik Hareket', 'Dalga Mekaniği', 'Elektromanyetik Endüksiyon', 'Atom ve Nükleer Fizik'],
+    'Kimya':          ['Organik Kimya', 'Kimyasal Kinetik', 'Kimyasal Denge', 'Çözünürlük Dengesi', 'Elektrokimya'],
+    'Biyoloji':       ['İnsan Fizyolojisi', 'Komünite ve Popülasyon Ekolojisi', 'Güncel Çevre Sorunları ve Biyoteknoloji'],
+    'Tarih':          ['17. ve 18. Yüzyıllarda Değişim', 'Fransız İhtilali', 'Osmanlı Devletinin Gerileme Dönemi', 'Sanayi Devrimi'],
+    'Coğrafya':       ['Bölgesel Coğrafya', 'Küresel Çevre Sorunları', 'Türkiye Jeopolitiği'],
+    'İngilizce':      ['Future Jobs', 'Let\'s Celebrate', 'A Heroic Story', 'What if', 'Back to the Future'],
+  },
+  '12': {
+    'Matematik':      ['İntegral Uygulamaları', 'Diferansiyel Denklemler', 'Kompleks Sayılar', 'Olasılık', 'İstatistik'],
+    'Fizik':          ['Fiziğin Özel Alan Konuları', 'Elektromanyetizma', 'Kuantum Mekaniği Temelleri'],
+    'Kimya':          ['Karbon Kimyası', 'Polimer Kimyası', 'Nükleer Kimya', 'Çevre Kimyası'],
+    'Biyoloji':       ['Genden Proteine', 'Biyoteknoloji ve Genetik Mühendisliği', 'Canlılık ve Evrim'],
+    'Tarih':          ['1. Dünya Savaşı', 'Milli Mücadele', 'Atatürk Dönemi', '2. Dünya Savaşı', 'Soğuk Savaş'],
+    'Coğrafya':       ['Afet Yönetimi', 'Türkiyenin Coğrafi Bölgeleri', 'Küreselleşme'],
+    'İngilizce':      ['Struggle for Life', 'Books', 'Science and Technology', 'Art', 'Psychology'],
+  },
+};
+
+function initMEBPicker() {
+  const gradeEl   = document.getElementById('mebGrade');
+  const subjectEl = document.getElementById('mebSubject');
+  const unitEl    = document.getElementById('mebUnit');
+  const fillBtn   = document.getElementById('mebFillBtn');
+  if (!gradeEl) return;
+
+  // Sınıf seçilince ders listesi doldur
+  gradeEl.addEventListener('change', () => {
+    subjectEl.innerHTML = '<option value="">Seçin</option>';
+    unitEl.innerHTML    = '<option value="">Önce ders seçin</option>';
+    subjectEl.disabled  = true;
+    unitEl.disabled     = true;
+    fillBtn.disabled    = true;
+    const grade = gradeEl.value;
+    if (!grade) return;
+    const key = (parseInt(grade) <= 4) ? '1-4' : grade;
+    const subjects = MEB_CURRICULUM[key];
+    if (!subjects) return;
+    Object.keys(subjects).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      subjectEl.appendChild(opt);
+    });
+    subjectEl.disabled = false;
+  });
+
+  // Ders seçilince ünite listesi doldur
+  subjectEl.addEventListener('change', () => {
+    unitEl.innerHTML = '<option value="">Seçin</option>';
+    unitEl.disabled  = true;
+    fillBtn.disabled = true;
+    const grade   = gradeEl.value;
+    const subject = subjectEl.value;
+    if (!grade || !subject) return;
+    const key    = (parseInt(grade) <= 4) ? '1-4' : grade;
+    const units  = MEB_CURRICULUM[key]?.[subject] || [];
+    units.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u; opt.textContent = u;
+      unitEl.appendChild(opt);
+    });
+    unitEl.disabled = false;
+  });
+
+  // Ünite seçilince butonu aktifleştir
+  unitEl.addEventListener('change', () => {
+    fillBtn.disabled = !unitEl.value;
+  });
+
+  // Konuya doldur
+  fillBtn.addEventListener('click', () => {
+    const grade   = gradeEl.value;
+    const subject = subjectEl.value;
+    const unit    = unitEl.value;
+    if (!unit) return;
+    const topicInput = document.getElementById('topicInput');
+    if (topicInput) {
+      topicInput.value = `${grade}. Sınıf ${subject} - ${unit}`;
+      topicInput.dispatchEvent(new Event('input'));
+      topicInput.focus();
+      // Sınıf seviyesini de doldur
+      const gradeLevel = document.getElementById('gradeLevel');
+      if (gradeLevel) gradeLevel.value = grade;
+      // Ders seçimini de doldur
+      const docSubject = document.getElementById('docSubject');
+      if (docSubject) {
+        for (const opt of docSubject.options) {
+          if (opt.value === subject) { docSubject.value = subject; break; }
+        }
+      }
+    }
+    // Details'ı kapat
+    const details = document.getElementById('mebPickerCard');
+    if (details) details.removeAttribute('open');
+    showToast('Konu dolduruldu!', 'success', 2000);
+  });
+}
+
+/* =====================================================
+   AI SOHBET MODU
+===================================================== */
+function initAIChat(getParams, onNewContent) {
+  const panel     = document.getElementById('aiChatPanel');
+  const input     = document.getElementById('aiChatInput');
+  const sendBtn   = document.getElementById('aiChatSend');
+  const history   = document.getElementById('aiChatHistory');
+  if (!panel || !input || !sendBtn) return;
+
+  sendBtn.addEventListener('click', sendChat);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+  async function sendChat() {
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<span class="spinner"></span>';
+
+    // Kullanıcı mesajını göster
+    const userBubble = document.createElement('div');
+    userBubble.style.cssText = 'background:rgba(232,133,90,.1);border-radius:8px;padding:8px 12px;font-size:.84rem;align-self:flex-end;max-width:90%;';
+    userBubble.textContent = msg;
+    history.appendChild(userBubble);
+
+    try {
+      const { data: { session } } = await getSB().auth.getSession();
+      const params = getParams();
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ ...params, extraNotes: msg }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Hata');
+
+      onNewContent(json.content);
+
+      const aiBubble = document.createElement('div');
+      aiBubble.style.cssText = 'background:var(--bg-2);border-radius:8px;padding:8px 12px;font-size:.84rem;max-width:90%;color:var(--text-2);';
+      aiBubble.textContent = 'Belge güncellendi.';
+      history.appendChild(aiBubble);
+      history.scrollTop = history.scrollHeight;
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<i data-lucide="send"></i> Uygula';
+      initIcons(sendBtn);
+    }
+  }
+}
+
+/* =====================================================
+   TOPLU BELGE ÜRETİMİ
+===================================================== */
+async function initBatchPage() {
+  if (!document.getElementById('batchPage')) return;
+  const session = await requireAuth();
+  if (!session) return;
+  await populateUserInfo();
+  initSidebar();
+  initLogout();
+  initIcons();
+
+  const form      = document.getElementById('batchForm');
+  const topicsEl  = document.getElementById('batchTopics');
+  const typeEl    = document.getElementById('batchType');
+  const pagesEl   = document.getElementById('batchPages');
+  const audienceEl= document.getElementById('batchAudience');
+  const startBtn  = document.getElementById('batchStartBtn');
+  const logEl     = document.getElementById('batchLog');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rawTopics = topicsEl.value.trim().split('\n').map(t => t.trim()).filter(Boolean);
+    if (!rawTopics.length) return showToast('En az bir konu girin.', 'error');
+    if (rawTopics.length > 20) return showToast('En fazla 20 konu destekleniyor.', 'error');
+
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<span class="spinner"></span> Oluşturuluyor...';
+    logEl.innerHTML = '';
+
+    const { data: { session: s } } = await getSB().auth.getSession();
+    const type     = typeEl?.value || 'pdf';
+    const pages    = parseInt(pagesEl?.value || '5', 10);
+    const audience = audienceEl?.value || 'teacher';
+
+    for (let i = 0; i < rawTopics.length; i++) {
+      const topic = rawTopics[i];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--bg-2);margin-bottom:8px;font-size:.85rem;';
+      row.innerHTML = `<span class="spinner"></span><span>${escapeHtml(topic)}</span>`;
+      logEl.appendChild(row);
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s?.access_token || ''}` },
+          body: JSON.stringify({ topic, type, pages, audience, language: 'tr' }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Hata');
+
+        // Supabase'e kaydet
+        await getSB().from('documents').insert({ user_id: session.user.id, title: topic.slice(0, 60), type, content: json.content, pages, audience });
+
+        row.innerHTML = `<i data-lucide="check-circle" style="color:#4ade80;width:16px;height:16px;flex-shrink:0;"></i><span>${escapeHtml(topic)}</span><span style="margin-left:auto;color:#4ade80;">Tamamlandı</span>`;
+        initIcons(row);
+      } catch (err) {
+        row.innerHTML = `<i data-lucide="alert-circle" style="color:#f87171;width:16px;height:16px;flex-shrink:0;"></i><span>${escapeHtml(topic)}</span><span style="margin-left:auto;color:#f87171;">${escapeHtml(err.message)}</span>`;
+        initIcons(row);
+      }
+
+      // Küçük bekleme — API rate limit için
+      if (i < rawTopics.length - 1) await new Promise(r => setTimeout(r, 1200));
+    }
+
+    startBtn.disabled = false;
+    startBtn.innerHTML = '<i data-lucide="zap"></i> Toplu Oluştur';
+    initIcons(startBtn);
+    showToast('Toplu oluşturma tamamlandı!', 'success');
+  });
+}
+
+/* =====================================================
    INIT
 ===================================================== */
 // Apply theme before paint to avoid flash
@@ -1904,6 +2346,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAnalyzePage();
   initPricingPage();
   initExamPage();
+  initBatchPage();
   initKeyboardShortcuts();
 });
 

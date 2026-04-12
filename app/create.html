@@ -67,6 +67,10 @@
         <i data-lucide="bookmark"></i>
         <span data-i18n="nav_templates">Şablonlar</span>
       </a>
+      <a href="batch.html" class="sidebar__link">
+        <i data-lucide="layers"></i>
+        <span>Toplu Oluştur</span>
+      </a>
       <a href="folders.html" class="sidebar__link">
         <i data-lucide="folder"></i>
         <span data-i18n="nav_folders">Klasörlerim</span>
@@ -136,6 +140,44 @@
       </div>
 
       <form id="createForm" novalidate>
+
+        <!-- MEB PICKER -->
+        <details class="form-card fade-up" id="mebPickerCard" style="padding:0;">
+          <summary style="padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;list-style:none;user-select:none;">
+            <i data-lucide="book-marked" style="width:16px;height:16px;color:var(--accent);flex-shrink:0;"></i>
+            MEB Müfredatından Seç
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text-3);font-weight:400;">isteğe bağlı</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--text-3);flex-shrink:0;" id="mebChevron"></i>
+          </summary>
+          <div style="padding:0 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;" id="mebPickerBody">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:.78rem;">Sınıf</label>
+              <select id="mebGrade" class="form-select form-select--sm">
+                <option value="">Seçin</option>
+                <option value="1">1. Sınıf</option><option value="2">2. Sınıf</option><option value="3">3. Sınıf</option><option value="4">4. Sınıf</option>
+                <option value="5">5. Sınıf</option><option value="6">6. Sınıf</option><option value="7">7. Sınıf</option><option value="8">8. Sınıf</option>
+                <option value="9">9. Sınıf</option><option value="10">10. Sınıf</option><option value="11">11. Sınıf</option><option value="12">12. Sınıf</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:.78rem;">Ders</label>
+              <select id="mebSubject" class="form-select form-select--sm" disabled>
+                <option value="">Önce sınıf seçin</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:.78rem;">Ünite / Konu</label>
+              <select id="mebUnit" class="form-select form-select--sm" disabled>
+                <option value="">Önce ders seçin</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;display:flex;align-items:flex-end;">
+              <button type="button" class="btn btn--primary btn--sm" id="mebFillBtn" disabled style="width:100%;">
+                <i data-lucide="arrow-down-to-line"></i> Konuya Doldur
+              </button>
+            </div>
+          </div>
+        </details>
 
         <!-- TOPIC INPUT -->
         <div class="form-card fade-up fade-up--1">
@@ -383,17 +425,34 @@
               <i data-lucide="download"></i>
               <span data-i18n="download">İndir</span>
             </button>
-            <button class="btn btn--ghost" data-action="download">
+            <button class="btn btn--ghost" data-action="preview">
               <i data-lucide="eye"></i>
               <span data-i18n="preview">Önizle</span>
             </button>
-            <button class="btn btn--ghost" onclick="document.getElementById('createForm').reset(); document.getElementById('generationPanel').classList.remove('visible'); document.getElementById('generationResult').classList.remove('visible'); document.getElementById('progressFill').style.width='0%'; document.querySelectorAll('.generation-step').forEach(s=>s.classList.remove('active','done')); document.getElementById('generateBtn').disabled=false; document.getElementById('generateBtn').querySelector('[data-i18n]').textContent = t('generate_btn'); lucide.createIcons();">
+            <button class="btn btn--ghost" data-action="share-doc">
+              <i data-lucide="share-2"></i>
+              <span>Paylaş</span>
+            </button>
+            <button class="btn btn--ghost" onclick="document.getElementById('createForm').reset(); document.getElementById('generationPanel').classList.remove('visible'); document.getElementById('generationResult').classList.remove('visible'); document.getElementById('progressFill').style.width='0%'; document.querySelectorAll('.generation-step').forEach(s=>s.classList.remove('active','done')); document.getElementById('generateBtn').disabled=false; document.getElementById('generateBtn').querySelector('[data-i18n]').textContent = t('generate_btn'); document.getElementById('aiChatPanel').style.display='none'; lucide.createIcons();">
               <i data-lucide="refresh-cw"></i>
               <span data-i18n="new_create">Yeni Oluştur</span>
             </button>
           </div>
         </div>
+
+        <!-- AI CHAT MOD -->
+        <div id="aiChatPanel" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:20px;">
+          <p style="font-size:.82rem;color:var(--text-2);margin-bottom:10px;"><i data-lucide="message-circle" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;"></i>Belgeyi düzenlemek ister misiniz?</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" id="aiChatInput" class="form-input" placeholder="Örn: 3. bölümü daha detaylı yaz" style="flex:1;min-width:0;" />
+            <button class="btn btn--primary btn--sm" id="aiChatSend" style="white-space:nowrap;">
+              <i data-lucide="send"></i> Uygula
+            </button>
+          </div>
+          <div id="aiChatHistory" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
       </div>
+    </div>
 
     </div>
   </main>

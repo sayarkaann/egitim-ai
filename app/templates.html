@@ -50,6 +50,7 @@
       <a href="analyze.html" class="sidebar__link"><i data-lucide="file-search"></i><span>Makale Özetle</span></a>
       <a href="exam.html" class="sidebar__link"><i data-lucide="graduation-cap"></i><span>Sınav Hazırlık</span></a>
       <a href="templates.html" class="sidebar__link sidebar__link--active"><i data-lucide="bookmark"></i><span>Şablonlar</span></a>
+      <a href="batch.html" class="sidebar__link"><i data-lucide="layers"></i><span>Toplu Oluştur</span></a>
       <a href="folders.html" class="sidebar__link"><i data-lucide="folder"></i><span>Klasörlerim</span></a>
       <div class="sidebar__section-label">Hesap</div>
       <a href="pricing.html" class="sidebar__link"><i data-lucide="crown"></i><span>Planlar</span></a>
@@ -88,10 +89,38 @@
       <p>Bir şablon seçin, yapay zeka sizin için özelleştirilmiş bir belge oluştursun.</p>
     </div>
 
+    <!-- Filtreler -->
+    <div class="fade-up" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="templateFilters">
+      <button class="filter-chip active" data-tf="all">Tümü</button>
+      <button class="filter-chip" data-tf="teacher">Öğretmen</button>
+      <button class="filter-chip" data-tf="student">Öğrenci</button>
+      <button class="filter-chip" data-tf="pdf">PDF</button>
+      <button class="filter-chip" data-tf="word">Word</button>
+      <button class="filter-chip" data-tf="pptx">PowerPoint</button>
+    </div>
+
+    <!-- Arama -->
+    <div class="fade-up" style="margin-bottom:20px;">
+      <input type="text" id="templateSearch" class="form-input" placeholder="Şablon ara..." style="max-width:340px;" />
+    </div>
+
     <div class="templates-grid fade-up fade-up--1">
       <!-- JS tarafından doldurulur -->
     </div>
   </main>
+
+  <style>
+    .filter-chip {
+      padding: 5px 14px; border-radius: 99px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-2); font-family: inherit; font-size: .82rem;
+      cursor: pointer; transition: .2s;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(232,133,90,.07);
+    }
+  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
