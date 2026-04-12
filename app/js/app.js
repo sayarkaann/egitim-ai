@@ -192,47 +192,13 @@ async function requireAuth() {
 ===================================================== */
 async function fetchEducationalImage(query, language) {
   if (!query) return null;
-  const wikiLang = language === 'tr' ? 'tr' : 'en';
-
   try {
-    // 1. Wikipedia thumbnail
-    const url1 = `https://${wikiLang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=800&origin=*`;
-    const r1 = await fetch(url1);
-    if (r1.ok) {
-      const d1 = await r1.json();
-      const pages = d1.query?.pages;
-      if (pages) {
-        const thumb = Object.values(pages)[0]?.thumbnail?.source;
-        if (thumb) return thumb;
-      }
-    }
-  } catch (_) {}
-
-  try {
-    // 2. Wikimedia Commons
-    const url2 = `https://commons.wikimedia.org/w/api.php?action=query&list=allimages&ailimit=6&aisearch=${encodeURIComponent(query)}&format=json&origin=*&aiprop=url|size|mediatype&aisort=relevance`;
-    const r2 = await fetch(url2);
-    if (r2.ok) {
-      const d2 = await r2.json();
-      const imgs = d2.query?.allimages || [];
-      const ok = imgs.find(i =>
-        i.mediatype === 'BITMAP' &&
-        (i.url.toLowerCase().endsWith('.jpg') || i.url.toLowerCase().endsWith('.png')) &&
-        (i.width || 0) >= 400 && (i.height || 0) >= 300
-      );
-      if (ok?.url) return ok.url;
-    }
-  } catch (_) {}
-
-  try {
-    // 3. Pexels fallback (server-side proxy)
     const res = await fetch(`/api/image?q=${encodeURIComponent(query)}`);
     if (res.ok) {
       const data = await res.json();
-      if (data.url) return data.url;
+      if (data.dataUrl) return data.dataUrl;
     }
   } catch (_) {}
-
   return null;
 }
 
@@ -1374,12 +1340,9 @@ async function generatePPTX(title, content, pages, language) {
 
   showToast('Görseller yükleniyor...', 'info', 3000);
 
-  // Her slayt için paralel görsel çek
-  const imageUrls = await Promise.all(
-    slides.map(s => fetchEducationalImage(s.title, language).catch(() => null))
-  );
+  // Her slayt için paralel görsel çek (API direkt base64 döndürüyor)
   const imageData = await Promise.all(
-    imageUrls.map(u => (u ? imageUrlToBase64(u).catch(() => null) : Promise.resolve(null)))
+    slides.map(s => fetchEducationalImage(s.title, language).catch(() => null))
   );
 
   for (let i = 0; i < slides.length; i++) {
@@ -1465,6 +1428,7 @@ function stripMarkdown(text) {
     .replace(/[•◦▸▹◆◇■□●○▪▫]/g, '') // bullet symbols
     .replace(/\[|\]/g,         '')     // brackets
     .replace(/\|/g,            ' ')    // pipe
+    .replace(/[\u2E80-\u9FFF\uF900-\uFAFF]/g, '') // Çince/Japonca/Korece karakterler
     .trim();
 }
 
