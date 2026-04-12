@@ -113,6 +113,7 @@ supabase_migration_3.sql        — exam kolonları
 supabase_migration_referral.sql — referral kolonları
 supabase_migration_trial.sql    — trial_used kolonu
 supabase_migration_share.sql    — shared_docs tablosu
+supabase_migration_logo.sql     — profiles.logo_url + storage.logos bucket
 ```
 
 ## Önemli Uygulama Kararları
