@@ -1247,7 +1247,16 @@ async function downloadDocument(title, type, content, pages, imageUrl, lang) {
   else if (type === 'pptx')  await generatePPTX(title, content, pages, lang || 'tr');
 }
 
+function filterTeacherNotes(text) {
+  // Parantez içindeki öğretmen notlarını kaldır
+  return text
+    .replace(/\s*\((öğretmen notu|öğretim notu|öğrencilere|not:|ipucu:|dikkat:|sınıfta|ders notu)[^)]*\)/gi, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 async function generatePDF(title, content, imageUrl) {
+  content = filterTeacherNotes(content);
   const imgHtml = imageUrl
     ? `<div style="text-align:center;margin:0 0 28px;"><img src="${imageUrl}" style="max-width:100%;max-height:260px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="İlgili görsel" /></div>`
     : '';
@@ -1262,8 +1271,8 @@ async function generatePDF(title, content, imageUrl) {
   * { box-sizing: border-box; }
   body { font-family: Arial, Helvetica, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #222; font-size: 12pt; line-height: 1.7; hyphens: none; word-break: normal; }
   h1 { font-size: 20pt; color: #1a1a2e; border-bottom: 2px solid #e8855a; padding-bottom: 10px; margin: 0 0 24px; }
-  h2 { font-size: 14pt; color: #2d2d4e; margin: 24px 0 8px; }
-  h3 { font-size: 12pt; color: #444; margin: 16px 0 6px; }
+  h2 { font-size: 14pt; color: #e8855a; margin: 24px 0 8px; }
+  h3 { font-size: 12pt; color: #c96840; margin: 16px 0 6px; }
   p  { margin: 0 0 10px; }
   p.soru { margin: 16px 0 6px; font-weight: 500; }
   ul, ol { margin: 0 0 10px 22px; }
@@ -1288,6 +1297,7 @@ ${markdownToHtml(content)}
 }
 
 async function generateWord(title, content, imageUrl) {
+  content = filterTeacherNotes(content);
   const imgHtml = imageUrl
     ? `<p style="text-align:center;"><img src="${imageUrl}" style="max-width:100%;max-height:240px;border-radius:8px;" /></p><br>`
     : '';
@@ -1299,8 +1309,8 @@ async function generateWord(title, content, imageUrl) {
 <style>
   body   { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.6; margin: 2cm; hyphens: none; word-break: normal; }
   h1     { font-size: 18pt; color: #1a1a2e; border-bottom: 1px solid #e8855a; padding-bottom: 6pt; }
-  h2     { font-size: 14pt; color: #2d2d4e; }
-  h3     { font-size: 12pt; color: #444; }
+  h2     { font-size: 14pt; color: #e8855a; }
+  h3     { font-size: 12pt; color: #c96840; }
   p      { margin-bottom: 8pt; }
   p.soru { margin-top: 16pt; margin-bottom: 4pt; font-weight: bold; }
   ul, ol { margin-left: 18pt; }
