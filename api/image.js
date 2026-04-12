@@ -38,7 +38,20 @@ async function fetchJson(urlStr, headers = {}) {
 }
 
 async function findImageUrl(query) {
-  // 1. Wikipedia search API (başlık yerine arama — daha esnek)
+  // 1. Pexels (fotoğraf kalitesi daha yüksek, daha alakalı)
+  const apiKey = process.env.PEXELS_API_KEY;
+  if (apiKey) {
+    try {
+      const data = await fetchJson(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=landscape`,
+        { Authorization: apiKey }
+      );
+      const photo = data.photos?.[0];
+      if (photo?.src?.large) return photo.src.large;
+    } catch (_) {}
+  }
+
+  // 2. Wikipedia search API (TR önce, EN fallback)
   for (const lang of ['tr', 'en']) {
     try {
       const searchUrl = `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=3&format=json`;
@@ -56,7 +69,7 @@ async function findImageUrl(query) {
     } catch (_) {}
   }
 
-  // 2. Wikimedia Commons
+  // 3. Wikimedia Commons
   try {
     const url  = `https://commons.wikimedia.org/w/api.php?action=query&list=allimages&ailimit=5&aisearch=${encodeURIComponent(query)}&format=json&aiprop=url|size|mediatype&aisort=relevance`;
     const data = await fetchJson(url);
@@ -68,19 +81,6 @@ async function findImageUrl(query) {
     );
     if (ok?.url) return ok.url;
   } catch (_) {}
-
-  // 3. Pexels
-  const apiKey = process.env.PEXELS_API_KEY;
-  if (apiKey) {
-    try {
-      const data  = await fetchJson(
-        `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=3&orientation=landscape`,
-        { Authorization: apiKey }
-      );
-      const photo = data.photos?.[0];
-      if (photo?.src?.large) return photo.src.large;
-    } catch (_) {}
-  }
 
   return null;
 }

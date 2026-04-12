@@ -1356,11 +1356,7 @@ async function generatePPTX(title, content, pages, language) {
   for (let b = 0; b < slides.length; b += BATCH) {
     const batch = slides.slice(b, b + BATCH);
     const results = await Promise.all(
-      batch.map((s, j) => {
-        const i = b + j;
-        const query = i === 0 ? title : `${s.title} ${title}`;
-        return fetchEducationalImage(query, language).catch(() => null);
-      })
+      batch.map(s => fetchEducationalImage(s.title, language).catch(() => null))
     );
     imageData.push(...results);
   }
