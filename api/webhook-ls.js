@@ -9,8 +9,10 @@ function buildVariantMap() {
   return {
     [process.env.LS_VARIANT_OGRENCI_MONTHLY]: { type: 'subscription', plan: 'ogrenci' },
     [process.env.LS_VARIANT_OGRENCI_YEARLY]:  { type: 'subscription', plan: 'ogrenci' },
-    [process.env.LS_VARIANT_PRO_MONTHLY]:     { type: 'subscription', plan: 'pro'     },
-    [process.env.LS_VARIANT_PRO_YEARLY]:      { type: 'subscription', plan: 'pro'     },
+    [process.env.LS_VARIANT_PRO_MONTHLY]:      { type: 'subscription', plan: 'pro'      },
+    [process.env.LS_VARIANT_PRO_YEARLY]:       { type: 'subscription', plan: 'pro'      },
+    [process.env.LS_VARIANT_KURUMSAL_MONTHLY]: { type: 'subscription', plan: 'kurumsal' },
+    [process.env.LS_VARIANT_KURUMSAL_YEARLY]:  { type: 'subscription', plan: 'kurumsal' },
     [process.env.LS_VARIANT_TOPUP_STARTER]:   { type: 'topup', docs: 5,   pages: 5   },
     [process.env.LS_VARIANT_TOPUP_MID]:       { type: 'topup', docs: 10,  pages: 10  },
     [process.env.LS_VARIANT_TOPUP_LARGE]:     { type: 'topup', docs: 20,  pages: 20  },

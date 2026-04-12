@@ -81,6 +81,8 @@ egitim-ai/
 - Öğrenci Yıllık: `62df31af-a884-4857-94b9-7af03e3e5123`
 - Pro Aylık: `a445d557-fe0c-41a7-bc77-3b829aa7f15e`
 - Pro Yıllık: `b356c0f0-7c7e-4d80-aa21-016577fd3617`
+- Kurumsal Aylık: `00539657-1c76-4494-ab09-26a022e14cce`
+- Kurumsal Yıllık: `2fbfb582-46f9-4fd2-a7c1-8a6691c88e23`
 
 ## Vercel Env Variables
 
