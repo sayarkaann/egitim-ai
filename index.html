@@ -882,5 +882,31 @@
       });
     }
   </script>
+  <script>
+    // Pricing toggle — aylık / yıllık
+    (function () {
+      const toggle = document.getElementById('pricingToggle');
+      if (!toggle) return;
+      let yearly = false;
+      const yearlyNotes = ['studentYearlyNote', 'proYearlyNote', 'kurumsalYearlyNote'];
+
+      toggle.addEventListener('click', () => {
+        yearly = !yearly;
+        toggle.setAttribute('aria-checked', yearly);
+        toggle.classList.toggle('active', yearly);
+
+        document.querySelectorAll('[data-monthly]').forEach(el => {
+          const val = yearly ? el.dataset.yearly : el.dataset.monthly;
+          // Fiyat string içinde ₺ yoksa başa ekle
+          el.textContent = /₺/.test(val) ? val : (val === '0' ? '₺0' : '₺' + val);
+        });
+
+        yearlyNotes.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = yearly ? 'block' : 'none';
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
