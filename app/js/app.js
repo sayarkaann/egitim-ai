@@ -1416,12 +1416,15 @@ async function generatePPTX(title, content, pages, imageUrl) {
       if (slide.bullets.length > 0) {
         const bulletItems = slide.bullets.map(b => ({
           text: b,
-          options: { bullet: { type: 'bullet' }, paraSpaceAfter: 8 }
+          options: { bullet: { type: 'bullet' }, paraSpaceAfter: 12, lineSpacingMultiple: 1.3 }
         }));
         s.addText(bulletItems, {
           x: 0.4, y: 1.15, w: contentW, h: 5.9,
-          fontSize: 14, color: '333344', valign: 'top',
+          fontSize: 17, color: '333344', valign: 'top',
         });
+      }
+      if (slide.notes && slide.notes.length > 0) {
+        s.addNotes(slide.notes.join('\n'));
       }
       s.addText(`${i + 1} / ${slides.length}`, {
         x: 11.8, y: 7.1, w: 1.2, h: 0.3,
@@ -1466,8 +1469,14 @@ function parseSlidecontent(content) {
     const match = trimmed.match(/^SLAYT\s*\d+\s*[:：]\s*(.+)/i);
     if (match) {
       if (current) slides.push(current);
-      current = { title: stripMarkdown(match[1].trim()), bullets: [] };
+      current = { title: stripMarkdown(match[1].trim()), bullets: [], notes: [] };
     } else if (current) {
+      // Öğretim notlarını slayttan filtrele, speaker note'a taşı
+      if (/\(öğretim notu[^)]*\)/i.test(trimmed) || /\(not[^)]*\)/i.test(trimmed)) {
+        const note = trimmed.replace(/^[-•*]\s+/, '').trim();
+        current.notes.push(stripMarkdown(note));
+        continue;
+      }
       if (/^[-•*]\s+/.test(trimmed)) {
         const b = stripMarkdown(trimmed.replace(/^[-•*]\s+/, '').trim());
         if (b) current.bullets.push(b);
