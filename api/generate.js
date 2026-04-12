@@ -391,7 +391,8 @@ SLAYT 2: [Bölüm Başlığı]
 KURALLAR:
 - TÜM slaytlar YALNIZCA "${topic}" konusuyla ilgili olmalı — başka konu kesinlikle yasak
 - Her slayt tek bir konuya odaklanır, 3-5 madde
-- Maddeler bilgilendirici ve tam (her biri 1-2 cümle, 15-25 kelime)
+- Maddeler açıklayıcı ve bilgi dolu olmalı (kuru tanım değil, bağlam ve detay içeren tam cümleler)
+- Tarihi/bilimsel konularda: tarihler, sayılar, önemli olaylar, sonuçlar belirt
 - TAM OLARAK ${pages} slayt
 - TÜM metin ${langCfg.name} dilinde
 - Özel karakter, ok işareti veya markdown sembolü kullanma`;

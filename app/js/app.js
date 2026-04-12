@@ -192,11 +192,41 @@ async function requireAuth() {
 ===================================================== */
 async function fetchEducationalImage(query, language) {
   if (!query) return null;
+  const wikiLang = language === 'tr' ? 'tr' : 'en';
 
   try {
-    // Pexels API (server-side proxy)
-    const searchQuery = language === 'tr' ? query : query;
-    const res = await fetch(`/api/image?q=${encodeURIComponent(searchQuery)}`);
+    // 1. Wikipedia thumbnail
+    const url1 = `https://${wikiLang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=800&origin=*`;
+    const r1 = await fetch(url1);
+    if (r1.ok) {
+      const d1 = await r1.json();
+      const pages = d1.query?.pages;
+      if (pages) {
+        const thumb = Object.values(pages)[0]?.thumbnail?.source;
+        if (thumb) return thumb;
+      }
+    }
+  } catch (_) {}
+
+  try {
+    // 2. Wikimedia Commons
+    const url2 = `https://commons.wikimedia.org/w/api.php?action=query&list=allimages&ailimit=6&aisearch=${encodeURIComponent(query)}&format=json&origin=*&aiprop=url|size|mediatype&aisort=relevance`;
+    const r2 = await fetch(url2);
+    if (r2.ok) {
+      const d2 = await r2.json();
+      const imgs = d2.query?.allimages || [];
+      const ok = imgs.find(i =>
+        i.mediatype === 'BITMAP' &&
+        (i.url.toLowerCase().endsWith('.jpg') || i.url.toLowerCase().endsWith('.png')) &&
+        (i.width || 0) >= 400 && (i.height || 0) >= 300
+      );
+      if (ok?.url) return ok.url;
+    }
+  } catch (_) {}
+
+  try {
+    // 3. Pexels fallback (server-side proxy)
+    const res = await fetch(`/api/image?q=${encodeURIComponent(query)}`);
     if (res.ok) {
       const data = await res.json();
       if (data.url) return data.url;
