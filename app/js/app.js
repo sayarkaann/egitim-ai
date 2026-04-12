@@ -243,7 +243,11 @@ async function initAuthPage() {
   }
 
   const { data: { session } } = await sb.auth.getSession();
-  if (session) { window.location.href = 'index.html'; return; }
+  if (session) {
+    const nextPage = new URLSearchParams(window.location.search).get('next');
+    window.location.href = nextPage ? `${nextPage}.html` : 'index.html';
+    return;
+  }
 
   initIcons();
 
@@ -2752,6 +2756,40 @@ async function initPricingPage() {
       openLSCheckout(variantId, session.user.email, session.user.id);
     });
   });
+
+  // Kurumsal iletişim butonu
+  const kurumsalBtn = document.getElementById('kurumsalContactBtn');
+  if (kurumsalBtn) {
+    kurumsalBtn.addEventListener('click', () => {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal" style="max-width:360px;text-align:center;">
+          <div class="modal__header" style="justify-content:center;border:none;padding-bottom:0;">
+            <h3 style="font-size:1.1rem;">Kurumsal Plan</h3>
+          </div>
+          <div class="modal__body" style="padding-top:12px;">
+            <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Aşağıdaki e-posta adresine yazın, size en kısa sürede dönelim.</p>
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;">
+              <span style="flex:1;font-size:14px;font-weight:500;">destek.notioai@gmail.com</span>
+              <button id="copyEmailBtn" class="btn btn--ghost btn--sm"><i data-lucide="copy"></i></button>
+            </div>
+            <a href="mailto:destek.notioai@gmail.com?subject=Kurumsal%20Plan%20Talebi" class="btn btn--primary btn--full" style="margin-top:12px;">
+              <i data-lucide="mail"></i> Mail Gönder
+            </a>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      initIcons(modal);
+      modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+      document.getElementById('copyEmailBtn')?.addEventListener('click', () => {
+        navigator.clipboard.writeText('destek.notioai@gmail.com').then(() => {
+          showToast('E-posta adresi kopyalandı!', 'success');
+          modal.remove();
+        });
+      });
+    });
+  }
 
   // Top-up butonları
   document.querySelectorAll('.js-topup-btn').forEach(btn => {
