@@ -383,26 +383,31 @@ ${contextBlock}
 
 ${pptxAudience}
 
-ZORUNLU FORMAT:
-SLAYT 1: [Başlık]
-- [Alt başlık]
-- [${gradeLabel}]
+ZORUNLU FORMAT (kesinlikle bu formatta yaz, başka format kabul edilmez):
+SLAYT 1: Başlık Buraya
+- Madde buraya
+- Madde buraya
 
-SLAYT 2: [Bölüm Başlığı]
-- [Madde]
-- [Madde]
-- [Madde]
+SLAYT 2: Başlık Buraya
+- Madde buraya
+- Madde buraya
+- Madde buraya
 
-(${pages} slayta kadar devam et)
+SLAYT 3: Başlık Buraya
+- Madde buraya
+- Madde buraya
+
+(TAM OLARAK ${pages} slayt olacak, SLAYT 1'den SLAYT ${pages}'e kadar)
 
 KURALLAR:
-- TÜM slaytlar YALNIZCA "${topic}" konusuyla ilgili olmalı — başka konu kesinlikle yasak
-- Her slayt tek bir konuya odaklanır, 3-5 madde
-- Maddeler açıklayıcı ve bilgi dolu olmalı (kuru tanım değil, bağlam ve detay içeren tam cümleler)
-- Tarihi/bilimsel konularda: tarihler, sayılar, önemli olaylar, sonuçlar belirt
-- TAM OLARAK ${pages} slayt
+- Her satır ya "SLAYT N: Başlık" ya da "- madde" formatında olmalı, başka hiçbir şey yazma
+- TÜM slaytlar YALNIZCA "${topic}" konusuyla ilgili olmalı
+- Her slayt 3-5 madde içermeli
+- Maddeler açıklayıcı ve bilgi dolu olmalı (kuru tanım değil, detaylı tam cümleler)
+- Tarihi/bilimsel konularda: tarihler, sayılar, önemli olaylar belirt
+- TAM OLARAK ${pages} slayt — ne eksik ne fazla
 - TÜM metin ${langCfg.name} dilinde
-- Özel karakter, ok işareti veya markdown sembolü kullanma`;
+- Markdown, ok işareti veya özel sembol kullanma`;
   }
 
   /* ── PDF / WORD ── */
