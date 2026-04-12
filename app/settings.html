@@ -253,9 +253,14 @@
             <div class="plan-usage-bar__fill" id="planUsageBar"></div>
           </div>
           <p class="text-muted text-sm" style="margin-top:6px;" id="planUsageText">— / 10 belge kullanıldı</p>
-          <a href="pricing.html" class="btn btn--primary btn--sm" style="margin-top:16px;display:inline-flex;">
-            <i data-lucide="arrow-up-right"></i> <span data-i18n="upgrade_pro">Pro Plana Geç</span>
-          </a>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+            <a href="pricing.html" class="btn btn--primary btn--sm" style="display:inline-flex;">
+              <i data-lucide="arrow-up-right"></i> <span data-i18n="upgrade_pro">Pro Plana Geç</span>
+            </a>
+            <a href="cancel.html" class="btn btn--ghost btn--sm" id="cancelSubBtn" style="display:none;color:var(--text-3);">
+              <i data-lucide="x-circle"></i> Aboneliği İptal Et
+            </a>
+          </div>
         </div>
       </div>
 
@@ -341,14 +346,28 @@
 
       document.getElementById('themeDarkBtn').addEventListener('click', () => {
         document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('egitim-theme', 'dark');
         updateThemeButtons();
       });
       document.getElementById('themeLightBtn').addEventListener('click', () => {
         document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
+        localStorage.setItem('egitim-theme', 'light');
         updateThemeButtons();
       });
+
+      // Ücretli plan varsa iptal butonunu göster
+      (async () => {
+        try {
+          const { data: { session } } = await getSB().auth.getSession();
+          if (!session) return;
+          const { data: profile } = await getSB()
+            .from('profiles').select('plan, plan_expires_at').eq('id', session.user.id).single();
+          if (profile?.plan && profile.plan !== 'free') {
+            const btn = document.getElementById('cancelSubBtn');
+            if (btn) btn.style.display = 'inline-flex';
+          }
+        } catch (_) {}
+      })();
     });
   </script>
   <script>

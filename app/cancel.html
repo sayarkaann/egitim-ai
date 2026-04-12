@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H7PF01MD2N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-H7PF01MD2N');
+  </script>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#e8855a" />
+  <title>Aboneliği İptal Et — NotioAI</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/app.css?v=3" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    .cancel-wrap { max-width: 520px; width: 100%; text-align: center; }
+    .cancel-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.25);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; color: #f87171; font-size: 2rem;
+    }
+    .cancel-wrap h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
+    .cancel-wrap p  { color: var(--text-2); line-height: 1.65; margin-bottom: 10px; }
+    .reasons { display: flex; flex-direction: column; gap: 10px; margin: 28px 0; text-align: left; }
+    .reason-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text); font-family: inherit; font-size: .9rem;
+      cursor: pointer; transition: border-color .2s;
+      text-align: left;
+    }
+    .reason-btn:hover { border-color: var(--accent); }
+    .reason-btn.selected { border-color: var(--accent); background: rgba(232,133,90,.06); }
+    .reason-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--text-3); font-size: .8rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .retention-box {
+      border-radius: var(--radius); border: 1px solid rgba(74,222,128,.25);
+      background: rgba(74,222,128,.05); padding: 20px 24px; text-align: left; margin-bottom: 24px;
+    }
+    .retention-box__title { font-weight: 700; color: #4ade80; margin-bottom: 6px; font-size: .95rem; }
+    .retention-box__text  { color: var(--text-2); font-size: .85rem; line-height: 1.6; }
+    .actions { display: flex; flex-direction: column; gap: 10px; }
+    .confirm-msg { display: none; margin-top: 20px; color: var(--text-2); font-size: .85rem; line-height: 1.6; }
+    .confirm-msg a { color: var(--accent); }
+  </style>
+</head>
+<body id="cancelPage">
+
+  <div class="cancel-wrap fade-up">
+    <div class="cancel-icon">😢</div>
+    <h1>Aboneliğinizi iptal etmek üzeresiniz</h1>
+    <p>Sizi kaybetmek istemiyoruz. Ayrılma nedeninizi paylaşır mısınız?</p>
+
+    <!-- Sebep seçimi -->
+    <div class="reasons" id="reasons">
+      <button class="reason-btn" data-reason="pahali">
+        <span class="reason-icon">💸</span>
+        <span>Fiyat çok pahalı</span>
+      </button>
+      <button class="reason-btn" data-reason="kullanmiyorum">
+        <span class="reason-icon">📦</span>
+        <span>Yeterince kullanmıyorum</span>
+      </button>
+      <button class="reason-btn" data-reason="ozellik">
+        <span class="reason-icon">🔧</span>
+        <span>İhtiyacım olan özellikler eksik</span>
+      </button>
+      <button class="reason-btn" data-reason="kalite">
+        <span class="reason-icon">📝</span>
+        <span>Belge kalitesinden memnun değilim</span>
+      </button>
+      <button class="reason-btn" data-reason="baska">
+        <span class="reason-icon">🔀</span>
+        <span>Başka bir araca geçiyorum</span>
+      </button>
+    </div>
+
+    <!-- Retention teklifi (fiyat şikayeti varsa göster) -->
+    <div class="retention-box" id="retentionBox" style="display:none;">
+      <div class="retention-box__title">Özel Teklif: 1 Ay Ücretsiz</div>
+      <div class="retention-box__text">Fiyat konusunda endişeniz varsa, bir ay daha ücretsiz kullanabilirsiniz. Ayrılmadan önce bize ulaşın.</div>
+      <a href="mailto:destek@notioai.net?subject=Abonelik+Teklifi" class="btn btn--primary btn--sm" style="margin-top:14px;display:inline-flex;">
+        <i data-lucide="mail"></i> Teklifi Talep Et
+      </a>
+    </div>
+
+    <div class="divider">veya</div>
+
+    <div class="actions">
+      <a href="/app/settings.html" class="btn btn--ghost">
+        <i data-lucide="arrow-left"></i> Geri Dön, Vazgeçtim
+      </a>
+      <button class="btn btn--ghost" id="proceedCancelBtn" style="color:#f87171;border-color:rgba(248,113,113,.3);">
+        <i data-lucide="x-circle"></i> Yine de İptal Et
+      </button>
+    </div>
+
+    <div class="confirm-msg" id="confirmMsg">
+      Aboneliğinizi <strong>LemonSqueezy müşteri portalı</strong> üzerinden iptal edebilirsiniz.<br><br>
+      Portalda "Manage Subscription" → "Cancel" adımlarını izleyin.<br><br>
+      Aboneliğiniz <strong>mevcut dönem sonuna kadar</strong> aktif kalacak, ardından ücretsiz plana geçeceksiniz.<br><br>
+      Sorun yaşarsanız: <a href="mailto:destek@notioai.net">destek@notioai.net</a>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Reason selection
+    document.querySelectorAll('.reason-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        const reason = btn.dataset.reason;
+        document.getElementById('retentionBox').style.display = reason === 'pahali' ? 'block' : 'none';
+      });
+    });
+
+    // Proceed to cancel
+    document.getElementById('proceedCancelBtn').addEventListener('click', () => {
+      document.getElementById('reasons').style.display = 'none';
+      document.getElementById('retentionBox').style.display = 'none';
+      document.querySelector('.divider').style.display = 'none';
+      document.querySelector('.actions').style.display = 'none';
+      document.getElementById('confirmMsg').style.display = 'block';
+    });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

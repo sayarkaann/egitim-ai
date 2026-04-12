@@ -1904,7 +1904,109 @@ document.addEventListener('DOMContentLoaded', () => {
   initAnalyzePage();
   initPricingPage();
   initExamPage();
+  initKeyboardShortcuts();
 });
+
+/* =====================================================
+   KEYBOARD SHORTCUTS
+===================================================== */
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const tag = document.activeElement?.tagName;
+    const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' ||
+                    document.activeElement?.isContentEditable;
+
+    // Esc — açık modalı kapat
+    if (e.key === 'Escape') {
+      const modal = document.querySelector('.modal-overlay');
+      if (modal) { modal.remove(); return; }
+    }
+
+    // ? — kısayol listesini göster (input içinde değilse)
+    if (e.key === '?' && !inInput) {
+      e.preventDefault();
+      showShortcutsModal();
+      return;
+    }
+
+    // Ctrl+Enter — belge oluştur (create sayfasında)
+    if (e.ctrlKey && e.key === 'Enter') {
+      const generateBtn = document.getElementById('generateBtn');
+      if (generateBtn && !generateBtn.disabled) { e.preventDefault(); generateBtn.click(); }
+      return;
+    }
+
+    // Ctrl+K — konu alanına / arama alanına odaklan
+    if (e.ctrlKey && e.key === 'k') {
+      e.preventDefault();
+      const topicInput   = document.getElementById('topicInput');
+      const histSearch   = document.getElementById('historySearch');
+      const analyzeInput = document.getElementById('analyzeUrl') || document.getElementById('analyzeInput');
+      const target = topicInput || histSearch || analyzeInput;
+      if (target) { target.focus(); target.select(); }
+      return;
+    }
+
+    // Alt+T — tema değiştir
+    if (e.altKey && e.key === 't') {
+      e.preventDefault();
+      toggleTheme();
+      return;
+    }
+
+    // Ctrl+H — geçmiş sayfasına git
+    if (e.ctrlKey && e.key === 'h') {
+      e.preventDefault();
+      window.location.href = '/app/history.html';
+      return;
+    }
+
+    // Ctrl+B — belge oluştur sayfasına git
+    if (e.ctrlKey && e.key === 'b') {
+      e.preventDefault();
+      window.location.href = '/app/create.html';
+      return;
+    }
+  });
+}
+
+function showShortcutsModal() {
+  const existing = document.getElementById('shortcutsModal');
+  if (existing) { existing.remove(); return; }
+
+  const shortcuts = [
+    { key: 'Ctrl + Enter', desc: 'Belge oluştur' },
+    { key: 'Ctrl + K',     desc: 'Arama / konu alanına odaklan' },
+    { key: 'Ctrl + B',     desc: 'Belge oluştur sayfasına git' },
+    { key: 'Ctrl + H',     desc: 'Geçmiş sayfasına git' },
+    { key: 'Alt + T',      desc: 'Temayı değiştir (Koyu/Açık)' },
+    { key: 'Esc',          desc: 'Modalı kapat' },
+    { key: '?',            desc: 'Bu listeyi göster / gizle' },
+  ];
+
+  const modal = document.createElement('div');
+  modal.id = 'shortcutsModal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-icon"><i data-lucide="keyboard"></i></div>
+      <h3 style="margin:0 0 4px;font-size:1.1rem;">Klavye Kısayolları</h3>
+      <p style="margin:0 0 20px;color:var(--text-2);font-size:.85rem;">Hızlı gezinme için kısayollar</p>
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
+        ${shortcuts.map(s => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-2);border-radius:8px;gap:16px;">
+            <span style="color:var(--text-2);font-size:.85rem;">${s.desc}</span>
+            <kbd style="font-family:inherit;font-size:.78rem;padding:3px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--text);white-space:nowrap;">${s.key}</kbd>
+          </div>`).join('')}
+      </div>
+      <button class="btn btn--ghost" style="margin-top:20px;width:100%;" id="shortcutsClose">Kapat</button>
+    </div>`;
+
+  document.body.appendChild(modal);
+  initIcons(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  document.getElementById('shortcutsClose').addEventListener('click', () => modal.remove());
+}
 
 /* =====================================================
    ANALYZE PAGE

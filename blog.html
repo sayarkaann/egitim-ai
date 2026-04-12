@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H7PF01MD2N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-H7PF01MD2N');
+  </script>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#e8855a" />
+  <title>Blog — NotioAI | Eğitimde Yapay Zeka</title>
+  <meta name="description" content="Yapay zeka destekli eğitim, öğretmen rehberleri, sınav hazırlık ipuçları ve NotioAI kullanım kılavuzları." />
+  <link rel="canonical" href="https://notioai.net/blog.html" />
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://notioai.net/blog.html" />
+  <meta property="og:title"       content="Blog — NotioAI | Eğitimde Yapay Zeka" />
+  <meta property="og:description" content="Yapay zeka destekli eğitim, öğretmen rehberleri ve sınav hazırlık ipuçları." />
+  <meta property="og:image"       content="https://notioai.net/og-image.png" />
+  <meta property="og:locale"      content="tr_TR" />
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "NotioAI Blog",
+    "url": "https://notioai.net/blog.html",
+    "description": "Eğitimde yapay zeka, öğretmen rehberleri ve sınav hazırlık içerikleri",
+    "publisher": {
+      "@type": "Organization",
+      "name": "NotioAI",
+      "url": "https://notioai.net",
+      "logo": "https://notioai.net/favicon.svg"
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <style>
+    /* ── Blog-specific styles ── */
+    .blog-hero {
+      padding: 120px 0 60px;
+      text-align: center;
+    }
+    .blog-hero__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border-h);
+      background: rgba(240,120,72,.07);
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .blog-hero__title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .blog-hero__sub {
+      color: var(--text-2);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Filter tabs ── */
+    .blog-filters {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 0 0 48px;
+    }
+    .filter-btn {
+      padding: 6px 16px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      font-family: inherit;
+      font-size: .84rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(240,120,72,.07);
+    }
+
+    /* ── Featured post ── */
+    .blog-featured {
+      padding-bottom: 56px;
+    }
+    .featured-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .featured-card:hover {
+      border-color: var(--border-h);
+      box-shadow: var(--shadow);
+    }
+    .featured-card__img {
+      background: linear-gradient(135deg, rgba(240,120,72,.15) 0%, rgba(240,120,72,.04) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      font-size: 5rem;
+    }
+    .featured-card__body {
+      padding: 40px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .post-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: .73rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .post-tag--rehber   { background: rgba(74,222,128,.12);  color: #4ade80; }
+    .post-tag--ipucu    { background: rgba(251,191,36,.12);  color: #fbbf24; }
+    .post-tag--sunum    { background: rgba(139,92,246,.12);  color: #a78bfa; }
+    .post-tag--sinav    { background: rgba(248,113,113,.12); color: #f87171; }
+    .post-tag--haber    { background: rgba(56,189,248,.12);  color: #38bdf8; }
+
+    .featured-card__title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+    .featured-card__excerpt {
+      color: var(--text-2);
+      font-size: .9rem;
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-3);
+      font-size: .8rem;
+    }
+    .post-meta__sep { opacity: .4; }
+    .read-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: gap var(--transition);
+    }
+    .read-more:hover { gap: 10px; }
+
+    /* ── Post grid ── */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      padding-bottom: 80px;
+    }
+    .post-card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      color: inherit;
+    }
+    .post-card:hover {
+      border-color: var(--border-h);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+    .post-card__img {
+      background: linear-gradient(135deg, rgba(240,120,72,.12) 0%, rgba(240,120,72,.03) 100%);
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+    }
+    .post-card__body {
+      padding: 20px 22px 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .post-card__title {
+      font-size: 1rem;
+      font-weight: 650;
+      line-height: 1.4;
+      margin: 8px 0 10px;
+    }
+    .post-card__excerpt {
+      color: var(--text-2);
+      font-size: .83rem;
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    /* ── Newsletter ── */
+    .blog-newsletter {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-h);
+      background: linear-gradient(135deg, rgba(240,120,72,.08) 0%, transparent 60%);
+      padding: 56px 48px;
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    .blog-newsletter h2 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .blog-newsletter p {
+      color: var(--text-2);
+      margin-bottom: 28px;
+    }
+    .newsletter-form {
+      display: flex;
+      gap: 10px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .newsletter-form input {
+      flex: 1;
+      padding: 11px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-h);
+      background: var(--bg-2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .newsletter-form input:focus { border-color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .featured-card { grid-template-columns: 1fr; }
+      .featured-card__img { min-height: 160px; }
+      .featured-card__body { padding: 28px 24px; }
+      .blog-newsletter { padding: 40px 24px; }
+      .newsletter-form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="nav__inner container">
+      <a href="/" class="nav__logo">
+        <span class="nav__logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="28" height="28" rx="8" fill="#e8855a"/>
+            <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="21" cy="19" r="4" fill="#fff" opacity=".9"/>
+            <path d="M19.5 19l1 1 2-2" stroke="#e8855a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="nav__logo-text">NotioAI</span>
+      </a>
+
+      <nav class="nav__links" id="navLinks">
+        <a href="/#features" class="nav__link">Özellikler</a>
+        <a href="/#how" class="nav__link">Nasıl Çalışır</a>
+        <a href="/#pricing" class="nav__link">Fiyatlar</a>
+        <a href="/blog.html" class="nav__link" style="color:var(--accent);">Blog</a>
+      </nav>
+
+      <div class="nav__actions">
+        <a href="app/auth.html" class="btn btn--primary btn--sm">Ücretsiz Başla</a>
+      </div>
+
+      <button class="nav__hamburger" id="hamburger" aria-label="Menüyü Aç">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu__inner">
+      <a href="/#features" class="mobile-menu__link">Özellikler</a>
+      <a href="/#how" class="mobile-menu__link">Nasıl Çalışır</a>
+      <a href="/#pricing" class="mobile-menu__link">Fiyatlar</a>
+      <a href="/blog.html" class="mobile-menu__link">Blog</a>
+      <div class="mobile-menu__actions">
+        <a href="app/auth.html" class="btn btn--primary btn--full">Ücretsiz Başla</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- HERO -->
+    <section class="blog-hero fade-up">
+      <div class="blog-hero__tag">✦ Blog</div>
+      <h1 class="blog-hero__title">Eğitimde Yapay Zeka</h1>
+      <p class="blog-hero__sub">Öğretmen rehberleri, sınav hazırlık ipuçları ve NotioAI'ı daha verimli kullanmanın yolları.</p>
+    </section>
+
+    <!-- FILTERS -->
+    <div class="blog-filters fade-up">
+      <button class="filter-btn active" data-filter="all">Tümü</button>
+      <button class="filter-btn" data-filter="rehber">Rehber</button>
+      <button class="filter-btn" data-filter="ipucu">İpuçları</button>
+      <button class="filter-btn" data-filter="sinav">Sınav Hazırlık</button>
+      <button class="filter-btn" data-filter="sunum">Sunum</button>
+      <button class="filter-btn" data-filter="haber">Haberler</button>
+    </div>
+
+    <!-- FEATURED -->
+    <section class="blog-featured fade-up">
+      <a href="/blog/yapay-zeka-ile-ders-notu-hazirlama.html" class="featured-card" style="text-decoration:none;color:inherit;" aria-label="Öne çıkan yazı">
+        <div class="featured-card__img">📚</div>
+        <div class="featured-card__body">
+          <span class="post-tag post-tag--rehber">Rehber</span>
+          <h2 class="featured-card__title">Yapay Zeka ile Ders Notu Hazırlamanın 5 Altın Kuralı</h2>
+          <p class="featured-card__excerpt">
+            Saniyeler içinde kaliteli ders notu üretmek mümkün — ama doğru sorular sormadan yapay zeka gerçek potansiyelini gösteremiyor. Bu rehberde öğretmenlerin en çok yaptığı hatalardan ve çözümlerinden bahsediyoruz.
+          </p>
+          <div class="post-meta">
+            <span>12 Nisan 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>5 dk okuma</span>
+            <span class="post-meta__sep">•</span>
+            <span class="read-more">Devamını oku →</span>
+          </div>
+        </div>
+      </a>
+    </section>
+
+    <!-- POST GRID -->
+    <section class="blog-grid">
+
+      <a class="post-card fade-up fade-up--1" href="/blog/tyt-ayt-konu-anlatimi-yapay-zeka.html" data-category="sinav">
+        <div class="post-card__img">🎯</div>
+        <div class="post-card__body">
+          <span class="post-tag post-tag--sinav">Sınav Hazırlık</span>
+          <h3 class="post-card__title">TYT ve AYT için Yapay Zeka Destekli Konu Anlatımı</h3>
+          <p class="post-card__excerpt">YKS hazırlığında yapay zekayı nasıl kullanmalısınız? Konu özeti, soru bankası ve kişiselleştirilmiş çalışma planı oluşturma rehberi.</p>
+          <div class="post-meta">
+            <span>10 Nisan 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>4 dk okuma</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card fade-up fade-up--2" href="/blog/pptx-sunum-hazirlama-ipuclari.html" data-category="sunum">
+        <div class="post-card__img">🖥️</div>
+        <div class="post-card__body">
+          <span class="post-tag post-tag--sunum">Sunum</span>
+          <h3 class="post-card__title">Saniyeler İçinde Etkileyici Ders Sunumu Nasıl Hazırlanır?</h3>
+          <p class="post-card__excerpt">NotioAI'ın PPTX özelliği ile otomatik görsel seçimi, konuşmacı notları ve slayt düzeni. Adım adım kılavuz.</p>
+          <div class="post-meta">
+            <span>8 Nisan 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>3 dk okuma</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card fade-up fade-up--3" href="/blog/ogretmen-zamandan-tasarruf-yollari.html" data-category="ipucu">
+        <div class="post-card__img">⏱️</div>
+        <div class="post-card__body">
+          <span class="post-tag post-tag--ipucu">İpuçları</span>
+          <h3 class="post-card__title">Öğretmenler İçin Haftada 5 Saat Kazandıran 7 İpucu</h3>
+          <p class="post-card__excerpt">Belge hazırlama, sınav oluşturma ve değerlendirme süreçlerini otomasyona bırakarak daha fazla zamana kavuşun.</p>
+          <div class="post-meta">
+            <span>5 Nisan 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>6 dk okuma</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card fade-up fade-up--1" href="/blog/lgs-hazirlik-yapay-zeka.html" data-category="sinav">
+        <div class="post-card__img">📝</div>
+        <div class="post-card__body">
+          <span class="post-tag post-tag--sinav">Sınav Hazırlık</span>
+          <h3 class="post-card__title">LGS'ye Hazırlanan Öğrenciler İçin Yapay Zeka Araçları</h3>
+          <p class="post-card__excerpt">8. sınıf öğrencilerine özel konu tarama testleri, özet notlar ve zayıf konu tespiti için pratik bir rehber.</p>
+          <div class="post-meta">
+            <span>3 Nisan 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>5 dk okuma</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card fade-up fade-up--2" href="/blog/notioai-nasil-kullanilir.html" data-category="rehber">
+        <div class="post-card__img">🚀</div>
+        <div class="post-card__body">
+          <span class="post-tag post-tag--rehber">Rehber</span>
+          <h3 class="post-card__title">NotioAI'a Başlangıç: İlk Belgenizi 60 Saniyede Oluşturun</h3>
+          <p class="post-card__excerpt">Kayıt olmaktan ilk PDF'nizi indirmeye kadar tüm adımlar. Yeni kullanıcılar için eksiksiz başlangıç kılavuzu.</p>
+          <div class="post-meta">
+            <span>1 Nisan 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>4 dk okuma</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card fade-up fade-up--3" href="/blog/egitimde-yapay-zeka-gelecegi.html" data-category="haber">
+        <div class="post-card__img">🔮</div>
+        <div class="post-card__body">
+          <span class="post-tag post-tag--haber">Haberler</span>
+          <h3 class="post-card__title">2026'da Eğitimde Yapay Zeka: Trendler ve Beklentiler</h3>
+          <p class="post-card__excerpt">Küresel eğitim teknolojisi pazarı büyümeye devam ederken Türk öğretmenler yapay zekaya nasıl bakıyor? Araştırma bulgularıyla kapsamlı bir analiz.</p>
+          <div class="post-meta">
+            <span>28 Mart 2026</span>
+            <span class="post-meta__sep">•</span>
+            <span>7 dk okuma</span>
+          </div>
+        </div>
+      </a>
+
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="blog-newsletter fade-up">
+      <h2>Yeni yazılardan haberdar olun</h2>
+      <p>Haftada bir, eğitim ve yapay zeka hakkında faydalı içerikler.</p>
+      <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+        <input type="email" id="nlEmail" placeholder="E-posta adresiniz" required />
+        <button type="submit" class="btn btn--primary">Abone Ol</button>
+      </form>
+      <p id="nlSuccess" style="display:none;margin-top:14px;color:#4ade80;font-size:.9rem;">Teşekkürler! Abone oldunuz.</p>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="/" class="nav__logo" style="text-decoration:none;">
+          <span class="nav__logo-icon">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+              <rect width="28" height="28" rx="8" fill="#e8855a"/>
+              <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav__logo-text">NotioAI</span>
+        </a>
+        <p class="footer__tagline">Öğretmenler ve öğrenciler için<br>yapay zeka destekli belge üretici.</p>
+      </div>
+      <div class="footer__links">
+        <div class="footer__col">
+          <span class="footer__col-title">Ürün</span>
+          <a href="/#features">Özellikler</a>
+          <a href="/#pricing">Fiyatlar</a>
+          <a href="/app/auth.html">Başla</a>
+        </div>
+        <div class="footer__col">
+          <span class="footer__col-title">Kaynaklar</span>
+          <a href="/blog.html">Blog</a>
+          <a href="/app/help.html">Yardım</a>
+        </div>
+        <div class="footer__col">
+          <span class="footer__col-title">Yasal</span>
+          <a href="/legal.html#privacy">Gizlilik</a>
+          <a href="/legal.html#terms">Kullanım Koşulları</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom container">
+      <span>© 2026 NotioAI. Tüm hakları saklıdır.</span>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Hamburger
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger?.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+    mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+    // Filter tabs
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.post-card').forEach(card => {
+          const match = filter === 'all' || card.dataset.category === filter;
+          card.style.display = match ? '' : 'none';
+        });
+      });
+    });
+
+    // Newsletter
+    function handleNewsletter(e) {
+      e.preventDefault();
+      document.getElementById('nlSuccess').style.display = 'block';
+      document.getElementById('nlEmail').value = '';
+    }
+  </script>
+</body>
+</html>
