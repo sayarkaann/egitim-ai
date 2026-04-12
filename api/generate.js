@@ -83,7 +83,9 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: 'API anahtarı eksik.' });
     }
 
-    const prompt = buildPrompt(topic, extraNotes, type, audience, pages, gradeLevel, language, tone, subject);
+    // MEB müfredat entegrasyonu sadece Pro ve Kurumsal planlara açık
+    const mebEnabled = ['pro', 'kurumsal'].includes(currentPlan);
+    const prompt = buildPrompt(topic, extraNotes, type, audience, pages, mebEnabled ? gradeLevel : null, language, tone, mebEnabled ? subject : null);
 
     let content = null;
 
