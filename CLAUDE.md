@@ -71,9 +71,9 @@ egitim-ai/
 | Plan       | Fiyat          | Belge/ay | Sayfa/belge | Analiz/ay | Sınav/ay |
 |------------|----------------|----------|-------------|-----------|----------|
 | Ücretsiz   | 0₺             | 10       | 5           | 3         | 5        |
-| Öğrenci    | 99₺/ay         | 60       | 20          | 10        | 30       |
-| Pro        | 169₺/ay        | 150      | 30          | 30        | 100      |
-| Kurumsal   | 2.999₺/ay      | 200      | 50          | 100       | 300      |
+| Öğrenci    | 99₺/ay         | 30       | 20          | 10        | 30       |
+| Pro        | 199₺/ay        | 60       | 30          | 30        | 100      |
+| Kurumsal   | 3.499₺/ay      | 200      | 50          | 100       | 300      |
 
 ## LemonSqueezy Variant ID'leri (CANLI)
 
