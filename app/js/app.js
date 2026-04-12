@@ -1255,8 +1255,34 @@ function filterTeacherNotes(text) {
     .trim();
 }
 
+/* Tüm belgeler için genel unicode temizleyici */
+function cleanText(text) {
+  if (!text) return text;
+  return text
+    // Sıfır genişlikli ve görünmez karakterler
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g, '')
+    // Kontrol karakterleri (tab ve newline hariç)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    // Box drawing / block elements
+    .replace(/[\u2500-\u259F]/g, '')
+    // Geometric shapes & misc symbols
+    .replace(/[\u25A0-\u26FF]/g, '')
+    // Dingbats
+    .replace(/[\u2700-\u27BF]/g, '')
+    // Supplemental arrows / math operators (bazıları sorunlu)
+    .replace(/[\u27C0-\u27EF\u2900-\u297F]/g, '')
+    // Enclosed alphanumerics
+    .replace(/[\u2460-\u24FF]/g, '')
+    // CJK (Çince/Japonca/Korece)
+    .replace(/[\u2E80-\u9FFF\uF900-\uFAFF]/g, '')
+    // Surrogate pairs / private use
+    .replace(/[\uD800-\uDFFF\uE000-\uF8FF]/g, '')
+    // Çoklu boşlukları tek boşluğa indir (satır sonu hariç)
+    .replace(/[^\S\n]{2,}/g, ' ');
+}
+
 async function generatePDF(title, content, imageUrl) {
-  content = filterTeacherNotes(content);
+  content = cleanText(filterTeacherNotes(content));
   const imgHtml = imageUrl
     ? `<div style="text-align:center;margin:0 0 28px;"><img src="${imageUrl}" style="max-width:100%;max-height:260px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="İlgili görsel" /></div>`
     : '';
@@ -1297,7 +1323,7 @@ ${markdownToHtml(content)}
 }
 
 async function generateWord(title, content, imageUrl) {
-  content = filterTeacherNotes(content);
+  content = cleanText(filterTeacherNotes(content));
   const imgHtml = imageUrl
     ? `<p style="text-align:center;"><img src="${imageUrl}" style="max-width:100%;max-height:240px;border-radius:8px;" /></p><br>`
     : '';
@@ -1429,7 +1455,7 @@ async function generatePPTX(title, content, pages, language) {
 /* Remove markdown markers and problematic symbols from plain text (for PPTX) */
 function stripMarkdown(text) {
   const supMap = '⁰¹²³⁴⁵⁶⁷⁸⁹';
-  return text
+  return cleanText(text
     .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
     .replace(/\*(.+?)\*/g,     '$1')   // *italic*
     .replace(/__(.+?)__/g,     '$1')   // __bold__
@@ -1444,8 +1470,7 @@ function stripMarkdown(text) {
     .replace(/[•◦▸▹◆◇■□●○▪▫]/g, '') // bullet symbols
     .replace(/\[|\]/g,         '')     // brackets
     .replace(/\|/g,            ' ')    // pipe
-    .replace(/[\u2E80-\u9FFF\uF900-\uFAFF]/g, '') // Çince/Japonca/Korece karakterler
-    .trim();
+  ).trim();
 }
 
 function parseSlidecontent(content) {
