@@ -2774,8 +2774,8 @@ async function initPricingPage() {
               <span style="flex:1;font-size:14px;font-weight:500;">destek.notioai@gmail.com</span>
               <button id="copyEmailBtn" class="btn btn--ghost btn--sm"><i data-lucide="copy"></i></button>
             </div>
-            <a href="mailto:destek.notioai@gmail.com?subject=Kurumsal%20Plan%20Talebi" class="btn btn--primary btn--full" style="margin-top:12px;">
-              <i data-lucide="mail"></i> Mail Gönder
+            <a href="https://mail.google.com/mail/?view=cm&to=destek.notioai@gmail.com&su=Kurumsal+Plan+Talebi" target="_blank" class="btn btn--primary btn--full" style="margin-top:12px;">
+              <i data-lucide="mail"></i> Gmail ile Yaz
             </a>
           </div>
         </div>`;
