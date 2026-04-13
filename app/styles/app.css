@@ -145,6 +145,9 @@ em { font-style: italic; }
 
 .btn--lg { padding: 13px 28px; font-size: 1rem; border-radius: var(--radius-sm); }
 .btn--sm { padding: 7px 14px; font-size: .8rem; }
+@media (max-width: 768px) {
+  .btn--sm { min-height: 40px; padding: 9px 16px; }
+}
 .btn--full { width: 100%; }
 .btn--icon {
   padding: 8px;
@@ -2179,4 +2182,31 @@ em { font-style: italic; }
   .cookie-banner { flex-direction: column; align-items: flex-start; bottom: 12px; }
   .cookie-banner__actions { width: 100%; }
   .cookie-banner__actions .btn { flex: 1; justify-content: center; }
+}
+
+/* =====================================================
+   EK MOBİL DOKUNMATİK DÜZELTMELER
+===================================================== */
+/* Topbar: çok küçük ekranlarda plan-badge gizle */
+@media (max-width: 420px) {
+  .plan-badge { display: none; }
+  .topbar__right { gap: 6px; }
+}
+
+/* Pricing karşılaştırma tablosu — kaydırma sarmalayıcı */
+@media (max-width: 640px) {
+  .pricing-compare-table { font-size: .78rem; }
+  .pricing-compare-table th,
+  .pricing-compare-table td { padding: 8px 10px; }
+}
+
+/* Settings sayfası form grupları */
+@media (max-width: 480px) {
+  .settings-section { gap: 12px; }
+  .form-group { margin-bottom: 14px; }
+}
+
+/* Referral stats mobil */
+@media (max-width: 480px) {
+  .referral-stats { flex-direction: column; gap: 10px; }
 }
