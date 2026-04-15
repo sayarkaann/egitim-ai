@@ -402,8 +402,16 @@ em { font-style: italic; }
 .onb-actions {
   display: flex; gap: 8px; justify-content: flex-end;
 }
-@media (max-width: 400px) {
-  .onb-tooltip { width: calc(100vw - 32px); left: 16px !important; right: 16px; }
+@media (max-width: 640px) {
+  .onb-tooltip {
+    width: calc(100vw - 32px) !important;
+    left: 16px !important;
+    right: 16px !important;
+    max-width: none !important;
+    transform: none !important;
+    top: auto !important;
+    bottom: 24px !important;
+  }
 }
 
 .trial-banner {

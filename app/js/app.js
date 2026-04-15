@@ -3469,8 +3469,15 @@ function startOnboardingTour() {
   let spotlight = null;
 
   function positionTooltip(targetEl) {
+    const isMobile = window.innerWidth <= 640;
+    if (isMobile) {
+      // Mobilde CSS bottom:24px ile sabitlenir, JS override etmez
+      tooltip.style.top = '';
+      tooltip.style.left = '';
+      tooltip.style.transform = '';
+      return;
+    }
     if (!targetEl) {
-      // Ortala
       tooltip.style.top  = '50%';
       tooltip.style.left = '50%';
       tooltip.style.transform = 'translate(-50%, -50%)';
@@ -3478,11 +3485,12 @@ function startOnboardingTour() {
     }
     tooltip.style.transform = '';
     const rect = targetEl.getBoundingClientRect();
-    const tw = 300, th = 220;
+    const tw = 300, th = 240;
     const vw = window.innerWidth, vh = window.innerHeight;
     let top = rect.bottom + 12;
     let left = rect.left;
     if (top + th > vh - 16) top = rect.top - th - 12;
+    if (top < 16) top = 16;
     if (left + tw > vw - 16) left = vw - tw - 16;
     if (left < 16) left = 16;
     tooltip.style.top  = top + 'px';
